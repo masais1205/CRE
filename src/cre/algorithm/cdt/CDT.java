@@ -1,5 +1,8 @@
 package cre.algorithm.cdt;
 
+import cre.algorithm.CanShowOutput;
+
+import javax.swing.*;
 import java.io.*;
 import java.util.*;
 
@@ -788,7 +791,7 @@ public class CDT {
         for (int i = 0; i < equiclassNum; i++) {
 
     		/*        contingency table
-    		 *       Class=1     Class=0
+             *       Class=1     Class=0
     		 * A=1   V[0](Ma)    V[1](Mb)
     		 * A=0   V[2](Mc)    V[3](Md)
     		 */
@@ -1088,73 +1091,16 @@ public class CDT {
 //            }
     }
 
-    public CDT(int argc, char[] argv) {
+    public CDT(CDTConfig config, String fileNameWithoutExtension, CanShowOutput showArea) {
 
-//		String namebase = "";
-        fileName = "";
-
-        for (int n = 0; n < argv.length; n++) {
-            if (argv[n] == '-') {
-                if (n != 0) {
-                    if (argv[n - 1] != ' ') break;
-                }
-                switch (argv[n + 1]) {
-                    case 'f':
-                        fileName = "";
-                        int fileNameCharacter = n + 3;
-                        while (fileNameCharacter < argv.length && argv[fileNameCharacter] != ' ') {
-                            fileName += argv[fileNameCharacter];
-                            fileNameCharacter++;
-                        }
-                        printf("\t File Name: %s\n", fileName);
-                        break;
-
-                    case 'h':
-                        String height = "";
-                        int hightCharacter = n + 3;
-                        while (hightCharacter < argv.length && argv[hightCharacter] != ' ') {
-                            height += argv[hightCharacter];
-                            hightCharacter++;
-                        }
-                        hmax = Integer.parseInt(height);
-                        printf("\t The maximum height of the tree is: %d\n", hmax);
-                        break;
-
-//				case 'l':
-//					localAssTest = 1;
-//					printf("\t Do association test (locally) on the context based data set \n");
-//					break;
-
-                    case 'i':
-                        improving = 1;
-                        printf("\t Test if the child node can improve PA value \n");
-                        break;
-
-                    case 'p':
-                        pruning = 1;
-                        printf("\t Pruning causal decision trees after creation \n");
-                        break;
-
-                    case 'm':
-                        matching = 1;
-                        int matchingcnt = n + 3;
-                        while (matchingcnt < argv.length && argv[matchingcnt] != ' ') {
-                            matchingMethod += argv[matchingcnt];
-                            matchingcnt++;
-                        }
-                        if (matchingMethod.equalsIgnoreCase("nearest"))
-                            printf("\t Using mathcing method (nearest - propensity score) to generate fair dataset \n");
-                        else if (matchingMethod.equalsIgnoreCase("subclass"))
-                            printf("\t Using mathcing method (subclass) to generate fair dataset \n");
-                        break;
-
-                    case '?':
-                        printf("## ERROR - Rule - Rule() - Dash given without an option - Character no:" + n + ": proceding letter:" + argv[n + 1] + ":");
-                        System.exit(1);
-                }
-                n = n + 2;
-            }
-        }
+        fileName = fileNameWithoutExtension;
+        showArea.showOutputString("\t File Name: " + fileName + "\n");
+        hmax = config.getHeight();
+        showArea.showOutputString("\t The maximum height of the tree is: " + hmax + "\n");
+        improving = config.isTest_improve_PA() ? 1 : 0;
+        showArea.showOutputString("\t Test if the child node can improve PA value" + improving + " \n");
+        pruning = config.isPruned() ? 1 : 0;
+        showArea.showOutputString("\t Pruning causal decision trees after creation " + pruning + " \n");
 
         pathTmpVar = new int[hmax];
         pathTmpVarVal = new int[hmax];
@@ -1179,42 +1125,6 @@ public class CDT {
     }
 
 
-    //public static void copyOfMain()
-
-    /* Here is the definition of the main function */
-    public static void main(String[] args) throws Exception {
-
-        char[] input;
-        String wholeInput = "";
-        for (int i = 0; i < args.length; i++) {
-            if (i != args.length - 1)
-                wholeInput += args[i] + " ";
-            else
-                wholeInput += args[i];
-        }
-        input = wholeInput.toCharArray();
-
-        new CDT(args.length, input);
-
-    }
-
-
-    public void printf(String s) {
-        System.out.format(s);
-    }
-
-    public void printf(String s, Object a) {
-        System.out.format(s, a);
-    }
-
-    public void printf(String s, Object a, Object b) {
-        System.out.format(s, a, b);
-    }
-
-    public void printf(String s, Object a, Object b, Object c) {
-        System.out.format(s, a, b, c);
-    }
-
     public void fprintf(BufferedWriter out, String s) {
         try {
             out.write(s);
@@ -1223,55 +1133,6 @@ public class CDT {
         }
     }
 
-    public void fprintf(BufferedWriter out, String s, Object a) {
-        String output = String.format(s, a);
-        try {
-            out.write(output);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public void fprintf(BufferedWriter out, String s, Object a, Object b) {
-        String output = String.format(s, a, b);
-        try {
-            out.write(output);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public void printRecord(String[] record) {
-
-        for (int x = 0; x < record.length; x++) {
-            System.out.format("%s, ", record[x]);
-        }
-        System.out.print("\n");
-    }
-
-    public void printRecord(int[] record) {
-
-        for (int x = 0; x < record.length; x++) {
-            System.out.format("%d, ", record[x]);
-        }
-        System.out.print("\n");
-    }
-
-    public void printRecord(int[] record, int len) {
-
-        for (int x = 0; x < len; x++) {
-            System.out.format("%d, ", record[x]);
-        }
-        System.out.print("\n");
-    }
-
-    public void printRecord(double[] record, int len) {
-
-        for (int x = 0; x < len; x++) {
-            System.out.format("%d, ", record[x]);
-        }
-        System.out.print("\n");
-    }
 
     // remove zeros in the end of the array
     public double[] trimzeros(double[] array) {
@@ -1289,22 +1150,6 @@ public class CDT {
         return newArray;
     }
 
-    // remove all zeros in the array
-    public int[] trimzeros(int[] array) {
-        int len = 0;
-        for (int i = 0; i < array.length; i++)
-            if (array[i] != 0) {
-                len++;
-            }
-
-        int[] newArray = new int[len];
-        int index = 0;
-        for (int i = 0; i < array.length; i++) {
-            if (array[i] != 0)
-                newArray[index++] = array[i];
-        }
-        return newArray;
-    }
 
     public int[] trimlength(int[] array, int len) {
         int[] newArray = new int[len];
@@ -1312,23 +1157,6 @@ public class CDT {
             newArray[i] = array[i];
         }
         return newArray;
-    }
-
-    public void unique() {
-        List<String> uniqueleaf = new ArrayList<String>();
-        List<Integer> uniqueleafVal = new ArrayList<Integer>();
-        uniqueleaf.add(leaf.get(0));
-        uniqueleafVal.add(leafVal.get(0));
-
-        for (int i = 1; i < leaf.size(); i++) {
-            if (!uniqueleaf.contains(leaf.get(i))) {
-                uniqueleaf.add(leaf.get(i));
-                uniqueleafVal.add(leafVal.get(i));
-            }
-        }
-
-        leaf = uniqueleaf;
-        leafVal = uniqueleafVal;
     }
 
     public static void sort(int[][] ob, final int[] columns) {

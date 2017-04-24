@@ -3,10 +3,24 @@ package cre.algorithm.cdt;
 /**
  * Created by HanYizhao on 2017/4/7.
  */
-public class CDTConfig {
+public class CDTConfig implements Cloneable {
     private int height;
     private boolean pruned;
     private boolean test_improve_PA;
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("-h ").append(height);
+        if (pruned) {
+            sb.append(" -p");
+        }
+        if (test_improve_PA) {
+            sb.append(" -i");
+        }
+
+        return sb.toString();
+    }
 
     public int getHeightMin() {
         return 2;
@@ -26,6 +40,17 @@ public class CDTConfig {
 
     public String getPrunedShownName() {
         return "test PA value?";
+    }
+
+    @Override
+    public Object clone() {
+        CDTConfig newC = null;
+        try {
+            newC = (CDTConfig) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return newC;
     }
 
     public int getHeight() {

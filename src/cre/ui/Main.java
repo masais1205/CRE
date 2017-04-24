@@ -1,9 +1,10 @@
-package cre;
+package cre.ui;
 
 import javax.swing.*;
+import java.awt.*;
 
 /**
- * Created by HanYizhao on 2017/4/6.
+ * Created by HanYizhao on 4/13/2017.
  */
 public class Main {
     public static void main(String[] args) {
@@ -15,17 +16,11 @@ public class Main {
                 | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
-        ConfigSample sample = new ConfigSample();
-        sample.setAaaaaaaaaaaaaaaaaa(100);
-        sample.setB(1.23);
-        sample.setC(false);
-        sample.setD("234");
-        sample.setDd("history");
         try {
-            ConfigSetter.show(null, sample);
-        } catch (ConfigSetter.ConfigException e) {
-            e.printStackTrace();
+            MainFrame mainFrame = new MainFrame();
+            mainFrame.setVisible(true);
+        } catch (HeadlessException e) {
+            System.out.println("This environment does not support a keyboard, display or mouse");
         }
-        System.out.println("true");
     }
 }

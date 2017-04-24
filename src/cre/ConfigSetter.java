@@ -72,6 +72,11 @@ public class ConfigSetter {
         }
     }
 
+    private static String getFieldIsName(String fieldName) {
+        return "is" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+
+    }
+
     private static String getFieldGetName(String fieldName) {
         return "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
     }
@@ -111,8 +116,8 @@ public class ConfigSetter {
      * @return value or false
      */
     public static boolean getFieldBoolean(Object o, String fieldName) {
-        Object returned = getMethodValue(o, getFieldGetName(fieldName), boolean.class);
-        return returned == null ? false : ((boolean) returned);
+        Object returned = getMethodValue(o, getFieldIsName(fieldName), boolean.class);
+        return returned != null && ((boolean) returned);
     }
 
     /**

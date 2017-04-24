@@ -1,20 +1,46 @@
 package cre.algorithm;
 
 import javax.swing.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by HanYizhao on 2017/4/7.
  */
-public abstract class AbstractAlgorithm {
+public abstract class AbstractAlgorithm implements Cloneable {
+
+    protected File filePath;
+
+    public AbstractAlgorithm(File filePath) {
+        this.filePath = filePath;
+    }
 
     public abstract String getName();
 
     public abstract String getIntroduction();
 
-    public abstract Object getConfiguration();
+    public Collection<String> getSupportLowerFileExtension() {
+        return new ArrayList<>();
+    }
 
-    public abstract void doAlgorithm(Object config, JTextArea outPutArea);
+    public abstract Cloneable getConfiguration();
+
+    public abstract AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile);
+
+    public abstract void doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus);
 
     public abstract void setShouldStop();
 
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
+    @Override
+    public String toString() {
+        Cloneable config = getConfiguration();
+        return this.getName() + " " + (config == null ? " no Config" : config);
+    }
 }
