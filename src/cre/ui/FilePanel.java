@@ -10,6 +10,10 @@ import java.io.File;
 
 /**
  * Created by HanYizhao on 4/13/2017.
+ * Until now, FilePanel has only one function, choose a file.
+ * When user chooses a file, this class inform the MainFrameEventHandler(actually MainFrame) by calling its function selectANewFile(File).
+ * <p>
+ * Notice: user may choose a file repeatly even when other algorithm is calculating.
  */
 public class FilePanel extends JPanel {
     public FilePanel(MainFrameEventHandler mainFrame) {

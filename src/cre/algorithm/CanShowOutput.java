@@ -5,4 +5,6 @@ package cre.algorithm;
  */
 public interface CanShowOutput {
     void showOutputString(String value);
+
+    void showLogString(String value);
 }

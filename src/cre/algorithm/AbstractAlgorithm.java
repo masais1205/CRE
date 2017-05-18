@@ -1,5 +1,7 @@
 package cre.algorithm;
 
+import cre.Config.OtherConfig;
+
 import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
@@ -27,9 +29,11 @@ public abstract class AbstractAlgorithm implements Cloneable {
 
     public abstract Cloneable getConfiguration();
 
+    public abstract OtherConfig getOtherConfiguration();
+
     public abstract AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile);
 
-    public abstract void doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus);
+    public abstract void doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus, OtherConfig otherConfig);
 
     public abstract void setShouldStop();
 

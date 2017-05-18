@@ -1,12 +1,12 @@
 package cre.algorithm.test;
 
 
+import cre.algorithm.CalculatingException;
 import cre.algorithm.CanShowOutput;
 import cre.algorithm.CanShowStatus;
-import cre.algorithm.test.ce.AbstractCE;
-import cre.algorithm.test.ce.CEAlgorithm;
-import cre.algorithm.test.ce.NumberCE;
-import cre.algorithm.test.ce.TrueFalseCE;
+import cre.algorithm.test.ce.*;
+
+import cre.algorithm.tool.FileTool;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -19,59 +19,18 @@ import java.util.*;
 public class TestOldAlgorithm {
     private static String delimiter = ",";
 
-    public static void do_it(String fileName, double ZC, String WName, String YName, String[] removeName,
-                             CanShowStatus canShowStatus, CanShowOutput canShowOutput) {
+    public static void do_it(String fileName, double ZC, int WP, int YP, int[] XPArray,
+                             int[] crossValidationGroup, int nowFold,
+                             CanShowStatus canShowStatus,
+                             CanShowOutput canShowOutput) throws CalculatingException {
 
         BufferedReader br = null;
-        BufferedReader brPre = null;
-        int WP;
-        int YP;
-        HashSet<Integer> XP = new HashSet<>();
-        int[] XPArray;
         int[] XPSorted;
         int[] XPReverseSorted;
         try {
             br = new BufferedReader(new FileReader(fileName));
-            brPre = new BufferedReader(new FileReader(fileName));
             String header = br.readLine();
-            brPre.readLine();
             String[] names = header.split(delimiter);
-            HashMap<String, Integer> namesPositionMap = new HashMap<>();
-            for (int i = 0; i < names.length; i++) {
-                namesPositionMap.put(names[i], i);
-            }
-            Integer temp;
-            temp = namesPositionMap.remove(WName);
-            if (temp == null) {
-                canShowOutput.showOutputString("Not find column name : " + WName);
-                return;
-            }
-            WP = temp;
-            temp = namesPositionMap.remove(YName);
-            if (temp == null) {
-                canShowOutput.showOutputString("Not find column name : " + YName);
-                return;
-            }
-            YP = temp;
-            for (String i : removeName) {
-                temp = namesPositionMap.remove(i);
-                if (temp == null) {
-                    canShowOutput.showOutputString("Not find column name : " + i);
-                    return;
-                }
-            }
-            XPArray = new int[namesPositionMap.size()];
-            int cC = 0;
-            for (Integer i : namesPositionMap.values()) {
-                XP.add(i);
-                XPArray[cC] = i;
-                cC++;
-            }
-            Arrays.sort(XPArray);
-            HashMap<String, AbstractCE> data = new HashMap<>();
-            String tempS;
-            int count = 0;
-            char[] cBuffer = new char[XPArray.length];
             OR[] orWX = new OR[XPArray.length];
             OR[] orYX = new OR[XPArray.length];
             for (int i = 0; i < XPArray.length; i++) {
@@ -79,63 +38,64 @@ public class TestOldAlgorithm {
                 orYX[i] = new OR(i);
             }
 
-            boolean simpleTrueFalse = true;
+
+            boolean simpleTrueFalse;
             double YMedian = 0;
-            {
-                List<Double> yValueList = new ArrayList<>();
-                while ((tempS = brPre.readLine()) != null) {
-                    String[] tempSS = tempS.split(delimiter);
-                    if (tempSS.length == names.length) {
-                        if (!tempSS[YP].equals("1") && !tempSS[YP].equals("0")) {
-                            simpleTrueFalse = false;
-                            yValueList.add(Double.parseDouble(tempSS[YP]));
-                        }
-                    } else {
-                        canShowOutput.showOutputString("Line value ERROR: (line:" + count + ") " + tempS);
-                        break;
-                    }
-                }
-                if (!simpleTrueFalse) {
-                    Collections.sort(yValueList);
-                    int length = yValueList.size();
-                    if (length % 2 != 0) {
-                        YMedian = yValueList.get(length / 2);
-                    } else {
-                        YMedian = (yValueList.get(length / 2) + yValueList.get(length / 2 - 1)) / 2;
-                    }
-                }
+
+            Double YMedianResult = FileTool.getMedianOfAttribute(fileName,
+                    delimiter, YP, names.length, crossValidationGroup, nowFold, canShowOutput);
+            if (YMedianResult == null) {
+                simpleTrueFalse = true;
+            } else {
+                simpleTrueFalse = false;
+                YMedian = YMedianResult;
             }
-            canShowOutput.showOutputString("SimpleTrueFalse:" + simpleTrueFalse);
+            canShowOutput.showLogString("SimpleTrueFalse:" + simpleTrueFalse);
 
-
+            char[] cBuffer = new char[XPArray.length];
+            int count = 2;
+            String tempS;
+            boolean isTrainingSet;
+            HashMap<String, AbstractCE> trainingData = new HashMap<>();
+            HashMap<String, LineValue> testingData = new HashMap<>();
             while ((tempS = br.readLine()) != null) {
+                isTrainingSet = crossValidationGroup[count - 2] != nowFold;
                 String[] tempSS = tempS.split(delimiter);
                 if (tempSS.length == names.length) {
                     double yValue = Double.parseDouble(tempSS[YP]);
+                    boolean WValue = tempSS[WP].equals("1");
+                    boolean YBooleanValue = simpleTrueFalse ? tempSS[YP].equals("1") : yValue > YMedian;
                     for (int i = 0; i < XPArray.length; i++) {
                         cBuffer[i] = tempSS[XPArray[i]].equals("1") ? '1' : '0';
-                        orWX[i].addValue(tempSS[WP].equals("1"), tempSS[XPArray[i]].equals("1"));
-                        if (simpleTrueFalse) {
-                            orYX[i].addValue(tempSS[YP].equals("1"), tempSS[XPArray[i]].equals("1"));
-                        } else {
-                            orYX[i].addValue(yValue > YMedian, tempSS[XPArray[i]].equals("1"));
+                        if (isTrainingSet) {
+                            orWX[i].addValue(WValue, tempSS[XPArray[i]].equals("1"));
+                            orYX[i].addValue(YBooleanValue, tempSS[XPArray[i]].equals("1"));
                         }
                     }
                     String s = new String(cBuffer);
-                    if (simpleTrueFalse) {
-                        AbstractCE cE = data.get(s);
-                        if (cE == null) {
-                            cE = new TrueFalseCE(cBuffer);
-                            data.put(s, cE);
+                    if (isTrainingSet) {
+                        if (simpleTrueFalse) {
+                            AbstractCE cE = trainingData.get(s);
+                            if (cE == null) {
+                                cE = new TrueFalseCE(cBuffer);
+                                trainingData.put(s, cE);
+                            }
+                            ((TrueFalseCE) cE).addItem(WValue, YBooleanValue);
+                        } else {
+                            AbstractCE cE = trainingData.get(s);
+                            if (cE == null) {
+                                cE = new NumberCE(cBuffer);
+                                trainingData.put(s, cE);
+                            }
+                            ((NumberCE) cE).addItem(WValue, yValue);
                         }
-                        ((TrueFalseCE) cE).addItem(tempSS[WP].equals("1"), tempSS[YP].equals("1"));
                     } else {
-                        AbstractCE cE = data.get(s);
-                        if (cE == null) {
-                            cE = new NumberCE(cBuffer);
-                            data.put(s, cE);
+                        LineValue lv = testingData.get(s);
+                        if (lv == null) {
+                            lv = new LineValue(cBuffer);
+                            testingData.put(s, lv);
                         }
-                        ((NumberCE) cE).addItem(tempSS[WP].equals("1"), yValue);
+                        lv.addItem(WValue, YBooleanValue);
                     }
                 } else {
                     canShowOutput.showOutputString("Line value ERROR: (line:" + count + ") " + tempS);
@@ -168,11 +128,11 @@ public class TestOldAlgorithm {
             for (int i = 0; i < orYX.length; i++) {
                 XPSorted[i] = ((Integer) orYX[i].getAttach());
             }
-            for (AbstractCE i : data.values()) {
+            for (AbstractCE i : trainingData.values()) {
                 i.updateCEValue(ZC);
             }
             List<AbstractCE> mergeResult = new ArrayList<>();
-            CEAlgorithm.doMerge(data.values(), mergeResult, XPSorted, XPReverseSorted, ZC, canShowOutput);
+            CEAlgorithm.doMerge(trainingData.values(), mergeResult, XPSorted, XPReverseSorted, ZC, canShowOutput);
             StringBuilder sb = new StringBuilder();
             sb.append(mergeResult.size());
             sb.append("\n");
@@ -191,20 +151,62 @@ public class TestOldAlgorithm {
                 sb.append(i.toString());
                 sb.append("\n");
             }
-            canShowOutput.showOutputString(sb.toString());
+            canShowOutput.showLogString(sb.toString());
+
+            CESearchTool searchTool = new CESearchTool(mergeResult);
+            int[] plusStatus = new int[4];
+            int[] minusStatus = new int[4];
+            int questionStatus = 0;
+            int notMatch = 0;
+            for (LineValue lv : testingData.values()) {
+                CEValue ceValue = searchTool.getCEValue(lv.getValue());
+                if (ceValue != null) {
+                    switch (ceValue) {
+                        case PLUS:
+                            for (int i = 0; i < 4; i++) {
+                                plusStatus[i] += lv.getWYValues()[i];
+                            }
+                            break;
+                        case MINUS:
+                            for (int i = 0; i < 4; i++) {
+                                minusStatus[i] += lv.getWYValues()[i];
+                            }
+                            break;
+                        case QUESTION:
+                            for (int i = 0; i < 4; i++) {
+                                questionStatus += lv.getWYValues()[i];
+                            }
+                            break;
+                    }
+
+                } else {
+                    for (int i = 0; i < 4; i++) {
+                        notMatch += lv.getWYValues()[i];
+                    }
+                    canShowOutput.showLogString("CESearchTool#getCEValue return null");
+                }
+            }
+            canShowOutput.showOutputString(CEValue.PLUS + "\t" + Arrays.toString(plusStatus));
+            canShowOutput.showOutputString(CEValue.MINUS + "\t" + Arrays.toString(minusStatus));
+            canShowOutput.showOutputString(CEValue.QUESTION + "\t" + questionStatus);
+            canShowOutput.showOutputString("not match\t" + notMatch);
+            double sum = 0;
+            double bingo = 0;
+            for (int i = 0; i < 4; i++) {
+                sum += plusStatus[i];
+                sum += minusStatus[i];
+            }
+            bingo += plusStatus[0];
+            bingo += plusStatus[3];
+            bingo += minusStatus[1];
+            bingo += minusStatus[2];
+            canShowOutput.showOutputString("accuracy: " + bingo / sum);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             if (br != null) {
                 try {
                     br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (brPre != null) {
-                try {
-                    brPre.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

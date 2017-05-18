@@ -20,7 +20,7 @@ public class CEAlgorithm {
 
     private static void mergeQuestionList(List<AbstractCE> old, List<AbstractCE> plusResult, List<AbstractCE> minusResult,
                                           List<AbstractCE> questionResult, MergeConfig mc, CanShowOutput canShowOutput) {
-        canShowOutput.showOutputString("Merge Question: " + old.size() + "\t" + plusResult.size() + "\t" + questionResult.size());
+        canShowOutput.showLogString("Merge Question: " + old.size() + "\t" + plusResult.size() + "\t" + questionResult.size());
         //As index
         HashMap<String, Integer> map = new HashMap<>();
         // Copy of old
@@ -68,7 +68,7 @@ public class CEAlgorithm {
                 }
             }
         } while (hasMergeOne);
-        canShowOutput.showOutputString("loop count: " + count);
+        canShowOutput.showLogString("loop count: " + count);
         for (Map.Entry<String, Integer> i : map.entrySet()) {
             questionResult.add(list.get(i.getValue()));
         }
@@ -79,11 +79,11 @@ public class CEAlgorithm {
             mergeSimpleList(newMinusList, minusResult, mc, CEValue.MINUS, canShowOutput);
         }
         old.clear();
-        canShowOutput.showOutputString("Merge Question Finish: " + "\t" + plusResult.size() + "\t" + questionResult.size());
+        canShowOutput.showLogString("Merge Question Finish: " + "\t" + plusResult.size() + "\t" + questionResult.size());
     }
 
     private static void mergeSimpleList(List<AbstractCE> old, List<AbstractCE> result, MergeConfig mc, CEValue preferredValue, CanShowOutput canShowOutput) {
-        canShowOutput.showOutputString("Merge " + preferredValue + ": " + old.size() + "\t" + result.size());
+        canShowOutput.showLogString("Merge " + preferredValue + ": " + old.size() + "\t" + result.size());
         HashMap<String, Integer> map = new HashMap<>();
         ArrayList<AbstractCE> list = new ArrayList<>(old.size());
         int cc = 0;
@@ -112,7 +112,7 @@ public class CEAlgorithm {
                                 AbstractCE newCE = tempCE.mergeInstance(list.get(position),
                                         i, char_Star, null, mc.zc);
                                 if (newCE.cEValue.compareTo(preferredValue) != 0) {
-                                    canShowOutput.showOutputString("ERROR");
+                                    canShowOutput.showLogString("ERROR");
                                 }
                                 list.set(l, newCE);
                                 list.set(position, null);
@@ -125,11 +125,11 @@ public class CEAlgorithm {
             }
         } while (hasMergeOne);
         old.clear();
-        canShowOutput.showOutputString("loop count: " + count);
+        canShowOutput.showLogString("loop count: " + count);
         for (Map.Entry<String, Integer> i : map.entrySet()) {
             result.add(list.get(i.getValue()));
         }
-        canShowOutput.showOutputString("Merge " + preferredValue + " Finish: " + old.size() + "\t" + result.size());
+        canShowOutput.showLogString("Merge " + preferredValue + " Finish: " + old.size() + "\t" + result.size());
     }
 
     public static void doMerge(Collection<AbstractCE> old, List<AbstractCE> result, int[] order, int[] reverseOrder, double zc, CanShowOutput canShowOutput) {
@@ -158,7 +158,7 @@ public class CEAlgorithm {
         mergeSimpleList(plusResult, result, mc, CEValue.PLUS, canShowOutput);
         mergeSimpleList(minusResult, result, mc, CEValue.MINUS, canShowOutput);
         result.addAll(questionResult);
-        canShowOutput.showOutputString("All Finish:" + result.size());
+        canShowOutput.showLogString("All Finish:" + result.size());
     }
 
 

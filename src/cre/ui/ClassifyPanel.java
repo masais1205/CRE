@@ -1,5 +1,6 @@
 package cre.ui;
 
+import cre.Config.OtherConfig;
 import cre.ConfigSetter;
 import cre.algorithm.AbstractAlgorithm;
 import cre.algorithm.CanShowOutput;
@@ -12,10 +13,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,6 +21,12 @@ import java.util.Date;
 
 /**
  * Created by HanYizhao on 4/13/2017.
+ * <p>
+ * When user chooses a file in FilePanel, ClassifyPanel becomes available.
+ * This panel consisits of three parts.
+ * North is the section in which user can choose an algorithm and configure the algorithm.
+ * West is the section which has “start button” and “stop button” and shows history of each transaction.
+ * When we change the item in history, the center part, a JTextArea will switch the outputs.
  */
 public class ClassifyPanel extends MyPanel implements CanShowOutput {
 
@@ -52,8 +56,22 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
         });
 
         JPanel leftPanel = new JPanel(new GridBagLayout());
-        leftPanel.setPreferredSize(new Dimension(200, 0));
+        leftPanel.setPreferredSize(new Dimension(250, 0));
         this.add(leftPanel, BorderLayout.WEST);
+        JPanel testOptionPanel = new JPanel(new GridBagLayout());
+        testOptionPanel.setBorder(new TitledBorder("Test Options"));
+        s.weightx = 1;
+        s.gridwidth = 0;
+        s.insets = new Insets(10, 5, 5, 5);
+        leftPanel.add(testOptionPanel, s);
+        crossValidationComboBox.setSelectedItem(10);
+        s.weightx = 1;
+        s.gridwidth = 1;
+        s.insets = new Insets(0, 0, 0, 0);
+        testOptionPanel.add(new JLabel("Cross Validation"), s);
+        testOptionPanel.add(new JLabel("Folds"), s);
+        s.gridwidth = 0;
+        testOptionPanel.add(crossValidationComboBox, s);
         s.weightx = 1;
         s.gridwidth = 1;
         s.insets = new Insets(10, 7, 5, 5);
@@ -68,7 +86,7 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
         s.weightx = 1;
         s.weighty = 1;
         s.fill = GridBagConstraints.BOTH;
-        s.insets = new Insets(0, 5, 5, 5);
+        s.insets = new Insets(0, 5, 0, 5);
         leftPanel.add(scrollPane, s);
 
         JScrollPane textScroll = new JScrollPane(textArea);
@@ -90,26 +108,38 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
             }
         });
 
+        crossValidationComboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    nowOtherConfig.setCrossValidationFolds(((Integer) e.getItem()));
+                }
+            }
+        });
+
         resultList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting()) {
-                    restoreTextAreaStatus();
+                    resultListItems.get(oldSelectionIndex).messageBuffer = new StringBuilder(textArea.getText());
+                    oldSelectionIndex = resultList.getSelectedIndex();
+                    textArea.setText(resultListItems.get(oldSelectionIndex).messageBuffer.toString());
                 }
             }
         });
+
+        nowOtherConfig = new OtherConfig();
     }
 
+    /**
+     * This attribute is only working for the resultList.
+     * Store the selected index of resultList.
+     */
     private int oldSelectionIndex = 0;
 
-    private void restoreTextAreaStatus() {
-        resultListItems.get(oldSelectionIndex).messageBuffer = new StringBuilder(textArea.getText());
-        oldSelectionIndex = resultList.getSelectedIndex();
-        textArea.setText(resultListItems.get(oldSelectionIndex).messageBuffer.toString());
-    }
-
-    private void saveTextAreaStatus() {
-        System.out.println("saveTextAreaStatus " + resultList.getSelectedIndex());
+    @Override
+    public void showLogString(String value) {
+        System.out.println(value);
     }
 
     @Override
@@ -129,23 +159,41 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
         });
     }
 
+
+    /**
+     * Called when "Start Button" is clicked.
+     */
     private void startButtonClicked() {
         if (nowSelectedAlgorithm == null) {
-            JOptionPane.showMessageDialog(mainFrame.getFrame(), "Please Choose a Classifier first");
+            JOptionPane.showMessageDialog(mainFrame.getFrame(),
+                    "Please Choose a Classifier first");
         } else {
+            final AbstractAlgorithm calculatingAlgorithm;
+            try {
+                calculatingAlgorithm = (AbstractAlgorithm) nowSelectedAlgorithm.clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(mainFrame.getFrame(),
+                        e.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             startButton.setEnabled(false);
             stopButton.setEnabled(true);
             ResultListItem item = new ResultListItem();
-            item.algorithm = nowSelectedAlgorithm;
+            item.algorithm = calculatingAlgorithm;
             resultListItems.add(item);
-            listModel.addElement(new SimpleDateFormat().format(new Date()) + " - " + nowSelectedAlgorithm.toString());
+            listModel.addElement(new SimpleDateFormat().format(new Date()) + " - " + calculatingAlgorithm.toString());
             resultList.setSelectedIndex(listModel.size() - 1);
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     CanShowStatus canShowStatus = mainFrame.getCanShowStatus();
                     canShowStatus.showStatus("Starting...");
-                    nowSelectedAlgorithm.doAlgorithm(ClassifyPanel.this, canShowStatus);
+                    try {
+                        calculatingAlgorithm.doAlgorithm(ClassifyPanel.this, canShowStatus, (OtherConfig) nowOtherConfig.clone());
+                    } catch (CloneNotSupportedException e) {
+                        e.printStackTrace();
+                    }
                     canShowStatus.showStatus("OK");
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
@@ -160,12 +208,20 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
         }
     }
 
+    /**
+     * Called when the calculation is finished.
+     */
     private void calculatingFinished() {
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
         runningThread = null;
     }
 
+    /**
+     * Called by MainFrame to inform ClassifyPanel that user chooses a new file.
+     *
+     * @param nowSelectedFile the new file
+     */
     public void setNowSelectedFile(File nowSelectedFile) {
         this.nowSelectedFile = nowSelectedFile;
         if (nowSelectedAlgorithm != null) {
@@ -173,6 +229,9 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
         }
     }
 
+    /**
+     * Called when "configTextField" is clicked.
+     */
     private void configTextFieldMouseClicked() {
         if (nowSelectedAlgorithm == null) {
             chooseClassifier();
@@ -191,6 +250,10 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
         }
     }
 
+    /**
+     * When the configuration of algorithm is changed,
+     * this function is called to refresh the content of "configTextField"
+     */
     private void refreshConfigTextField() {
         if (nowSelectedAlgorithm != null) {
             configTextField.setText(nowSelectedAlgorithm.toString());
@@ -199,6 +262,10 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
         }
     }
 
+    /**
+     * Choose an algorithm. This function is called when use press "choose button"
+     * or press "configTextField" with no algorithm.
+     */
     private void chooseClassifier() {
         String[] names = new String[]{"CDT", "Test"};
         ChooseFromStringList choose = new ChooseFromStringList(mainFrame.getFrame(),
@@ -229,15 +296,41 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
     private DefaultListModel<String> listModel = new DefaultListModel<>();
     private JList<String> resultList = new JList<>(listModel);
     private JTextArea textArea = new JTextArea();
+    private JComboBox<Integer> crossValidationComboBox = new JComboBox<>(new Integer[]{2, 3, 4, 5, 6, 7, 8, 9, 10});
 
+    /**
+     * The interface in which there are functions MainFrame provide.
+     */
     private MainFrameEventHandler mainFrame;
 
+    /**
+     * The file which is chosen. Maybe not the file used by the running algorithm.
+     * Because when user press 'Start', he can still choose another file.
+     */
     private File nowSelectedFile;
 
+    /**
+     * The test options.
+     * When user press 'Start', the cloned option is used. Thus user can safely modify
+     * these options when algorithm is running.
+     */
+    private OtherConfig nowOtherConfig;
+
+
+    /**
+     * The algorithm which is chosen. Not the running algorithm.
+     * Because when user press 'Start' and then the cloned algorithm starts running, the user can still choose a algorithm
+     * which is not related to the running.
+     */
     private AbstractAlgorithm nowSelectedAlgorithm;
 
+    /**
+     * A data model of result list. Include the algorithm and output
+     */
     private ArrayList<ResultListItem> resultListItems = new ArrayList<>();
-
+    /**
+     * The only thread to do calculation using specific algorithm.
+     */
     private Thread runningThread;
 
     @Override
@@ -253,8 +346,18 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
     }
 
 
+    /**
+     * A Data Structure
+     */
     private class ResultListItem {
+        /**
+         * algorithm
+         */
         AbstractAlgorithm algorithm;
+        /**
+         * When this item is switched to the background,
+         * use this attribute to store the outputs.
+         */
         StringBuilder messageBuffer = new StringBuilder();
     }
 }

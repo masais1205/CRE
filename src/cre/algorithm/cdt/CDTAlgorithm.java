@@ -1,5 +1,6 @@
 package cre.algorithm.cdt;
 
+import cre.Config.OtherConfig;
 import cre.algorithm.AbstractAlgorithm;
 import cre.algorithm.CanShowOutput;
 import cre.algorithm.CanShowStatus;
@@ -14,6 +15,7 @@ import java.util.Collection;
 public class CDTAlgorithm extends AbstractAlgorithm {
 
     public CDTConfig config;
+    private OtherConfig otherConfig;
     public Boolean shouldStop = false;
 
     public CDTAlgorithm(File filePath, CDTConfig oldConfig) {
@@ -55,14 +57,20 @@ public class CDTAlgorithm extends AbstractAlgorithm {
     }
 
     @Override
+    public OtherConfig getOtherConfiguration() {
+        return otherConfig;
+    }
+
+    @Override
     public AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile) {
         CDTAlgorithm a = new CDTAlgorithm(newFile, this.config);
         return a;
     }
 
     @Override
-    public void doAlgorithm(CanShowOutput outPutArea, CanShowStatus canShowStatus) {
+    public void doAlgorithm(CanShowOutput outPutArea, CanShowStatus canShowStatus, OtherConfig otherConfig) {
         shouldStop = false;
+        this.otherConfig = otherConfig;
         String fileName = filePath.getAbsolutePath();
         if (fileName.toLowerCase().endsWith(".csv")) {
             fileName = fileName.substring(0, fileName.length() - 4);
@@ -82,6 +90,9 @@ public class CDTAlgorithm extends AbstractAlgorithm {
             algorithm = (CDTAlgorithm) super.clone();
             if (this.config != null) {
                 algorithm.config = (CDTConfig) this.config.clone();
+            }
+            if (this.otherConfig != null) {
+                algorithm.otherConfig = (OtherConfig) this.config.clone();
             }
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();

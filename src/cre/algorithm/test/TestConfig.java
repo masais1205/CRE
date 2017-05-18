@@ -102,7 +102,7 @@ public class TestConfig implements Cloneable {
     }
 
     public double getZCMax() {
-        return 2;
+        return 10;
     }
 
     public double getZCMin() {

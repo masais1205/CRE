@@ -13,6 +13,23 @@ public class ConfigSample {
     private String d;
     private String dd;
     private TreeMap<String, List<Integer>> attri;
+    private TreeMap<String, List<Integer>> malesOrNot;
+
+    public String[] getMalesOrNotNames() {
+        return new String[]{"Tina", "Bob", "Tom", "Helen"};
+    }
+
+    public String[] getMalesOrNotClasses() {
+        return new String[]{"Male", "Female"};
+    }
+
+    public TreeMap<String, List<Integer>> getMalesOrNot() {
+        return malesOrNot;
+    }
+
+    public void setMalesOrNot(TreeMap<String, List<Integer>> malesOrNot) {
+        this.malesOrNot = malesOrNot;
+    }
 
     public String getD() {
         return d;
@@ -55,7 +72,6 @@ public class ConfigSample {
     public double getBMax() {
         return 100;
     }
-
 
 
     public double getB() {

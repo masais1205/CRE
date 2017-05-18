@@ -17,7 +17,6 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
     public MainFrame() throws HeadlessException {
         this.setSize(800, 600);
         this.setTitle("CRE");
-        this.setBackground(Color.black);
         this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
         this.addWindowListener(new WindowAdapter() {
