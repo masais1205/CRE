@@ -64,7 +64,6 @@ public class TrueFalseCE extends AbstractCE {
                 cEValue = CEValue.QUESTION;
             }
         }
-
     }
 
 
