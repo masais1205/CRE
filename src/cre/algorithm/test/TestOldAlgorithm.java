@@ -7,6 +7,7 @@ import cre.algorithm.CanShowStatus;
 import cre.algorithm.test.ce.*;
 
 import cre.algorithm.tool.FileTool;
+import cre.algorithm.tool.OtherTool;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -128,57 +129,54 @@ public class TestOldAlgorithm {
             for (int i = 0; i < orYX.length; i++) {
                 XPSorted[i] = ((Integer) orYX[i].getAttach());
             }
+            /////////!!!!! Jiuyong asked to make XPReverseSorted same as XPSorted
+            System.arraycopy(XPSorted, 0, XPReverseSorted, 0, XPSorted.length);
+            ////////!!!!!!!!!!!!!!!!!
+
+
             for (AbstractCE i : trainingData.values()) {
                 i.updateCEValue(ZC);
             }
             List<AbstractCE> mergeResult = new ArrayList<>();
             CEAlgorithm.doMerge(trainingData.values(), mergeResult, XPSorted, XPReverseSorted, ZC, canShowOutput);
-            StringBuilder sb = new StringBuilder();
-            sb.append(mergeResult.size());
-            sb.append("\n");
-            for (int i = 0; i < XPArray.length; i++) {
-                sb.append(names[XPArray[i]]);
-                sb.append("\t");
-            }
-            if (simpleTrueFalse) {
-                sb.append("ce.TrueFalseCE\tn11\tn12\tn21\tn22\t");
-                sb.append("p1-p2");
-            } else {
-                sb.append("ce.TrueFalseCE\tW=1\tW=0");
-            }
-            sb.append("\n");
-            for (AbstractCE i : mergeResult) {
-                sb.append(i.toString());
+
+            //Log training result.
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.append(mergeResult.size());
                 sb.append("\n");
+                for (int i = 0; i < XPArray.length; i++) {
+                    sb.append(names[XPArray[i]]);
+                    sb.append("\t");
+                }
+                if (simpleTrueFalse) {
+                    sb.append("ce.TrueFalseCE\tn11\tn12\tn21\tn22\t");
+                    sb.append("p1-p2");
+                } else {
+                    sb.append("ce.TrueFalseCE\tW=1\tW=0");
+                }
+                sb.append("\n");
+                for (AbstractCE i : mergeResult) {
+                    sb.append(i.toString());
+                    sb.append("\n");
+                }
+                canShowOutput.showLogString(sb.toString());
             }
-            canShowOutput.showLogString(sb.toString());
 
+            // Training is finished. Start testing.
             CESearchTool searchTool = new CESearchTool(mergeResult);
-            int[] plusStatus = new int[4];
-            int[] minusStatus = new int[4];
-            int questionStatus = 0;
             int notMatch = 0;
+            HashMap<String, LineValue> testDataStatistic = new HashMap<>();
             for (LineValue lv : testingData.values()) {
-                CEValue ceValue = searchTool.getCEValue(lv.getValue());
-                if (ceValue != null) {
-                    switch (ceValue) {
-                        case PLUS:
-                            for (int i = 0; i < 4; i++) {
-                                plusStatus[i] += lv.getWYValues()[i];
-                            }
-                            break;
-                        case MINUS:
-                            for (int i = 0; i < 4; i++) {
-                                minusStatus[i] += lv.getWYValues()[i];
-                            }
-                            break;
-                        case QUESTION:
-                            for (int i = 0; i < 4; i++) {
-                                questionStatus += lv.getWYValues()[i];
-                            }
-                            break;
+                char[] charValue = searchTool.getCharValue(lv.getValue());
+                if (charValue != null) {
+                    String tS = new String(charValue);
+                    LineValue testLv = testDataStatistic.get(tS);
+                    if (testLv == null) {
+                        testLv = new LineValue(charValue);
+                        testDataStatistic.put(tS, testLv);
                     }
-
+                    testLv.addSomeItem(lv.getWYValues());
                 } else {
                     for (int i = 0; i < 4; i++) {
                         notMatch += lv.getWYValues()[i];
@@ -186,21 +184,49 @@ public class TestOldAlgorithm {
                     canShowOutput.showLogString("CESearchTool#getCEValue return null");
                 }
             }
-            canShowOutput.showOutputString(CEValue.PLUS + "\t" + Arrays.toString(plusStatus));
-            canShowOutput.showOutputString(CEValue.MINUS + "\t" + Arrays.toString(minusStatus));
-            canShowOutput.showOutputString(CEValue.QUESTION + "\t" + questionStatus);
-            canShowOutput.showOutputString("not match\t" + notMatch);
-            double sum = 0;
-            double bingo = 0;
-            for (int i = 0; i < 4; i++) {
-                sum += plusStatus[i];
-                sum += minusStatus[i];
+
+            int success = 0;
+            int failed = 0;
+            canShowOutput.showLogString("\n===Testing process===");
+            for (LineValue lv : testDataStatistic.values()) {
+                double[] dData = OtherTool.fromIntArrayToNoZeroArray(lv.getWYValues());
+                double ATE = dData[0] / (dData[0] + dData[1]) - dData[2] / (dData[2] + dData[3]);
+                CEValue ceValue = searchTool.getCEValue(lv.getValue());
+                {
+                    if (ceValue != null && (ceValue.compareTo(CEValue.MINUS) == 0
+                            || ceValue.compareTo(CEValue.PLUS) == 0)) {
+                        StringBuilder sbs = new StringBuilder();
+                        for (int i = 0; i < lv.getValue().length; i++) {
+                            sbs.append(lv.getValue()[i]);
+                            sbs.append('\t');
+                        }
+                        sbs.append(ceValue);
+                        sbs.append('\t');
+                        for (int i = 0; i < 4; i++) {
+                            sbs.append(dData[i]);
+                            sbs.append("\t");
+                        }
+                        sbs.append(ATE);
+                        canShowOutput.showLogString(sbs.toString());
+                    }
+                }
+                if (ceValue != null) {
+                    if (ceValue.compareTo(CEValue.PLUS) == 0) {
+                        if (ATE > 0) {
+                            success++;
+                        } else {
+                            failed++;
+                        }
+                    } else if (ceValue.compareTo(CEValue.MINUS) == 0) {
+                        if (ATE < 0) {
+                            success++;
+                        } else {
+                            failed++;
+                        }
+                    }
+                }
             }
-            bingo += plusStatus[0];
-            bingo += plusStatus[3];
-            bingo += minusStatus[1];
-            bingo += minusStatus[2];
-            canShowOutput.showOutputString("accuracy: " + bingo / sum);
+            canShowOutput.showOutputString("accuracy: " + (double) success / (success + failed));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

@@ -33,12 +33,14 @@ public class ConfigDialog extends JDialog {
 
         mainPanel.setLayout(new GridBagLayout());
         GridBagConstraints left = new GridBagConstraints();
-        left.insets = new Insets(5, 10, 5, 5);
+        int five = Tool.HighResolution(5);
+        int ten = Tool.HighResolution(10);
+        left.insets = new Insets(five, ten, five, five);
         left.anchor = GridBagConstraints.EAST;
         left.gridwidth = 1;
         left.weightx = 0;
         GridBagConstraints right = new GridBagConstraints();
-        right.insets = new Insets(5, 5, 5, 10);
+        right.insets = new Insets(five, five, five, ten);
         right.gridwidth = 0;
         right.weightx = 1;
         right.fill = GridBagConstraints.HORIZONTAL;

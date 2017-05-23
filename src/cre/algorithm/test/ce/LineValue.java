@@ -17,6 +17,14 @@ public class LineValue {
         return WYValues;
     }
 
+    public void addSomeItem(int[] values) {
+        if (values.length == 4) {
+            for (int i = 0; i < 4; i++) {
+                WYValues[i] += values[i];
+            }
+        }
+    }
+
     public void addItem(boolean W, boolean Y) {
         if (W) {
             if (Y) {

@@ -1,9 +1,6 @@
 package cre.algorithm;
 
-import cre.algorithm.tool.FileTool;
-
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -32,6 +29,79 @@ public class CrossValidation {
                 return 0;
             }
         }
+    }
+
+    public static class SliceLinesHelper {
+        public int[] nextLines(Integer preferredFold) {
+            Collections.shuffle(nowResult, random);
+            int[] result = new int[nowResult.size()];
+            for (int i = 0; i < nowResult.size(); i++) {
+                result[i] = nowResult.get(i);
+            }
+            if (preferredFold != null) {
+                int test = preferredFold;
+                int train = -preferredFold;
+                if (preferredFold == 0) {
+                    train = -1;
+                }
+                for (int i = 0; i < result.length; i++) {
+                    result[i] = result[i] == 1 ? test : train;
+                }
+            }
+            return result;
+        }
+
+
+        public SliceLinesHelper(String fileName, String delimiter, int position,
+                                int testingRatio, int attributeLength,
+                                CanShowOutput canShowOutput) throws CalculatingException {
+            BufferedReader br = null;
+            List<Simple> buffer = new ArrayList<>();
+            try {
+                br = new BufferedReader(new FileReader(fileName));
+                br.readLine();
+                String temp;
+                int count = 2;
+                while ((temp = br.readLine()) != null) {
+                    String[] strings = temp.split(delimiter);
+                    if (strings.length == attributeLength) {
+                        buffer.add(new Simple(Double.parseDouble(strings[position]),
+                                count - 2));
+                    } else {
+                        String message = "Line value ERROR: (line:" + count + ") " + temp;
+                        if (canShowOutput != null) {
+                            canShowOutput.showOutputString(message);
+                        }
+                        throw new CalculatingException(message);
+                    }
+                    count++;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            Collections.sort(buffer);
+            nowResult = new ArrayList<>(buffer.size());
+            int[] tempResult = new int[buffer.size()];
+            for (int i = 0; i < buffer.size(); i++) {
+                Simple s = buffer.get(i);
+                tempResult[s.position] = i % 100 < testingRatio ? 1 : 0;
+            }
+            for (int aTempResult : tempResult) {
+                nowResult.add(aTempResult);
+            }
+        }
+
+        private List<Integer> nowResult;
+        private Random random = new Random(1);
+
     }
 
     /**

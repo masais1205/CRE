@@ -5,13 +5,10 @@ import cre.algorithm.AbstractAlgorithm;
 import cre.algorithm.CanShowOutput;
 import cre.algorithm.CanShowStatus;
 import cre.algorithm.CrossValidation;
+import cre.algorithm.CrossValidation.SliceLinesHelper;
 import cre.algorithm.tool.OtherTool;
-import sun.security.x509.OtherName;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
@@ -22,7 +19,6 @@ import java.util.TreeMap;
 public class TestAlgorithm extends AbstractAlgorithm {
 
     private TestConfig config;
-    private OtherConfig otherConfig;
 
     @Override
     public Object clone() {
@@ -31,9 +27,6 @@ public class TestAlgorithm extends AbstractAlgorithm {
             algorithm = (TestAlgorithm) super.clone();
             if (this.config != null) {
                 algorithm.config = (TestConfig) this.config.clone();
-            }
-            if (this.otherConfig != null) {
-                algorithm.otherConfig = (OtherConfig) this.otherConfig.clone();
             }
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
@@ -63,11 +56,6 @@ public class TestAlgorithm extends AbstractAlgorithm {
     }
 
     @Override
-    public OtherConfig getOtherConfiguration() {
-        return otherConfig;
-    }
-
-    @Override
     public AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile) {
         TestAlgorithm a = new TestAlgorithm(newFile);
         a.config.setZC(this.config.getZC());
@@ -76,7 +64,6 @@ public class TestAlgorithm extends AbstractAlgorithm {
 
     @Override
     public void doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus, OtherConfig otherConfig) {
-        this.otherConfig = otherConfig;
         try {
             TreeMap<String, List<Integer>> configTreeMap = config.getType();
             String[] configAttributeNames = config.getTypeNames();
@@ -108,23 +95,41 @@ public class TestAlgorithm extends AbstractAlgorithm {
             Arrays.sort(XPArray);
 
             String fileName = filePath.getAbsolutePath();
-            int[] crossValidationGroup = CrossValidation.sliceLines(fileName,
-                    ",", YP, otherConfig.getCrossValidationFolds(),
-                    configAttributeNames.length, canShowOutput);
+            switch (otherConfig.getValidation()) {
+                case VALIDATION: {
+                    SliceLinesHelper helper = new SliceLinesHelper(fileName, ",", YP,
+                            otherConfig.getTest(), configAttributeNames.length, canShowOutput);
+                    for (int i = 0; i < otherConfig.getValidationRepeatTimes(); i++) {
+                        canShowStatus.showStatus("Times " + i);
+                        canShowOutput.showOutputString("\nTimes " + i);
+                        int[] group = helper.nextLines(i);
+                        TestOldAlgorithm.do_it(fileName,
+                                config.getZC(), WP, YP,
+                                XPArray, group, i, canShowStatus, canShowOutput);
+                    }
+                }
+                break;
+                case CROSS_VALIDATION: {
+                    int[] crossValidationGroup = CrossValidation.sliceLines(fileName,
+                            ",", YP, otherConfig.getCrossValidationFolds(),
+                            configAttributeNames.length, canShowOutput);
 
-            // check each fold
-            for (int i = 0; i < otherConfig.getCrossValidationFolds(); i++) {
-                canShowStatus.showStatus("Fold " + i);
-                canShowOutput.showOutputString("\nFold " + i);
-                TestOldAlgorithm.do_it(fileName,
-                        config.getZC(), WP, YP,
-                        XPArray, crossValidationGroup, i, canShowStatus, canShowOutput);
+                    // check each fold
+                    for (int i = 0; i < otherConfig.getCrossValidationFolds(); i++) {
+                        canShowStatus.showStatus("Fold " + i);
+                        canShowOutput.showOutputString("\nFold " + i);
+                        TestOldAlgorithm.do_it(fileName,
+                                config.getZC(), WP, YP,
+                                XPArray, crossValidationGroup, i, canShowStatus, canShowOutput);
+                    }
+                }
+                break;
             }
+
         } catch (Exception e) {
             e.printStackTrace();
             canShowOutput.showOutputString(e.getMessage());
         }
-
     }
 
     @Override

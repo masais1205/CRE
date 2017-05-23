@@ -30,6 +30,8 @@ import java.util.Date;
  */
 public class ClassifyPanel extends MyPanel implements CanShowOutput {
 
+    boolean isPressed = false;
+
     public ClassifyPanel(MainFrameEventHandler mainFrame) {
         this.mainFrame = mainFrame;
         this.setLayout(new BorderLayout());
@@ -38,10 +40,14 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
         topPanel.setBorder(new TitledBorder("Classifier"));
         GridBagConstraints s = new GridBagConstraints();
         s.weightx = 0;
-        s.insets = new Insets(10, 10, 10, 5);
+        int ten = Tool.HighResolution(10);
+        int five = Tool.HighResolution(5);
+        int two = Tool.HighResolution(2);
+        int seven = Tool.HighResolution(7);
+        s.insets = new Insets(ten, ten, ten, five);
         s.gridwidth = 1;
         topPanel.add(chooseButton, s);
-        s.insets = new Insets(10, 5, 10, 10);
+        s.insets = new Insets(ten, five, ten, ten);
         s.weightx = 1;
         s.gridwidth = 0;
         s.fill = GridBagConstraints.HORIZONTAL;
@@ -55,38 +61,110 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
             }
         });
 
-        JPanel leftPanel = new JPanel(new GridBagLayout());
-        leftPanel.setPreferredSize(new Dimension(250, 0));
+        final JPanel leftPanel = new JPanel(new GridBagLayout());
         this.add(leftPanel, BorderLayout.WEST);
+        leftPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (leftPanel.getPreferredSize().getWidth() - e.getX() <
+                        Tool.HighResolution(5)) {
+                    isPressed = true;
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                isPressed = false;
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                super.mouseEntered(e);
+            }
+
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
+        });
+        leftPanel.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (isPressed) {
+                    if (e.getX() > Tool.HighResolution(10)
+                            && ClassifyPanel.this.getSize().getWidth() - e.getX() >
+                            Tool.HighResolution(15)) {
+                        leftPanel.setPreferredSize(new Dimension(e.getX() + 1, 0));
+                        setCursor(new Cursor(Cursor.E_RESIZE_CURSOR));
+                        revalidate();
+                        repaint();
+                    }
+                }
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (leftPanel.getPreferredSize().getWidth() - e.getX() <
+                        Tool.HighResolution(5)) {
+                    setCursor(new Cursor(Cursor.E_RESIZE_CURSOR));
+                } else {
+                    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                }
+            }
+
+        });
+        leftPanel.setPreferredSize(new Dimension(Toolkit.getDefaultToolkit().getScreenSize().width * 300 / 1366, 0));
         JPanel testOptionPanel = new JPanel(new GridBagLayout());
         testOptionPanel.setBorder(new TitledBorder("Test Options"));
+
+
         s.weightx = 1;
         s.gridwidth = 0;
-        s.insets = new Insets(10, 5, 5, 5);
+        s.insets = new Insets(ten, five, five, five);
         leftPanel.add(testOptionPanel, s);
-        crossValidationComboBox.setSelectedItem(10);
-        s.weightx = 1;
+
+        ButtonGroup buttonGroup = new ButtonGroup();
+        buttonGroup.add(validationRadio);
+        buttonGroup.add(crossValidationRadio);
+        validationRadio.setSelected(true);
+
+        s.gridwidth = 1;
+        s.insets = new Insets(two, 0, 0, 0);
+        testOptionPanel.add(validationRadio, s);
+        testOptionPanel.add(new JLabel("Repeat times"), s);
+        s.gridwidth = 0;
+        validationRepeatTimeTextField.setIntRange(1, 100);
+        testOptionPanel.add(validationRepeatTimeTextField, s);
+
         s.gridwidth = 1;
         s.insets = new Insets(0, 0, 0, 0);
-        testOptionPanel.add(new JLabel("Cross Validation"), s);
+        testOptionPanel.add(new JLabel(), s);
+        testOptionPanel.add(new JLabel("Test"), s);
+        validationTestingRatioTextField.setIntRange(1, 99);
+        testOptionPanel.add(validationTestingRatioTextField, s);
+        s.gridwidth = GridBagConstraints.REMAINDER;
+
+        testOptionPanel.add(new JLabel("%", JLabel.CENTER), s);
+        crossValidationComboBox.setSelectedItem(10);
+        s.gridwidth = 1;
+        s.insets = new Insets(two, 0, 0, 0);
+        testOptionPanel.add(crossValidationRadio, s);
         testOptionPanel.add(new JLabel("Folds"), s);
         s.gridwidth = 0;
         testOptionPanel.add(crossValidationComboBox, s);
-        s.weightx = 1;
         s.gridwidth = 1;
-        s.insets = new Insets(10, 7, 5, 5);
+        s.insets = new Insets(ten, seven, five, five);
         leftPanel.add(startButton, s);
-        s.weightx = 1;
         s.gridwidth = 0;
-        s.insets = new Insets(10, 5, 5, 7);
+        s.insets = new Insets(ten, five, five, seven);
         leftPanel.add(stopButton, s);
         JScrollPane scrollPane = new JScrollPane(resultList);
         scrollPane.setBorder(new TitledBorder("Result list"));
         s.gridwidth = 0;
-        s.weightx = 1;
         s.weighty = 1;
         s.fill = GridBagConstraints.BOTH;
-        s.insets = new Insets(0, 5, 0, 5);
+        s.insets = new Insets(0, five, 0, five);
         leftPanel.add(scrollPane, s);
 
         JScrollPane textScroll = new JScrollPane(textArea);
@@ -108,15 +186,6 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
             }
         });
 
-        crossValidationComboBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange() == ItemEvent.SELECTED) {
-                    nowOtherConfig.setCrossValidationFolds(((Integer) e.getItem()));
-                }
-            }
-        });
-
         resultList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -127,8 +196,6 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
                 }
             }
         });
-
-        nowOtherConfig = new OtherConfig();
     }
 
     /**
@@ -157,6 +224,7 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
                 }
             }
         });
+        showLogString(value);
     }
 
 
@@ -169,9 +237,16 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
                     "Please Choose a Classifier first");
         } else {
             final AbstractAlgorithm calculatingAlgorithm;
+            final OtherConfig nowOtherConfig;
             try {
                 calculatingAlgorithm = (AbstractAlgorithm) nowSelectedAlgorithm.clone();
-            } catch (CloneNotSupportedException e) {
+                nowOtherConfig = new OtherConfig(
+                        validationRadio.isSelected() ? OtherConfig.Validation.VALIDATION
+                                : OtherConfig.Validation.CROSS_VALIDATION,
+                        Integer.parseInt(validationRepeatTimeTextField.getText()),
+                        Integer.parseInt(validationTestingRatioTextField.getText()),
+                        (Integer) crossValidationComboBox.getSelectedItem());
+            } catch (Exception e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(mainFrame.getFrame(),
                         e.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
@@ -189,11 +264,7 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
                 public void run() {
                     CanShowStatus canShowStatus = mainFrame.getCanShowStatus();
                     canShowStatus.showStatus("Starting...");
-                    try {
-                        calculatingAlgorithm.doAlgorithm(ClassifyPanel.this, canShowStatus, (OtherConfig) nowOtherConfig.clone());
-                    } catch (CloneNotSupportedException e) {
-                        e.printStackTrace();
-                    }
+                    calculatingAlgorithm.doAlgorithm(ClassifyPanel.this, canShowStatus, nowOtherConfig);
                     canShowStatus.showStatus("OK");
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
@@ -297,6 +368,10 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
     private JList<String> resultList = new JList<>(listModel);
     private JTextArea textArea = new JTextArea();
     private JComboBox<Integer> crossValidationComboBox = new JComboBox<>(new Integer[]{2, 3, 4, 5, 6, 7, 8, 9, 10});
+    private JRadioButton validationRadio = new JRadioButton("Validation"),
+            crossValidationRadio = new JRadioButton("Cross Validation");
+    private MyTextField validationRepeatTimeTextField = new MyTextField("10"),
+            validationTestingRatioTextField = new MyTextField("50");
 
     /**
      * The interface in which there are functions MainFrame provide.
@@ -308,13 +383,6 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
      * Because when user press 'Start', he can still choose another file.
      */
     private File nowSelectedFile;
-
-    /**
-     * The test options.
-     * When user press 'Start', the cloned option is used. Thus user can safely modify
-     * these options when algorithm is running.
-     */
-    private OtherConfig nowOtherConfig;
 
 
     /**

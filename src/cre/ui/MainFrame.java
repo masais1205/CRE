@@ -5,8 +5,7 @@ import cre.algorithm.CanShowStatus;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.File;
 
 /**
@@ -15,7 +14,7 @@ import java.io.File;
 public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowStatus {
 
     public MainFrame() throws HeadlessException {
-        this.setSize(800, 600);
+        this.setSize(Tool.HighResolution(800), Tool.HighResolution(600));
         this.setTitle("CRE");
         this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 

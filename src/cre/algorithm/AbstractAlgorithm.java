@@ -29,8 +29,6 @@ public abstract class AbstractAlgorithm implements Cloneable {
 
     public abstract Cloneable getConfiguration();
 
-    public abstract OtherConfig getOtherConfiguration();
-
     public abstract AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile);
 
     public abstract void doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus, OtherConfig otherConfig);

@@ -1,6 +1,7 @@
 package cre;
 
 import cre.algorithm.CalculatingException;
+import cre.algorithm.CrossValidation;
 import cre.algorithm.cdt.CDTAlgorithm;
 import cre.algorithm.cdt.CDTConfig;
 
@@ -9,6 +10,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by HanYizhao on 2017/4/6.
@@ -30,17 +34,14 @@ public class Test {
             e.printStackTrace();
         }
         try {
-            try {
-                BufferedReader br = new BufferedReader(new FileReader("D:/ValveUnhandledExceptionFilter.txt"));
-                throw new CalculatingException("1");
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                System.out.println(1);
+            CrossValidation.SliceLinesHelper helper = new CrossValidation.SliceLinesHelper(
+                    "D:\\Documents\\adultAllBinary_Simple_1.csv", ",", 13, 30, 14, null);
+            for (int i = 0; i < 10; i++) {
+                int[] aa = helper.nextLines(3);
+                System.out.println(Arrays.toString(aa));
             }
-        }catch (Exception e2){
-            e2.printStackTrace();
-            System.out.println(2);
+        } catch (CalculatingException e) {
+            e.printStackTrace();
         }
     }
 }

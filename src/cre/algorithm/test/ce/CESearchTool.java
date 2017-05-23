@@ -10,12 +10,12 @@ public class CESearchTool {
     private AbstractCE[] mergeResult;
 
 
-    public CESearchTool(List<AbstractCE> mergeResult) {
+    public CESearchTool(final List<AbstractCE> mergeResult) {
         this.mergeResult = new AbstractCE[mergeResult.size()];
         mergeResult.toArray(this.mergeResult);
     }
 
-    private boolean compareFromPatternToArray(char[] pattern, char[] array) {
+    private boolean compareFromPatternToArray(final char[] pattern, final char[] array) {
         boolean same = true;
         for (int i = 0; i < array.length; i++) {
             if (pattern[i] != array[i]) {
@@ -26,6 +26,20 @@ public class CESearchTool {
             }
         }
         return same;
+    }
+
+    public char[] getCharValue(char[] buffer) {
+        for (AbstractCE i : mergeResult) {
+            char[] now = i.value;
+            if (now.length == buffer.length) {
+                if (compareFromPatternToArray(now, buffer)) {
+                    return now;
+                }
+            } else {
+                break;
+            }
+        }
+        return null;
     }
 
     public CEValue getCEValue(char[] buffer) {

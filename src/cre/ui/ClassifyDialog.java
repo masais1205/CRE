@@ -62,7 +62,7 @@ public class ClassifyDialog extends JDialog {
 
         JTable table = new JTable();
         MyTableModel model = new MyTableModel();
-        table.setRowHeight(20);
+        table.setRowHeight(Tool.HighResolution(20));
         table.setModel(model);
         JComboBox<String> column = new JComboBox<>(classes);
         table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(column));
@@ -71,9 +71,10 @@ public class ClassifyDialog extends JDialog {
         s.gridwidth = 0;
         s.weightx = 1;
         s.fill = GridBagConstraints.HORIZONTAL;
-        s.insets = new Insets(5, 10, 0, 10);
+        int ten = Tool.HighResolution(10), five = Tool.HighResolution(5);
+        s.insets = new Insets(five, ten, 0, ten);
         mainPanel.add(table.getTableHeader(), s);
-        s.insets = new Insets(0, 10, 5, 10);
+        s.insets = new Insets(0, ten, five, ten);
         mainPanel.add(table, s);
         s.fill = GridBagConstraints.NONE;
         s.anchor = GridBagConstraints.EAST;

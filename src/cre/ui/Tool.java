@@ -20,4 +20,9 @@ public class Tool {
             window.setLocationByPlatform(true);
         }
     }
+
+    public static int HighResolution(int original) {
+        double a = Toolkit.getDefaultToolkit().getScreenSize().getWidth() * original / 1366;
+        return (int) Math.round(a);
+    }
 }

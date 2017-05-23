@@ -30,7 +30,8 @@ public class FilePanel extends JPanel {
 
         GridBagConstraints s = new GridBagConstraints();
         s.weightx = 0;
-        s.insets = new Insets(10, 10, 10, 10);
+        int ten = Tool.HighResolution(10);
+        s.insets = new Insets(ten, ten, ten, ten);
         s.gridwidth = 1;
         mainPanel.add(openFileButton, s);
         s.weightx = 1;
