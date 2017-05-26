@@ -20,10 +20,10 @@ import java.util.*;
 public class TestOldAlgorithm {
     private static String delimiter = ",";
 
-    public static void do_it(String fileName, double ZC, int WP, int YP, int[] XPArray,
-                             int[] crossValidationGroup, int nowFold,
-                             CanShowStatus canShowStatus,
-                             CanShowOutput canShowOutput) throws CalculatingException {
+    public static Statistic do_it(String fileName, double ZC, double odd_ratio, int WP, int YP, int[] XPArray,
+                                  int[] crossValidationGroup, int nowFold,
+                                  CanShowStatus canShowStatus,
+                                  CanShowOutput canShowOutput) throws CalculatingException {
 
         BufferedReader br = null;
         int[] XPSorted;
@@ -59,6 +59,7 @@ public class TestOldAlgorithm {
             boolean isTrainingSet;
             HashMap<String, AbstractCE> trainingData = new HashMap<>();
             HashMap<String, LineValue> testingData = new HashMap<>();
+            int testingDataCount = 0;
             while ((tempS = br.readLine()) != null) {
                 isTrainingSet = crossValidationGroup[count - 2] != nowFold;
                 String[] tempSS = tempS.split(delimiter);
@@ -91,6 +92,7 @@ public class TestOldAlgorithm {
                             ((NumberCE) cE).addItem(WValue, yValue);
                         }
                     } else {
+                        testingDataCount++;
                         LineValue lv = testingData.get(s);
                         if (lv == null) {
                             lv = new LineValue(cBuffer);
@@ -104,6 +106,30 @@ public class TestOldAlgorithm {
                 }
                 count++;
             }
+            /////////show OR
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Treatment\t");
+                sb.append(names[WP]);
+                sb.append("\nOutcome\t");
+                sb.append(names[YP]);
+                sb.append("\nattribute\tY\tW\n");
+                for (int i = 0; i < XPArray.length; i++) {
+                    sb.append(names[XPArray[i]]);
+                    sb.append("\t");
+                    sb.append(String.format(Locale.ENGLISH, "%.2f", orYX[i].getOR(false)));
+                    sb.append("\t");
+                    sb.append(String.format(Locale.ENGLISH, "%.2f", orWX[i].getOR(false)));
+                    sb.append("\n");
+                }
+                canShowOutput.showOutputString("Odd Ratio");
+                canShowOutput.showOutputString(sb.toString());
+            }
+            ///////////////
+
+
+            HashSet<Integer> orYXPNoFitOddsRatio = new HashSet<>();
+            HashSet<Integer> orWXPNoFitOddsRatio = new HashSet<>();
             //ascending sort
             Arrays.sort(orWX, new Comparator<OR>() {
                 @Override
@@ -124,11 +150,20 @@ public class TestOldAlgorithm {
             XPSorted = new int[XPArray.length];
             XPReverseSorted = new int[XPArray.length];
             for (int i = 0; i < orWX.length; i++) {
-                XPReverseSorted[orWX.length - i - 1] = ((Integer) orWX[i].getAttach());
+                Integer tempValue = ((Integer) orWX[i].getAttach());
+                XPReverseSorted[orWX.length - i - 1] = tempValue;
+                if (orWX[i].getOR(false) > odd_ratio) {
+                    orWXPNoFitOddsRatio.add(tempValue);
+                }
             }
             for (int i = 0; i < orYX.length; i++) {
-                XPSorted[i] = ((Integer) orYX[i].getAttach());
+                Integer tempValue = ((Integer) orYX[i].getAttach());
+                XPSorted[i] = tempValue;
+                if (orYX[i].getOR(false) > odd_ratio) {
+                    orYXPNoFitOddsRatio.add(tempValue);
+                }
             }
+
             /////////!!!!! Jiuyong asked to make XPReverseSorted same as XPSorted
             System.arraycopy(XPSorted, 0, XPReverseSorted, 0, XPSorted.length);
             ////////!!!!!!!!!!!!!!!!!
@@ -137,8 +172,50 @@ public class TestOldAlgorithm {
             for (AbstractCE i : trainingData.values()) {
                 i.updateCEValue(ZC);
             }
+            //show pattern numbers before generation
+            int countPlus = 0, countMinus = 0, countQuestion = 0;
+            for (AbstractCE ce : trainingData.values()) {
+                switch (ce.cEValue) {
+                    case PLUS:
+                        countPlus++;
+                        break;
+                    case QUESTION:
+                        countQuestion++;
+                        break;
+                    case MINUS:
+                        countMinus++;
+                        break;
+                }
+            }
+            canShowOutput.showOutputString("PLUS\tMINUS\tQUESTION");
+            canShowOutput.showOutputString(countPlus + "\t" + countMinus + "\t" + countQuestion);
+            /////////////
             List<AbstractCE> mergeResult = new ArrayList<>();
-            CEAlgorithm.doMerge(trainingData.values(), mergeResult, XPSorted, XPReverseSorted, ZC, canShowOutput);
+            CEAlgorithm.doMerge(trainingData.values(), mergeResult, XPSorted,
+                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, canShowOutput);
+            //show pattern numbers after generation
+            countPlus = 0;
+            countMinus = 0;
+            countQuestion = 0;
+            int trainPlusMinusCount = 0;
+            for (AbstractCE ce : mergeResult) {
+                switch (ce.cEValue) {
+                    case PLUS:
+                        countPlus++;
+                        break;
+                    case QUESTION:
+                        countQuestion++;
+                        break;
+                    case MINUS:
+                        countMinus++;
+                        break;
+                }
+            }
+            trainPlusMinusCount = countMinus + countPlus;
+            canShowOutput.showOutputString("After");
+            canShowOutput.showOutputString("PLUS\tMINUS\tQUESTION");
+            canShowOutput.showOutputString(countPlus + "\t" + countMinus + "\t" + countQuestion);
+            //////////////////
 
             //Log training result.
             {
@@ -188,6 +265,7 @@ public class TestOldAlgorithm {
             int success = 0;
             int failed = 0;
             canShowOutput.showLogString("\n===Testing process===");
+            int testPlusMinusCount = 0;
             for (LineValue lv : testDataStatistic.values()) {
                 double[] dData = OtherTool.fromIntArrayToNoZeroArray(lv.getWYValues());
                 double ATE = dData[0] / (dData[0] + dData[1]) - dData[2] / (dData[2] + dData[3]);
@@ -208,6 +286,7 @@ public class TestOldAlgorithm {
                         }
                         sbs.append(ATE);
                         canShowOutput.showLogString(sbs.toString());
+                        testPlusMinusCount++;
                     }
                 }
                 if (ceValue != null) {
@@ -227,6 +306,13 @@ public class TestOldAlgorithm {
                 }
             }
             canShowOutput.showOutputString("accuracy: " + (double) success / (success + failed));
+            canShowOutput.showOutputString("Testing Data not matched: " + notMatch + "/" + testingDataCount);
+            canShowOutput.showOutputString("Pattern(testing / training): " + testPlusMinusCount + "/" + trainPlusMinusCount);
+            Statistic statistic = new Statistic();
+            statistic.accuracy = (double) success / (success + failed);
+            statistic.testNoMatch = (double) notMatch / testingDataCount;
+            statistic.patternMatch = (double) testPlusMinusCount / trainPlusMinusCount;
+            return statistic;
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -238,5 +324,6 @@ public class TestOldAlgorithm {
                 }
             }
         }
+        return null;
     }
 }

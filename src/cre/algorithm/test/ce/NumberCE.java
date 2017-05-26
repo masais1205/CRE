@@ -25,10 +25,12 @@ public class NumberCE extends AbstractCE {
     }
 
     @Override
-    public AbstractCE mergeInstance(AbstractCE cc, int position, char positionChar, CEValue preferredValue, double zc) {
+    public AbstractCE mergeInstance(AbstractCE cc, int[] position, char positionChar, CEValue preferredValue, double zc) {
         NumberCE c2 = (NumberCE) cc;
         NumberCE result = new NumberCE(this.value);
-        result.value[position] = positionChar;
+        for (int i : position) {
+            result.value[i] = positionChar;
+        }
         result.trueList.addAll(this.trueList);
         result.trueList.addAll(c2.trueList);
         result.falseList.addAll(this.falseList);

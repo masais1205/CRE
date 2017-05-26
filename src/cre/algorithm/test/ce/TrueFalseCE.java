@@ -15,10 +15,12 @@ public class TrueFalseCE extends AbstractCE {
     }
 
     @Override
-    public AbstractCE mergeInstance(AbstractCE c, int position, char positionChar, CEValue preferredValue, double zc) {
+    public AbstractCE mergeInstance(AbstractCE c, int[] position, char positionChar, CEValue preferredValue, double zc) {
         TrueFalseCE c2 = (TrueFalseCE) c;
         TrueFalseCE result = new TrueFalseCE(this.value);
-        result.value[position] = positionChar;
+        for (int i : position) {
+            result.value[i] = positionChar;
+        }
         System.arraycopy(this.statisticValue, 0, result.statisticValue, 0, 4);
         for (int i = 0; i < 4; i++) {
             result.statisticValue[i] += c2.statisticValue[i];

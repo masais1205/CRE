@@ -9,6 +9,7 @@ import cre.algorithm.CrossValidation.SliceLinesHelper;
 import cre.algorithm.tool.OtherTool;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
@@ -37,7 +38,8 @@ public class TestAlgorithm extends AbstractAlgorithm {
     public TestAlgorithm(File filePath) {
         super(filePath);
         config = new TestConfig(filePath.getAbsolutePath());
-        config.setZC(1.28);
+        config.setZC(1.96);
+        config.setOddsRatio(2.5);
     }
 
     @Override
@@ -95,6 +97,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
             Arrays.sort(XPArray);
 
             String fileName = filePath.getAbsolutePath();
+            List<Statistic> result = new ArrayList<>();
             switch (otherConfig.getValidation()) {
                 case VALIDATION: {
                     SliceLinesHelper helper = new SliceLinesHelper(fileName, ",", YP,
@@ -103,9 +106,9 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         canShowStatus.showStatus("Times " + i);
                         canShowOutput.showOutputString("\nTimes " + i);
                         int[] group = helper.nextLines(i);
-                        TestOldAlgorithm.do_it(fileName,
-                                config.getZC(), WP, YP,
-                                XPArray, group, i, canShowStatus, canShowOutput);
+                        result.add(TestOldAlgorithm.do_it(fileName,
+                                config.getZC(),config.getOddsRatio(), WP, YP,
+                                XPArray, group, i, canShowStatus, canShowOutput));
                     }
                 }
                 break;
@@ -118,14 +121,15 @@ public class TestAlgorithm extends AbstractAlgorithm {
                     for (int i = 0; i < otherConfig.getCrossValidationFolds(); i++) {
                         canShowStatus.showStatus("Fold " + i);
                         canShowOutput.showOutputString("\nFold " + i);
-                        TestOldAlgorithm.do_it(fileName,
-                                config.getZC(), WP, YP,
-                                XPArray, crossValidationGroup, i, canShowStatus, canShowOutput);
+                        result.add(TestOldAlgorithm.do_it(fileName,
+                                config.getZC(),config.getOddsRatio(), WP, YP,
+                                XPArray, crossValidationGroup, i, canShowStatus, canShowOutput));
                     }
                 }
                 break;
             }
-
+            Statistic averageResult = Statistic.average(result);
+            canShowOutput.showOutputString(averageResult.toString());
         } catch (Exception e) {
             e.printStackTrace();
             canShowOutput.showOutputString(e.getMessage());

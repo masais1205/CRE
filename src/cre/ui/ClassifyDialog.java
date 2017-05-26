@@ -28,12 +28,11 @@ public class ClassifyDialog extends JDialog {
 
     public TreeMap<String, List<Integer>> getNewMap() {
         TreeMap<String, List<Integer>> map = new TreeMap<>();
+        for (String aClass : classes) {
+            map.put(aClass, new ArrayList<Integer>());
+        }
         for (int i = 0; i < inWhichClass.length; i++) {
             List<Integer> l = map.get(inWhichClass[i]);
-            if (l == null) {
-                l = new ArrayList<>();
-                map.put(inWhichClass[i], l);
-            }
             l.add(i);
         }
         return map;

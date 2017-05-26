@@ -22,7 +22,7 @@ public class OtherConfig {
         if (validationRepeatTimes > 100 || validationRepeatTimes < 1) {
             throw new Exception("Repeat times must be between 1 and 100");
         }
-        if (test > 99 || test < 1) {
+        if (test > 99 || test < 0) {
             throw new Exception("'Test' must be between 1 and 99");
         }
         if (fold > 10 || fold < 2) {

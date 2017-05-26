@@ -10,6 +10,7 @@ import java.util.*;
  */
 public class TestConfig implements Cloneable {
     private double ZC;
+    private double oddsRatio;
     private TreeMap<String, List<Integer>> type;
 
     private String[] attributeNames;
@@ -48,7 +49,7 @@ public class TestConfig implements Cloneable {
                 sb.append(" ");
             }
         }
-        return "ZC=" + ZC + "[" + sb.toString() + "]";
+        return "oddsRatio=" + oddsRatio + " ZC=" + ZC + "[" + sb.toString() + "]";
     }
 
     public TestConfig(String fileName) {
@@ -83,6 +84,26 @@ public class TestConfig implements Cloneable {
                 }
             }
         }
+    }
+
+    public String getOddsRatioShownName() {
+        return "Odds Ratio";
+    }
+
+    public double getOddsRatioMax() {
+        return 10;
+    }
+
+    public double getOddsRatioMin() {
+        return 1.5;
+    }
+
+    public double getOddsRatio() {
+        return oddsRatio;
+    }
+
+    public void setOddsRatio(double oddsRatio) {
+        this.oddsRatio = oddsRatio;
     }
 
     public String[] getTypeNames() {

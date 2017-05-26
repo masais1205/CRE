@@ -4,6 +4,8 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 /**
  * Created by HanYizhao on 2017/4/7.
@@ -17,10 +19,8 @@ public class MyTextField extends JTextField {
     }
 
     public void setDoubleRange(final double min, final double max) {
-        final Document dt = this.getDocument();
-        dt.addDocumentListener(new DocumentListener() {
+        this.addFocusListener(new FocusAdapter() {
             private void check() {
-                final DocumentListener ii = this;
                 boolean needChange = false;
                 double changeValue = 0;
                 String s = MyTextField.this.getText();
@@ -37,38 +37,26 @@ public class MyTextField extends JTextField {
                     } catch (Exception ignored) {
                     }
                     if (needChange) {
-                        final double finalChangeValue = changeValue;
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                dt.removeDocumentListener(ii);
-                                MyTextField.this.setText(finalChangeValue + "");
-                                dt.addDocumentListener(ii);
-                            }
-                        });
+                        MyTextField.this.setText(changeValue + "");
                     }
                 }
             }
 
-            public void insertUpdate(DocumentEvent e) {
+            @Override
+            public void focusLost(FocusEvent e) {
                 check();
             }
 
-            public void removeUpdate(DocumentEvent e) {
-                check();
-            }
-
-            public void changedUpdate(DocumentEvent e) {
+            @Override
+            public void focusGained(FocusEvent e) {
                 check();
             }
         });
     }
 
     public void setIntRange(final int min, final int max) {
-        final Document dt = this.getDocument();
-        dt.addDocumentListener(new DocumentListener() {
+        this.addFocusListener(new FocusAdapter() {
             private void check() {
-                final DocumentListener ii = this;
                 boolean needChange = false;
                 int changeValue = 0;
                 String s = MyTextField.this.getText();
@@ -85,28 +73,18 @@ public class MyTextField extends JTextField {
                     } catch (Exception ignored) {
                     }
                     if (needChange) {
-                        final int finalChangeValue = changeValue;
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                dt.removeDocumentListener(ii);
-                                MyTextField.this.setText(finalChangeValue + "");
-                                dt.addDocumentListener(ii);
-                            }
-                        });
+                        MyTextField.this.setText(changeValue + "");
                     }
                 }
             }
 
-            public void insertUpdate(DocumentEvent e) {
+            @Override
+            public void focusGained(FocusEvent e) {
                 check();
             }
 
-            public void removeUpdate(DocumentEvent e) {
-                check();
-            }
-
-            public void changedUpdate(DocumentEvent e) {
+            @Override
+            public void focusLost(FocusEvent e) {
                 check();
             }
         });

@@ -141,7 +141,7 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
         s.insets = new Insets(0, 0, 0, 0);
         testOptionPanel.add(new JLabel(), s);
         testOptionPanel.add(new JLabel("Test"), s);
-        validationTestingRatioTextField.setIntRange(1, 99);
+        validationTestingRatioTextField.setIntRange(0, 99);
         testOptionPanel.add(validationTestingRatioTextField, s);
         s.gridwidth = GridBagConstraints.REMAINDER;
 
