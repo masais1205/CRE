@@ -20,7 +20,7 @@ import java.util.*;
 public class TestOldAlgorithm {
     private static String delimiter = ",";
 
-    public static Statistic do_it(String fileName, double ZC, double odd_ratio, int WP, int YP, int[] XPArray,
+    public static Statistic do_it(String fileName, double ZC, double odd_ratio, int mergeDepth, int WP, int YP, int[] XPArray,
                                   int[] crossValidationGroup, int nowFold,
                                   CanShowStatus canShowStatus,
                                   CanShowOutput canShowOutput) throws CalculatingException {
@@ -174,47 +174,61 @@ public class TestOldAlgorithm {
             }
             //show pattern numbers before generation
             int countPlus = 0, countMinus = 0, countQuestion = 0;
+            int countPlusInstanceCount = 0, countMinusInstanceCount = 0, countQuestionInstanceCount = 0;
             for (AbstractCE ce : trainingData.values()) {
                 switch (ce.cEValue) {
                     case PLUS:
                         countPlus++;
+                        countPlusInstanceCount += ce.getInstanceNumber();
                         break;
                     case QUESTION:
                         countQuestion++;
+                        countQuestionInstanceCount += ce.getInstanceNumber();
                         break;
                     case MINUS:
                         countMinus++;
+                        countMinusInstanceCount += ce.getInstanceNumber();
                         break;
                 }
             }
             canShowOutput.showOutputString("PLUS\tMINUS\tQUESTION");
-            canShowOutput.showOutputString(countPlus + "\t" + countMinus + "\t" + countQuestion);
+            canShowOutput.showOutputString(countPlus + "(" + countPlusInstanceCount + ")\t"
+                    + countMinus + "(" + countMinusInstanceCount + ")\t"
+                    + countQuestion + "(" + countQuestionInstanceCount + ")");
             /////////////
             List<AbstractCE> mergeResult = new ArrayList<>();
             CEAlgorithm.doMerge(trainingData.values(), mergeResult, XPSorted,
-                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, canShowOutput);
+                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
             //show pattern numbers after generation
             countPlus = 0;
             countMinus = 0;
             countQuestion = 0;
+            countPlusInstanceCount = 0;
+            countMinusInstanceCount = 0;
+            countQuestionInstanceCount = 0;
             int trainPlusMinusCount = 0;
             for (AbstractCE ce : mergeResult) {
                 switch (ce.cEValue) {
                     case PLUS:
                         countPlus++;
+                        countPlusInstanceCount += ce.getInstanceNumber();
                         break;
                     case QUESTION:
                         countQuestion++;
+                        countQuestionInstanceCount += ce.getInstanceNumber();
                         break;
                     case MINUS:
                         countMinus++;
+                        countMinusInstanceCount += ce.getInstanceNumber();
                         break;
                 }
             }
             trainPlusMinusCount = countMinus + countPlus;
             canShowOutput.showOutputString("After");
             canShowOutput.showOutputString("PLUS\tMINUS\tQUESTION");
-            canShowOutput.showOutputString(countPlus + "\t" + countMinus + "\t" + countQuestion);
+            canShowOutput.showOutputString(countPlus + "(" + countPlusInstanceCount + ")\t"
+                    + countMinus + "(" + countMinusInstanceCount + ")\t"
+                    + countQuestion + "(" + countQuestionInstanceCount + ")");
             //////////////////
 
             //Log training result.
@@ -263,12 +277,15 @@ public class TestOldAlgorithm {
             }
 
             int success = 0;
+            int successInstance = 0;
+            int allInstance = 0;
             int failed = 0;
             canShowOutput.showLogString("\n===Testing process===");
             int testPlusMinusCount = 0;
             for (LineValue lv : testDataStatistic.values()) {
                 double[] dData = OtherTool.fromIntArrayToNoZeroArray(lv.getWYValues());
                 double ATE = dData[0] / (dData[0] + dData[1]) - dData[2] / (dData[2] + dData[3]);
+                int instanceCount = lv.getWYSum();
                 CEValue ceValue = searchTool.getCEValue(lv.getValue());
                 {
                     if (ceValue != null && (ceValue.compareTo(CEValue.MINUS) == 0
@@ -291,25 +308,29 @@ public class TestOldAlgorithm {
                 }
                 if (ceValue != null) {
                     if (ceValue.compareTo(CEValue.PLUS) == 0) {
+                        allInstance += instanceCount;
                         if (ATE > 0) {
                             success++;
+                            successInstance += instanceCount;
                         } else {
                             failed++;
                         }
                     } else if (ceValue.compareTo(CEValue.MINUS) == 0) {
+                        allInstance += instanceCount;
                         if (ATE < 0) {
                             success++;
+                            successInstance += instanceCount;
                         } else {
                             failed++;
                         }
                     }
                 }
             }
-            canShowOutput.showOutputString("accuracy: " + (double) success / (success + failed));
+            canShowOutput.showOutputString("accuracy: " + (double) successInstance / allInstance);
             canShowOutput.showOutputString("Testing Data not matched: " + notMatch + "/" + testingDataCount);
             canShowOutput.showOutputString("Pattern(testing / training): " + testPlusMinusCount + "/" + trainPlusMinusCount);
             Statistic statistic = new Statistic();
-            statistic.accuracy = (double) success / (success + failed);
+            statistic.accuracy = (double) successInstance / allInstance;
             statistic.testNoMatch = (double) notMatch / testingDataCount;
             statistic.patternMatch = (double) testPlusMinusCount / trainPlusMinusCount;
             return statistic;

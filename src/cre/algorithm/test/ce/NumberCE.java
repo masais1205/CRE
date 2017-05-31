@@ -86,6 +86,11 @@ public class NumberCE extends AbstractCE {
     }
 
     @Override
+    public int getInstanceNumber() {
+        return trueList.size() + falseList.size();
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (char aValue : value) {

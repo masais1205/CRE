@@ -13,14 +13,26 @@ public class Statistic {
 
     public static Statistic average(Collection<Statistic> data) {
         Statistic result = new Statistic();
+        int accuracyCount = 0;
+        int testNoMatchCount = 0;
+        int patternMatchCount = 0;
         for (Statistic i : data) {
-            result.accuracy += i.accuracy;
-            result.testNoMatch += i.testNoMatch;
-            result.patternMatch += i.patternMatch;
+            if (!Double.isNaN(i.accuracy) && !Double.isInfinite(i.accuracy)) {
+                result.accuracy += i.accuracy;
+                accuracyCount++;
+            }
+            if (!Double.isNaN(i.testNoMatch) && !Double.isInfinite(i.testNoMatch)) {
+                result.testNoMatch += i.testNoMatch;
+                testNoMatchCount++;
+            }
+            if (!Double.isNaN(i.patternMatch) && !Double.isInfinite(i.patternMatch)) {
+                result.patternMatch += i.patternMatch;
+                patternMatchCount++;
+            }
         }
-        result.accuracy = result.accuracy / data.size();
-        result.testNoMatch = result.testNoMatch / data.size();
-        result.patternMatch = result.patternMatch / data.size();
+        result.accuracy = result.accuracy / accuracyCount;
+        result.testNoMatch = result.testNoMatch / testNoMatchCount;
+        result.patternMatch = result.patternMatch / patternMatchCount;
         return result;
     }
 

@@ -11,6 +11,7 @@ import java.util.*;
 public class TestConfig implements Cloneable {
     private double ZC;
     private double oddsRatio;
+    private int mergeDepth;
     private TreeMap<String, List<Integer>> type;
 
     private String[] attributeNames;
@@ -49,7 +50,7 @@ public class TestConfig implements Cloneable {
                 sb.append(" ");
             }
         }
-        return "oddsRatio=" + oddsRatio + " ZC=" + ZC + "[" + sb.toString() + "]";
+        return "mergeDepth=" + mergeDepth + " oddsRatio=" + oddsRatio + " ZC=" + ZC + "[" + sb.toString() + "]";
     }
 
     public TestConfig(String fileName) {
@@ -84,6 +85,26 @@ public class TestConfig implements Cloneable {
                 }
             }
         }
+    }
+
+    public String getMergeDepthShownName() {
+        return "Depth of merge";
+    }
+
+    public String getMergeDepthComment() {
+        return "Must bigger than -1";
+    }
+
+    public int getMergeDepthMin() {
+        return 0;
+    }
+
+    public int getMergeDepth() {
+        return mergeDepth;
+    }
+
+    public void setMergeDepth(int mergeDepth) {
+        this.mergeDepth = mergeDepth;
     }
 
     public String getOddsRatioShownName() {

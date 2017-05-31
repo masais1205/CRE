@@ -68,6 +68,12 @@ public class TrueFalseCE extends AbstractCE {
         }
     }
 
+    @Override
+    public int getInstanceNumber() {
+        return statisticValue[0] + statisticValue[1]
+                + statisticValue[2] + statisticValue[3];
+    }
+
 
     public void addItem(boolean W, boolean Y) {
         if (W) {

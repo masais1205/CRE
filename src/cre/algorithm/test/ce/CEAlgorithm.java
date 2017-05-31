@@ -1,6 +1,7 @@
 package cre.algorithm.test.ce;
 
 import cre.algorithm.CanShowOutput;
+import cre.algorithm.test.MathListCombination;
 
 import java.awt.*;
 import java.util.*;
@@ -19,7 +20,7 @@ public class CEAlgorithm {
         int[] order;
         int[] reverseOrder;
         HashSet<Integer> positionNotFidOddsRatio;
-        boolean twoMerge = false;
+        int mergeDepth;
     }
 
     private static void mergeQuestionList(List<AbstractCE> old, List<AbstractCE> plusResult, List<AbstractCE> minusResult,
@@ -39,97 +40,56 @@ public class CEAlgorithm {
         List<AbstractCE> newMinusList = new ArrayList<>();
         boolean hasMergeOne;
         int count = 0;
-        do {
-            count++;
-            hasMergeOne = false;
-            for (int i : mc.reverseOrder) {
-                if (!mc.positionNotFidOddsRatio.contains(i)) {
-                    for (int l = 0; l < list.size(); l++) {
-                        AbstractCE tempCE = list.get(l);
-                        if (tempCE != null) {
-                            char charTemp = tempCE.value[i];
-                            if (charTemp == '0' || charTemp == '1') {
-                                tempCE.value[i] = charTemp == '0' ? '1' : '0';
-                                Integer position = map.remove(new String(tempCE.value));
-                                tempCE.value[i] = charTemp;
-                                if (position != null) {
-                                    hasMergeOne = true;
-                                    AbstractCE newCE = tempCE.mergeInstance(list.get(position),
-                                            new int[]{i}, char_QUESTION, null, mc.zc);
-                                    list.set(l, null);
-                                    list.set(position, null);
-                                    map.remove(new String(tempCE.value));
-                                    if (newCE.cEValue.compareTo(CEValue.QUESTION) == 0) {
-                                        list.set(l, newCE);
-                                        map.put(new String(newCE.value), l);
-                                    } else if (newCE.cEValue.compareTo(CEValue.PLUS) == 0) {
-                                        newPlusList.add(newCE);
-                                    } else {
-                                        newMinusList.add(newCE);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+        List<Integer> tempOrder = new ArrayList<>();
+        for (int i : mc.reverseOrder) {
+            if (!mc.positionNotFidOddsRatio.contains(i)) {
+                tempOrder.add(i);
             }
-        } while (hasMergeOne);
-        // Merge AbstractCE with only two different attributes.
-        if (mc.twoMerge) {
+        }
+        int[] realOrder = new int[tempOrder.size()];
+        for (int i = 0; i < tempOrder.size(); i++) {
+            realOrder[i] = tempOrder.get(i);
+        }
+        List<List<int[]>> realOrders = MathListCombination.listAllCombination(realOrder, mc.mergeDepth);
+        for (List<int[]> order : realOrders) {
             do {
                 count++;
                 hasMergeOne = false;
-                class pair {
-                    int x;
-                    int y;
-
-                    pair(int x, int y) {
-                        this.x = x;
-                        this.y = y;
-                    }
-                }
-                List<pair> pairs = new ArrayList<>();
-                for (int i = 0; i < mc.reverseOrder.length - 1; i++) {
-                    for (int l = i + 1; l < mc.reverseOrder.length; l++) {
-                        pairs.add(new pair(mc.reverseOrder[i], mc.reverseOrder[l]));
-                    }
-                }
-                for (pair i : pairs) {
-                    if (!mc.positionNotFidOddsRatio.contains(i.x)
-                            && !mc.positionNotFidOddsRatio.contains(i.y)) {
-                        for (int l = 0; l < list.size(); l++) {
-                            AbstractCE tempCE = list.get(l);
-                            if (tempCE != null) {
-                                char charTempX = tempCE.value[i.x];
-                                char charTempY = tempCE.value[i.y];
-                                if ((charTempX == '0' || charTempX == '1')
-                                        && (charTempY == '0' || charTempY == '1')) {
-                                    tempCE.value[i.x] = charTempX == '0' ? '1' : '0';
-                                    tempCE.value[i.y] = charTempY == '0' ? '1' : '0';
-                                    Integer position = map.remove(new String(tempCE.value));
-                                    tempCE.value[i.x] = charTempX;
-                                    tempCE.value[i.y] = charTempY;
-                                    if (position != null) {
-                                        hasMergeOne = true;
-                                        AbstractCE newCE = tempCE.mergeInstance(list.get(position),
-                                                new int[]{i.x, i.y}, char_QUESTION, null, mc.zc);
-                                        System.out.println("FFFF" + newCE.toString());
-                                        list.set(l, null);
-                                        list.set(position, null);
-                                        map.remove(new String(tempCE.value));
-                                        if (newCE.cEValue.compareTo(CEValue.QUESTION) == 0) {
-                                            list.set(l, newCE);
-                                            map.put(new String(newCE.value), l);
-                                        } else if (newCE.cEValue.compareTo(CEValue.PLUS) == 0) {
-                                            newPlusList.add(newCE);
-                                        } else {
-                                            newMinusList.add(newCE);
-                                        }
-                                    }
+                for (int[] i : order) {
+                    ce:
+                    for (int l = 0; l < list.size(); l++) {
+                        AbstractCE tempCE = list.get(l);
+                        if (tempCE != null) {
+                            char[] charTemps = Arrays.copyOf(tempCE.value, tempCE.value.length);
+                            for (int k = 0; k < i.length; k++) {
+                                int tPosition = i[k];
+                                if (charTemps[tPosition] == '0' || charTemps[tPosition] == '1') {
+                                    charTemps[tPosition] = charTemps[tPosition] == '0' ? '1' : '0';
+                                } else {
+                                    continue ce;
                                 }
                             }
+                            Integer position = map.remove(new String(charTemps));
+                            if (position != null) {
+                                hasMergeOne = true;
+                                AbstractCE newCE = tempCE.mergeInstance(list.get(position),
+                                        i, char_QUESTION, null, mc.zc);
+                                list.set(l, null);
+                                list.set(position, null);
+                                map.remove(new String(tempCE.value));
+                                if (newCE.cEValue.compareTo(CEValue.QUESTION) == 0) {
+                                    list.set(l, newCE);
+                                    map.put(new String(newCE.value), l);
+                                } else if (newCE.cEValue.compareTo(CEValue.PLUS) == 0) {
+                                    newPlusList.add(newCE);
+                                } else {
+                                    newMinusList.add(newCE);
+                                }
+                            }
+
                         }
                     }
+
                 }
             } while (hasMergeOne);
         }
@@ -200,13 +160,13 @@ public class CEAlgorithm {
 
     public static void doMerge(Collection<AbstractCE> old, List<AbstractCE> result,
                                int[] order, int[] reverseOrder, double zc,
-                               HashSet<Integer> positionNotFitOddsRatio, CanShowOutput canShowOutput) {
+                               HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {
         MergeConfig mc = new MergeConfig();
         mc.order = order;
         mc.reverseOrder = reverseOrder;
         mc.zc = zc;
         mc.positionNotFidOddsRatio = positionNotFitOddsRatio;
-        mc.twoMerge = true;
+        mc.mergeDepth = mergeDepth;
         List<AbstractCE> plusList = new ArrayList<>();
         List<AbstractCE> minusList = new ArrayList<>();
         List<AbstractCE> questionList = new ArrayList<>();

@@ -17,6 +17,10 @@ public class LineValue {
         return WYValues;
     }
 
+    public int getWYSum() {
+        return WYValues[0] + WYValues[1] + WYValues[2] + WYValues[3];
+    }
+
     public void addSomeItem(int[] values) {
         if (values.length == 4) {
             for (int i = 0; i < 4; i++) {

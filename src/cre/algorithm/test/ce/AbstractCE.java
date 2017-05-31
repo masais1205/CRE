@@ -17,4 +17,6 @@ public abstract class AbstractCE {
 
     public abstract void updateCEValue(double zc);
 
+    public abstract int getInstanceNumber();
+
 }

@@ -39,7 +39,8 @@ public class TestAlgorithm extends AbstractAlgorithm {
         super(filePath);
         config = new TestConfig(filePath.getAbsolutePath());
         config.setZC(1.96);
-        config.setOddsRatio(2.5);
+        config.setOddsRatio(2);
+        config.setMergeDepth(1);
     }
 
     @Override
@@ -107,7 +108,8 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         canShowOutput.showOutputString("\nTimes " + i);
                         int[] group = helper.nextLines(i);
                         result.add(TestOldAlgorithm.do_it(fileName,
-                                config.getZC(),config.getOddsRatio(), WP, YP,
+                                config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
+                                WP, YP,
                                 XPArray, group, i, canShowStatus, canShowOutput));
                     }
                 }
@@ -122,7 +124,8 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         canShowStatus.showStatus("Fold " + i);
                         canShowOutput.showOutputString("\nFold " + i);
                         result.add(TestOldAlgorithm.do_it(fileName,
-                                config.getZC(),config.getOddsRatio(), WP, YP,
+                                config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
+                                WP, YP,
                                 XPArray, crossValidationGroup, i, canShowStatus, canShowOutput));
                     }
                 }
