@@ -9,7 +9,7 @@ import java.awt.event.*;
  */
 public class ChooseFromStringList extends JDialog {
     public ChooseFromStringList(Frame owner, String title, String[] stringList) {
-        super(owner, title, true);
+        super(owner, title, ModalityType.DOCUMENT_MODAL);
         JPanel rootPanel = new JPanel(new GridBagLayout());
         this.add(rootPanel);
         list = new JList<>(stringList);

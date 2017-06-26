@@ -279,6 +279,7 @@ public class TestOldAlgorithm {
             int success = 0;
             int successInstance = 0;
             int allInstance = 0;
+            int allInstanceIncludeQuestion = 0;
             int failed = 0;
             canShowOutput.showLogString("\n===Testing process===");
             int testPlusMinusCount = 0;
@@ -286,6 +287,7 @@ public class TestOldAlgorithm {
                 double[] dData = OtherTool.fromIntArrayToNoZeroArray(lv.getWYValues());
                 double ATE = dData[0] / (dData[0] + dData[1]) - dData[2] / (dData[2] + dData[3]);
                 int instanceCount = lv.getWYSum();
+                allInstanceIncludeQuestion += instanceCount;
                 CEValue ceValue = searchTool.getCEValue(lv.getValue());
                 {
                     if (ceValue != null && (ceValue.compareTo(CEValue.MINUS) == 0
@@ -331,6 +333,7 @@ public class TestOldAlgorithm {
             canShowOutput.showOutputString("Pattern(testing / training): " + testPlusMinusCount + "/" + trainPlusMinusCount);
             Statistic statistic = new Statistic();
             statistic.accuracy = (double) successInstance / allInstance;
+            statistic.recall = (double) successInstance / allInstanceIncludeQuestion;
             statistic.testNoMatch = (double) notMatch / testingDataCount;
             statistic.patternMatch = (double) testPlusMinusCount / trainPlusMinusCount;
             return statistic;

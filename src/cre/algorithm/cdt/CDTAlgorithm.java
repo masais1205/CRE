@@ -6,7 +6,10 @@ import cre.algorithm.CanShowOutput;
 import cre.algorithm.CanShowStatus;
 
 import javax.swing.*;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Collection;
 
 /**
@@ -67,6 +70,49 @@ public class CDTAlgorithm extends AbstractAlgorithm {
         String fileName = filePath.getAbsolutePath();
         if (fileName.toLowerCase().endsWith(".csv")) {
             fileName = fileName.substring(0, fileName.length() - 4);
+        }
+
+        String[] attributes = null;
+        int instancesCount = 0;
+        outPutArea.showOutputString("Scheme: " + config.toString());
+        outPutArea.showOutputString("File Name: " + fileName + "\n");
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(filePath));
+            String temp = br.readLine();
+            attributes = temp.split(",");
+            while ((temp = br.readLine()) != null) {
+                if (temp.split(",").length == attributes.length) {
+                    instancesCount++;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        outPutArea.showOutputString("Attributes:");
+        for (String i : attributes) {
+            outPutArea.showOutputString("\t" + i);
+        }
+
+        outPutArea.showOutputString("==== full training set ===");
+        new CDT(config, fileName, outPutArea);
+
+
+        switch (otherConfig.getValidation()) {
+            case CROSS_VALIDATION:
+                break;
+            case VALIDATION:
+                break;
+            case NONE:
+                break;
         }
         new CDT(config, fileName, outPutArea);
     }

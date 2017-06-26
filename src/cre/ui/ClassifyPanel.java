@@ -23,7 +23,7 @@ import java.util.Date;
  * Created by HanYizhao on 4/13/2017.
  * <p>
  * When user chooses a file in FilePanel, ClassifyPanel becomes available.
- * This panel consisits of three parts.
+ * This panel consists of three parts.
  * North is the section in which user can choose an algorithm and configure the algorithm.
  * West is the section which has “start button” and “stop button” and shows history of each transaction.
  * When we change the item in history, the center part, a JTextArea will switch the outputs.
@@ -127,32 +127,43 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
         ButtonGroup buttonGroup = new ButtonGroup();
         buttonGroup.add(validationRadio);
         buttonGroup.add(crossValidationRadio);
-        validationRadio.setSelected(true);
+        buttonGroup.add(noneValidationRadio);
+        noneValidationRadio.setSelected(true);
 
         s.gridwidth = 1;
         s.insets = new Insets(two, 0, 0, 0);
         testOptionPanel.add(validationRadio, s);
-        testOptionPanel.add(new JLabel("Repeat times"), s);
-        s.gridwidth = 0;
-        validationRepeatTimeTextField.setIntRange(1, 100);
-        testOptionPanel.add(validationRepeatTimeTextField, s);
-
-        s.gridwidth = 1;
-        s.insets = new Insets(0, 0, 0, 0);
-        testOptionPanel.add(new JLabel(), s);
         testOptionPanel.add(new JLabel("Test"), s);
         validationTestingRatioTextField.setIntRange(0, 99);
         testOptionPanel.add(validationTestingRatioTextField, s);
         s.gridwidth = GridBagConstraints.REMAINDER;
 
         testOptionPanel.add(new JLabel("%", JLabel.CENTER), s);
+
         crossValidationComboBox.setSelectedItem(10);
         s.gridwidth = 1;
         s.insets = new Insets(two, 0, 0, 0);
         testOptionPanel.add(crossValidationRadio, s);
         testOptionPanel.add(new JLabel("Folds"), s);
-        s.gridwidth = 0;
+        s.gridwidth = 1;
         testOptionPanel.add(crossValidationComboBox, s);
+        s.gridwidth = GridBagConstraints.REMAINDER;
+        testOptionPanel.add(new JLabel(), s);
+
+        testOptionPanel.add(noneValidationRadio, s);
+
+        s.gridwidth = 1;
+        s.insets = new Insets(five, five, 0, 0);
+        testOptionPanel.add(new JLabel("Repeat times"), s);
+        s.insets.left = 0;
+        testOptionPanel.add(new JLabel(), s);
+        s.gridwidth = 1;
+        validationRepeatTimeTextField.setIntRange(1, 100);
+        testOptionPanel.add(validationRepeatTimeTextField, s);
+        s.gridwidth = GridBagConstraints.REMAINDER;
+        testOptionPanel.add(new JLabel(), s);
+
+
         s.gridwidth = 1;
         s.insets = new Insets(ten, seven, five, five);
         leftPanel.add(startButton, s);
@@ -241,8 +252,10 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
             try {
                 calculatingAlgorithm = (AbstractAlgorithm) nowSelectedAlgorithm.clone();
                 nowOtherConfig = new OtherConfig(
-                        validationRadio.isSelected() ? OtherConfig.Validation.VALIDATION
-                                : OtherConfig.Validation.CROSS_VALIDATION,
+                        validationRadio.isSelected() ?
+                                OtherConfig.Validation.VALIDATION :
+                                (crossValidationRadio.isSelected() ?
+                                        OtherConfig.Validation.CROSS_VALIDATION : OtherConfig.Validation.NONE),
                         Integer.parseInt(validationRepeatTimeTextField.getText()),
                         Integer.parseInt(validationTestingRatioTextField.getText()),
                         (Integer) crossValidationComboBox.getSelectedItem());
@@ -264,7 +277,10 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
                 public void run() {
                     CanShowStatus canShowStatus = mainFrame.getCanShowStatus();
                     canShowStatus.showStatus("Starting...");
+                    long startTime = System.nanoTime();
                     calculatingAlgorithm.doAlgorithm(ClassifyPanel.this, canShowStatus, nowOtherConfig);
+                    long endTime = System.nanoTime();
+                    ClassifyPanel.this.showOutputString("All Time:" + (endTime - startTime) + "ns");
                     canShowStatus.showStatus("OK");
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
@@ -309,7 +325,8 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
         } else {
             try {
                 Object config = nowSelectedAlgorithm.getConfiguration();
-                ConfigSetter.show(mainFrame.getFrame(), config);
+                ConfigSetter.show(mainFrame.getFrame(), config,
+                        nowSelectedAlgorithm.getName(), nowSelectedAlgorithm.getIntroduction());
                 refreshConfigTextField();
             } catch (ConfigSetter.ConfigException e) {
                 String error = "ERROR" + e.getMessage();
@@ -369,7 +386,8 @@ public class ClassifyPanel extends MyPanel implements CanShowOutput {
     private JTextArea textArea = new JTextArea();
     private JComboBox<Integer> crossValidationComboBox = new JComboBox<>(new Integer[]{2, 3, 4, 5, 6, 7, 8, 9, 10});
     private JRadioButton validationRadio = new JRadioButton("Validation"),
-            crossValidationRadio = new JRadioButton("Cross Validation");
+            crossValidationRadio = new JRadioButton("Cross Validation"),
+            noneValidationRadio = new JRadioButton("None");
     private MyTextField validationRepeatTimeTextField = new MyTextField("10"),
             validationTestingRatioTextField = new MyTextField("50");
 

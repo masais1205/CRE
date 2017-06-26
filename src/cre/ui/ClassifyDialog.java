@@ -39,7 +39,7 @@ public class ClassifyDialog extends JDialog {
     }
 
     public ClassifyDialog(Dialog owner, Object object, ConfigClassify classify, TreeMap<String, List<Integer>> map) {
-        super(owner, true);
+        super(owner, ModalityType.DOCUMENT_MODAL);
         classes = classify.classNames;
         names = classify.attributeNames;
         inWhichClass = new String[names.length];

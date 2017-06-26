@@ -2,7 +2,6 @@ package cre.algorithm.cdt;
 
 import cre.algorithm.CanShowOutput;
 
-import javax.swing.*;
 import java.io.*;
 import java.util.*;
 
@@ -397,18 +396,14 @@ public class CDT {
     }
 
 
-    public void decompose(TreeNode node, String fn) {
+    public void decompose(TreeNode node) {
         try {
-            fWrite = new FileWriter(fn);
-            fp = new BufferedWriter(fWrite);
-
-            fprintf(fp, "File Name: " + fn + "\n");
             decomposeNodePA(node);
-
             fp.close();
             fWrite.close();
         } catch (Exception e) {
-            System.out.println(e);
+            canShowOutput.showOutputString(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -934,23 +929,18 @@ public class CDT {
                     outputAttribute = { "Value1", "Value2", ..  }
             The second form is printed if the node cannot be decomposed any further into an homogenous set
     */
-    public void output2Treefile(TreeNode node, String tab, String fn) {
+    public void output2Treefile(TreeNode node, String tab) {
 
         try {
-            fWrite = new FileWriter(fn);
-            fp = new BufferedWriter(fWrite);
-
-            fprintf(fp, "File Name: " + fn + "\n");
             if (pruning == 1) {
                 for (int i = 0; i < hmax - 1; i++)
                     pruneTree(node, "");
             }
-            printTree(node, "");
+            printTree(node, "", 0);
 
-            fp.close();
-            fWrite.close();
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
+            canShowOutput.showOutputString(e.getMessage());
         }
     }
 
@@ -988,7 +978,7 @@ public class CDT {
     }
 
 
-    public void printTree(TreeNode node, String tab) {
+    public void printTree(TreeNode node, String tab, int depth) {
 
         int outputattr = atributoClase;
         pathVarInd++;
@@ -1016,7 +1006,7 @@ public class CDT {
             pathVarValRecord[pathVarInd] = Integer.parseInt((String) domains[node.decompositionAttribute].elementAt(i));
             fprintf(fp, tab + "if( " + attributeNames[node.decompositionAttribute] + " == \"" +
                     domains[node.decompositionAttribute].elementAt(i) + "\") (" + node.PA + ") {\n");
-            printTree(node.children[i], tab + ",");
+            printTree(node.children[i], tab + ",", depth + 1);
             if (i != numvalues - 1) fprintf(fp, tab + "} else ");
             else fprintf(fp, tab + "}\n");
         }
@@ -1025,33 +1015,6 @@ public class CDT {
             pathVarInd--;
 
     }
-
-
-    public void output2Pathfile(TreeNode node, String tab, String fn) {
-
-        try {
-            fWrite = new FileWriter(fn);
-            fp = new BufferedWriter(fWrite);
-
-            fprintf(fp, "File Name: " + fn + "\n");
-
-            int pathNum = 0;
-            for (int i = 0; i < pathVar.size(); i++) {
-                fprintf(fp, "Path," + ++pathNum + "\n");
-                int[] pathVarRecord = pathVar.get(i);
-                int[] pathVarValRecord = pathVarVal.get(i);
-                for (int j = 0; j < pathVarRecord.length; j++)
-                    fprintf(fp, attributeNames[pathVarRecord[j]] + ",\t=" + pathVarValRecord[j] + "\n");
-                fprintf(fp, "\n");
-            }
-
-            fp.close();
-            fWrite.close();
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-    }
-
 
     /*  This function creates the decision tree and prints it in the form of rules on the console
     */
@@ -1066,20 +1029,14 @@ public class CDT {
 //    				System.out.print(exposures.get(i) + " ");
 //    			System.out.println();
 
-
-        String namebase = fileName + "_PA.csv";
-        decompose(root, namebase);
+        decompose(root);
 
         long endTime = System.currentTimeMillis();
 
         System.out.println();
         System.out.println("Run time: " + (endTime - startTime));
 
-        namebase = fileName + "_tree.csv";
-        output2Treefile(root, "", namebase);
-
-        namebase = fileName + "_path.csv";
-        output2Pathfile(root, "", namebase);
+        output2Treefile(root, "");
 
 //            System.out.println("\n All leaf nodes are: ");
 //            unique();
@@ -1091,16 +1048,15 @@ public class CDT {
 //            }
     }
 
+    private CanShowOutput canShowOutput;
+
     public CDT(CDTConfig config, String fileNameWithoutExtension, CanShowOutput showArea) {
 
+        this.canShowOutput = showArea;
         fileName = fileNameWithoutExtension;
-        showArea.showOutputString("\t File Name: " + fileName + "\n");
         hmax = config.getHeight();
-        showArea.showOutputString("\t The maximum height of the tree is: " + hmax + "\n");
         improving = config.isTest_improve_PA() ? 1 : 0;
-        showArea.showOutputString("\t Test if the child node can improve PA value" + improving + " \n");
         pruning = config.isPruned() ? 1 : 0;
-        showArea.showOutputString("\t Pruning causal decision trees after creation " + pruning + " \n");
 
         pathTmpVar = new int[hmax];
         pathTmpVarVal = new int[hmax];

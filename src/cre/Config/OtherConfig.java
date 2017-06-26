@@ -7,7 +7,7 @@ package cre.Config;
 public class OtherConfig {
 
     public enum Validation {
-        VALIDATION, CROSS_VALIDATION
+        VALIDATION, CROSS_VALIDATION, NONE
     }
 
     private int crossValidationFolds;

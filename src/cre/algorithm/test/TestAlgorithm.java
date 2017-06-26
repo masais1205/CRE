@@ -4,8 +4,8 @@ import cre.Config.OtherConfig;
 import cre.algorithm.AbstractAlgorithm;
 import cre.algorithm.CanShowOutput;
 import cre.algorithm.CanShowStatus;
-import cre.algorithm.CrossValidation;
-import cre.algorithm.CrossValidation.SliceLinesHelper;
+import cre.algorithm.Validation;
+import cre.algorithm.Validation.SliceLinesHelper;
 import cre.algorithm.tool.OtherTool;
 
 import java.io.File;
@@ -115,7 +115,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                 }
                 break;
                 case CROSS_VALIDATION: {
-                    int[] crossValidationGroup = CrossValidation.sliceLines(fileName,
+                    int[] crossValidationGroup = Validation.sliceLines(fileName,
                             ",", YP, otherConfig.getCrossValidationFolds(),
                             configAttributeNames.length, canShowOutput);
 

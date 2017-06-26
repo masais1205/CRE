@@ -4,6 +4,7 @@ import cre.Config.*;
 import cre.ConfigSetter;
 
 import javax.swing.*;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,9 +18,11 @@ import java.util.List;
  */
 public class ConfigDialog extends JDialog {
 
-    public ConfigDialog(Frame owner, final Object config,
-                        final ArrayList<ConfigBase> configBases) {
-        super(owner, true);
+    public ConfigDialog(final Frame owner, final Object config,
+                        final ArrayList<ConfigBase> configBases,
+                        final String algorithmName, String algorithmIntroduction) {
+        super(owner, ModalityType.DOCUMENT_MODAL);
+        this.setTitle(algorithmName);
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         final ArrayList<Object> widgetList = new ArrayList<>();
         JPanel rootPanel = new JPanel(new BorderLayout());
@@ -112,8 +115,51 @@ public class ConfigDialog extends JDialog {
                 });
             }
         }
+        GridBagConstraints tipConstraints = new GridBagConstraints();
+        tipConstraints.anchor = GridBagConstraints.EAST;
+        tipConstraints.gridwidth = GridBagConstraints.REMAINDER;
+
+        JButton buttonHelp = new JButton("Help");
         JButton buttonOK = new JButton("OK");
         JButton buttonCancel = new JButton("Cancel");
+
+        final Document helpDoc = new DefaultStyledDocument();
+        MutableAttributeSet set = new SimpleAttributeSet();
+        StyleConstants.setFontSize(set, Tool.HighResolution(16));
+        StyleConstants.setBold(set, true);
+        try {
+            helpDoc.insertString(helpDoc.getLength(), "\n" + algorithmName + "\n", set);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+        StyleConstants.setFontSize(set, Tool.HighResolution(12));
+        StyleConstants.setBold(set, false);
+        try {
+            helpDoc.insertString(helpDoc.getLength(), "\n" + algorithmIntroduction + "\n", set);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+        for (ConfigBase i : configBases) {
+            try {
+                StyleConstants.setFontSize(set, Tool.HighResolution(12));
+                StyleConstants.setBold(set, true);
+                helpDoc.insertString(helpDoc.getLength(), "\n" + i.getShownName(), set);
+                StyleConstants.setFontSize(set, Tool.HighResolution(10));
+                StyleConstants.setBold(set, false);
+                helpDoc.insertString(helpDoc.getLength(), "    -    " + i.getComments() + "\n", set);
+            } catch (BadLocationException e) {
+                e.printStackTrace();
+            }
+        }
+
+        buttonHelp.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                TextInformationFrame textInformationFrame = new TextInformationFrame(algorithmName, helpDoc);
+                textInformationFrame.setVisible(true);
+            }
+        });
+
         buttonCancel.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -162,6 +208,8 @@ public class ConfigDialog extends JDialog {
         JPanel panel = new JPanel(new GridLayout(1, 2));
         panel.add(buttonOK);
         panel.add(buttonCancel);
+        right.gridwidth = 1;
+        mainPanel.add(buttonHelp, right);
         right.anchor = GridBagConstraints.EAST;
         right.fill = GridBagConstraints.NONE;
         right.gridwidth = 0;

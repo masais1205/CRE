@@ -14,9 +14,11 @@ import java.util.TreeMap;
  * Created by HanYizhao on 2017/4/6.
  */
 public class ConfigSetter {
-    public static void show(Frame ower, Object config) throws ConfigException {
+    public static void show(Frame ower, Object config,
+                            String algorithmName, String algorithmIntroduction) throws ConfigException {
         ArrayList<ConfigBase> configs = getConfigsFromObject(config);
-        ConfigDialog dialog = new ConfigDialog(ower, config, configs);
+
+        ConfigDialog dialog = new ConfigDialog(ower, config, configs, algorithmName, algorithmIntroduction);
         dialog.setVisible(true);
     }
 
@@ -254,7 +256,7 @@ public class ConfigSetter {
      * @param value      value
      * @return success or not
      */
-    public static boolean setMethodValue(Object o, String methodName, Class valueType, Object value) {
+    private static boolean setMethodValue(Object o, String methodName, Class valueType, Object value) {
         try {
             Class<?> c = o.getClass();
             Method m = c.getDeclaredMethod(methodName, valueType);
@@ -280,7 +282,7 @@ public class ConfigSetter {
      * @param returnType the type of returned value of this method
      * @return value or null
      */
-    public static Object getMethodValue(Object o, String methodName, Class returnType) {
+    private static Object getMethodValue(Object o, String methodName, Class returnType) {
         try {
             Class<?> c = o.getClass();
             Method m = c.getDeclaredMethod(methodName);
