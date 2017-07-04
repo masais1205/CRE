@@ -336,13 +336,21 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
                     CanShowStatus canShowStatus = mainFrame.getCanShowStatus();
                     canShowStatus.showStatus("Starting...");
                     long startTime = System.nanoTime();
-                    final List<ResizablePanel> panels = calculatingAlgorithm.doAlgorithm(AlgorithmPanel.this, canShowStatus, nowOtherConfig);
+                    List<ResizablePanel> panelss = null;
+                    try {
+                        panelss = calculatingAlgorithm.doAlgorithm(AlgorithmPanel.this, canShowStatus, nowOtherConfig);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        AlgorithmPanel.this.showOutputString("ERROR:" + e.getMessage());
+                    }
+                    final List<ResizablePanel> panels = panelss;
                     long endTime = System.nanoTime();
                     AlgorithmPanel.this.showOutputString("All Time:" + (endTime - startTime) + "ns");
                     canShowStatus.showStatus("OK");
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
+
                             resultListItems.get(resultListItems.size() - 1).figures = panels;
                             resultListSelectedChange();
                             calculatingFinished();
