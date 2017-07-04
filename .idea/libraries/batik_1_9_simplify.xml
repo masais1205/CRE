@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="batik-1.9-simplify">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/lib/batik-1.9-simplify" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/lib/batik-1.9-simplify" recursive="false" />
+  </library>
+</component>
