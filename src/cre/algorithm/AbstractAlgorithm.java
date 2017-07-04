@@ -1,6 +1,7 @@
 package cre.algorithm;
 
 import cre.Config.OtherConfig;
+import cre.view.ResizablePanel;
 
 import javax.swing.*;
 import java.io.File;
@@ -31,7 +32,7 @@ public abstract class AbstractAlgorithm implements Cloneable {
 
     public abstract AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile);
 
-    public abstract void doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus, OtherConfig otherConfig);
+    public abstract List<ResizablePanel> doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus, OtherConfig otherConfig);
 
     public abstract void setShouldStop();
 

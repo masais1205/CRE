@@ -1,78 +1,41 @@
 package cre.view.tree;
 
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.List;
+
+import cre.view.tree.LineBreakerTool.*;
 
 /**
  * Created by 16502 on 2017/6/22.
  */
 public class Node {
-    private String name;
-    private String content;
+    public String name;
+    public String content;
+    public Node parent;
+    public List<Children> children;
 
-    private Node parent;
-    private List<Children> children;
-
-    private Rectangle2D selfRect;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
+    public Node(String name, String content, Node parent) {
         this.name = name;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
         this.content = content;
-    }
-
-    public Node getParent() {
-        return parent;
-    }
-
-    public void setParent(Node parent) {
         this.parent = parent;
+        children = new ArrayList<>();
     }
 
-    public List<Children> getChildren() {
-        return children;
+    public float selfX;
+    public float selfY;
+    public float selfWidth;
+    public float selfHeight;
+    public List<TextLayoutAndContent> nameLayout;
+    public List<TextLayoutAndContent> contentLayout;
+    public List<Point2D.Float> namePoint;
+    public List<Point2D.Float> contentPoint;
+    public float divisionLocation;
+
+    public boolean hasContent() {
+        return contentLayout != null && contentPoint != null;
     }
 
-    public void setChildren(List<Children> children) {
-        this.children = children;
-    }
 
-    public Rectangle2D getSelfRect() {
-        return selfRect;
-    }
-
-    public void setSelfRect(Rectangle2D selfRect) {
-        this.selfRect = selfRect;
-    }
-
-    public class Children {
-        private Node value;
-        private String edge;
-
-        public Node getValue() {
-            return value;
-        }
-
-        public void setValue(Node value) {
-            this.value = value;
-        }
-
-        public String getEdge() {
-            return edge;
-        }
-
-        public void setEdge(String edge) {
-            this.edge = edge;
-        }
-    }
 }

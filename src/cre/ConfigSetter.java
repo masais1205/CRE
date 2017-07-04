@@ -1,29 +1,182 @@
 package cre;
 
 import cre.Config.*;
-import cre.ui.ConfigDialog;
+import cre.ui.*;
+import cre.ui.custom.MyFormattedTextField;
 
+import javax.swing.*;
+import javax.swing.text.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.TreeMap;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.*;
 
 /**
  * Created by HanYizhao on 2017/4/6.
  */
 public class ConfigSetter {
-    public static void show(Frame ower, Object config,
-                            String algorithmName, String algorithmIntroduction) throws ConfigException {
-        ArrayList<ConfigBase> configs = getConfigsFromObject(config);
 
-        ConfigDialog dialog = new ConfigDialog(ower, config, configs, algorithmName, algorithmIntroduction);
-        dialog.setVisible(true);
+    public static JPanel createAJPanel(final Window frame, final Object config) throws ConfigException {
+        final ArrayList<ConfigBase> configBases = getConfigsFromObject(config);
+
+        final ArrayList<Object> widgetList = new ArrayList<>();
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new GridBagLayout());
+        GridBagConstraints left = new GridBagConstraints();
+        int five = Tool.HighResolution(5);
+        int ten = Tool.HighResolution(10);
+        left.insets = new Insets(five, five, five, five);
+        left.anchor = GridBagConstraints.WEST;
+        left.gridwidth = 1;
+        left.weightx = 0;
+        GridBagConstraints right = new GridBagConstraints();
+        right.insets = new Insets(five, five, five, five);
+        right.gridwidth = 0;
+        right.weightx = 1;
+        right.fill = GridBagConstraints.HORIZONTAL;
+        for (ConfigBase i : configBases) {
+            JLabel label = new JLabel(i.getShownName());
+            mainPanel.add(label, left);
+            if (i instanceof ConfigBoolean) {
+                JComboBox<Boolean> comboBox = new JComboBox<>(new Boolean[]{true, false});
+                mainPanel.add(comboBox, right);
+                comboBox.setSelectedItem(ConfigSetter.getFieldBoolean(config, i.getName()));
+                comboBox.setToolTipText(i.getComments());
+                final ConfigBoolean nowConfig = (ConfigBoolean) i;
+                comboBox.addItemListener(new ItemListener() {
+                    @Override
+                    public void itemStateChanged(ItemEvent e) {
+                        if (e.getStateChange() == ItemEvent.SELECTED) {
+                            ConfigSetter.setFieldValue(config, nowConfig.getName(),
+                                    boolean.class, e.getItem());
+                            System.out.println(config);
+                        }
+                    }
+                });
+                widgetList.add(comboBox);
+            } else if (i instanceof ConfigInt) {
+                MyFormattedTextField tf = new MyFormattedTextField(NumberFormat.getIntegerInstance());
+                ConfigInt ci = (ConfigInt) i;
+                mainPanel.add(tf, right);
+                int original = ConfigSetter.getFieldInt(config, i.getName());
+                tf.setValue(original);
+                tf.setIntRange(ci.min, ci.max);
+                tf.setToolTipText(i.getComments());
+                final ConfigInt nowConfig = (ConfigInt) i;
+                tf.addTextFieldChangeListener(new MyFormattedTextField.TextFieldChangeListener() {
+                    @Override
+                    public void textFieldChange(String newValue) {
+                        try {
+                            ConfigSetter.setFieldValue(config, nowConfig.getName(), int.class,
+                                    Integer.parseInt(newValue));
+                            System.out.println(config);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                widgetList.add(tf);
+            } else if (i instanceof ConfigDouble) {
+                MyFormattedTextField tf = new MyFormattedTextField(new DecimalFormat());
+                ConfigDouble cd = (ConfigDouble) i;
+                mainPanel.add(tf, right);
+                tf.setValue(ConfigSetter.getFieldDouble(config, i.getName()));
+                tf.setDoubleRange(cd.min, cd.max);
+                tf.setToolTipText(i.getComments());
+                final ConfigDouble nowConfig = (ConfigDouble) i;
+                tf.addTextFieldChangeListener(new MyFormattedTextField.TextFieldChangeListener() {
+                    @Override
+                    public void textFieldChange(String newValue) {
+                        try {
+                            ConfigSetter.setFieldValue(config, nowConfig.getName(), double.class,
+                                    Double.parseDouble(newValue));
+                            System.out.println(config);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                widgetList.add(tf);
+            } else if (i instanceof ConfigString) {
+                if (((ConfigString) i).options == null) {
+                    MyFormattedTextField tf = new MyFormattedTextField();
+                    mainPanel.add(tf, right);
+                    String text = ConfigSetter.getFieldString(config, i.getName());
+                    if (text != null) {
+                        tf.setValue(text);
+                    }
+                    tf.setToolTipText(i.getComments());
+                    final ConfigString nowConfig = (ConfigString) i;
+                    tf.addTextFieldChangeListener(new MyFormattedTextField.TextFieldChangeListener() {
+                        @Override
+                        public void textFieldChange(String newValue) {
+                            try {
+                                ConfigSetter.setFieldValue(config, nowConfig.getName(), String.class,
+                                        newValue);
+                                System.out.println(config);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                    widgetList.add(tf);
+                } else {
+                    JComboBox<String> comboBox = new JComboBox<>(((ConfigString) i).options);
+                    mainPanel.add(comboBox, right);
+                    comboBox.setSelectedItem(ConfigSetter.getFieldString(config, i.getName()));
+                    comboBox.setToolTipText(i.getComments());
+                    final ConfigString nowConfig = (ConfigString) i;
+                    comboBox.addItemListener(new ItemListener() {
+                        @Override
+                        public void itemStateChanged(ItemEvent e) {
+                            if (e.getStateChange() == ItemEvent.SELECTED) {
+                                ConfigSetter.setFieldValue(config, nowConfig.getName(),
+                                        String.class, e.getItem());
+                                System.out.println(config);
+                            }
+                        }
+                    });
+                    widgetList.add(comboBox);
+                }
+            } else if (i instanceof ConfigClassify) {
+                final MyFormattedTextField tf = new MyFormattedTextField();
+                mainPanel.add(tf, right);
+                final ConfigClassify classify = (ConfigClassify) i;
+                tf.setValue(ConfigClassify.toString(config, classify));
+                tf.setTag(ConfigSetter.getFieldTreeMap(config, i.getName()));
+                tf.setToolTipText(i.getComments());
+                widgetList.add(tf);
+                tf.setEditable(false);
+                tf.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        ClassifyDialog dialog = new ClassifyDialog(frame,
+                                config, classify,
+                                ((TreeMap<String, java.util.List<Integer>>) tf.getTag()));
+                        dialog.setVisible(true);
+                        if (dialog.OK()) {
+                            TreeMap<String, java.util.List<Integer>> map = dialog.getNewMap();
+                            tf.setTag(map);
+                            tf.setValue(ConfigClassify.toString(map, classify));
+                            ConfigSetter.setFieldValue(config, classify.getName(), TreeMap.class, map);
+                            System.out.println(config);
+                        }
+                    }
+                });
+            }
+        }
+        GridBagConstraints tipConstraints = new GridBagConstraints();
+        tipConstraints.anchor = GridBagConstraints.EAST;
+        tipConstraints.gridwidth = GridBagConstraints.REMAINDER;
+        return mainPanel;
     }
 
 
-    private static ArrayList<ConfigBase> getConfigsFromObject(Object config) throws ConfigException {
+    public static ArrayList<ConfigBase> getConfigsFromObject(Object config) throws ConfigException {
         ArrayList<ConfigBase> configBases = new ArrayList<>();
         Class<?> c = config.getClass();
         Field[] fields = c.getDeclaredFields();

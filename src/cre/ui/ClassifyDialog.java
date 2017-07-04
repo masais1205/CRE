@@ -38,7 +38,7 @@ public class ClassifyDialog extends JDialog {
         return map;
     }
 
-    public ClassifyDialog(Dialog owner, Object object, ConfigClassify classify, TreeMap<String, List<Integer>> map) {
+    public ClassifyDialog(Window owner, Object object, ConfigClassify classify, TreeMap<String, List<Integer>> map) {
         super(owner, ModalityType.DOCUMENT_MODAL);
         classes = classify.classNames;
         names = classify.attributeNames;
@@ -87,6 +87,8 @@ public class ClassifyDialog extends JDialog {
         });
         mainPanel.add(buttonOk, s);
         this.pack();
+        Dimension oldSize = getSize();
+        this.setSize(Math.max(Tool.HighResolution(300), oldSize.width), oldSize.height);
         Tool.moveToCenter(this, true);
     }
 

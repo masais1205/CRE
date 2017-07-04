@@ -6,7 +6,6 @@ package cre.algorithm.cdt;
 public class CDTConfig implements Cloneable {
     private int height;
     private boolean pruned;
-    private boolean test_improve_PA;
 
     @Override
     public String toString() {
@@ -14,9 +13,6 @@ public class CDTConfig implements Cloneable {
         sb.append("-h ").append(height);
         if (pruned) {
             sb.append(" -p");
-        }
-        if (test_improve_PA) {
-            sb.append(" -i");
         }
 
         return sb.toString();
@@ -35,11 +31,11 @@ public class CDTConfig implements Cloneable {
     }
 
     public String getPrunedComment() {
-        return "Test if the child node can improve PA value";
+        return "Whether pruning is performed.";
     }
 
     public String getPrunedShownName() {
-        return "test PA value?";
+        return "pruned";
     }
 
     @Override
@@ -69,11 +65,4 @@ public class CDTConfig implements Cloneable {
         this.pruned = pruned;
     }
 
-    public boolean isTest_improve_PA() {
-        return test_improve_PA;
-    }
-
-    public void setTest_improve_PA(boolean test_improve_PA) {
-        this.test_improve_PA = test_improve_PA;
-    }
 }

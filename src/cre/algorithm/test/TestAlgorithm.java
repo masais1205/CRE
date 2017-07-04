@@ -7,6 +7,7 @@ import cre.algorithm.CanShowStatus;
 import cre.algorithm.Validation;
 import cre.algorithm.Validation.SliceLinesHelper;
 import cre.algorithm.tool.OtherTool;
+import cre.view.ResizablePanel;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -62,35 +63,37 @@ public class TestAlgorithm extends AbstractAlgorithm {
     public AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile) {
         TestAlgorithm a = new TestAlgorithm(newFile);
         a.config.setZC(this.config.getZC());
+        a.config.setMergeDepth(this.config.getMergeDepth());
+        a.config.setOddsRatio(this.config.getOddsRatio());
         return a;
     }
 
     @Override
-    public void doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus, OtherConfig otherConfig) {
+    public List<ResizablePanel> doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus, OtherConfig otherConfig) {
         try {
             TreeMap<String, List<Integer>> configTreeMap = config.getType();
             String[] configAttributeNames = config.getTypeNames();
             String[] configAttributeClasses = config.getTypeClasses();
             if (configAttributeNames == null) {
                 canShowOutput.showOutputString("Config ERROR: Need names of attributes");
-                return;
+                return null;
             }
             if (configTreeMap == null) {
                 canShowOutput.showOutputString("Config ERROR : Need to Classify the Attributes");
-                return;
+                return null;
             }
 
             List<Integer> configTempList = configTreeMap.get(configAttributeClasses[0]);
             if (configTempList.size() != 1) {
                 canShowOutput.showOutputString("Config ERROR : Need one attribute which is belong to W");
-                return;
+                return null;
             }
             int WP = configTempList.get(0);
 
             configTempList = configTreeMap.get(configAttributeClasses[2]);
             if (configTempList.size() != 1) {
                 canShowOutput.showOutputString("Config ERROR : Need one attribute which is belong to Y");
-                return;
+                return null;
             }
             int YP = configTempList.get(0);
             int[] XPArray = OtherTool.fromIntegerListToArray(
@@ -137,6 +140,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
             e.printStackTrace();
             canShowOutput.showOutputString(e.getMessage());
         }
+        return null;
     }
 
     @Override

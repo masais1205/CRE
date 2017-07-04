@@ -1,12 +1,21 @@
 package cre.algorithm.cdt;
 
 import cre.algorithm.CanShowOutput;
+import cre.view.tree.Children;
+import cre.view.tree.Node;
 
 import java.io.*;
 import java.util.*;
 
 
 public class CDT {
+
+    /**
+     * Yizhao Han
+     * This attribute is used to store the treeview.
+     */
+    public Node rootYizhao;
+
     int numAttributes;              // The number of attributes including the output attribute
     String[] attributeNames;        // The names of all attributes.  It is an array of dimension numAttributes.  The last attribute is the output attribute
     private int atributoClase;
@@ -48,7 +57,6 @@ public class CDT {
     int[] assList = new int[numAttributes];
     List<String> leaf = new ArrayList<String>();
     List<Integer> leafVal = new ArrayList<Integer>();
-    FileWriter fWrite;
     BufferedWriter fp;
     int rightChild = -1;
     int lastClassLabel = -1;
@@ -399,8 +407,9 @@ public class CDT {
     public void decompose(TreeNode node) {
         try {
             decomposeNodePA(node);
-            fp.close();
-            fWrite.close();
+            if (fp != null) {
+                fp.close();
+            }
         } catch (Exception e) {
             canShowOutput.showOutputString(e.getMessage());
             e.printStackTrace();
@@ -936,13 +945,18 @@ public class CDT {
                 for (int i = 0; i < hmax - 1; i++)
                     pruneTree(node, "");
             }
-            printTree(node, "", 0);
+            printTree(node, "");
+            printTreeYizhao(node, "");
+            rootYizhao = new Node(attributeNames[node.decompositionAttribute],
+                    "ROOT", null);
+            getTreeYizhao(node, rootYizhao);
 
         } catch (Exception e) {
             e.printStackTrace();
             canShowOutput.showOutputString(e.getMessage());
         }
     }
+
 
     public void pruneTree(TreeNode node, String tab) {
         int outputattr = atributoClase;
@@ -977,8 +991,51 @@ public class CDT {
             deSide.remove(deSide.size() - 1);
     }
 
+    private void getTreeYizhao(TreeNode treeNode, Node node) {
+        if (treeNode.children != null && treeNode.children.length == 2) {
+            node.children = new ArrayList<>();
+            for (int i = 0; i < 2; i++) {
+                if (treeNode.children[i].children == null || treeNode.children[i].children.length == 0) {
+                    int value = getMostValues(treeNode.children[i].data, atributoClase);
+                    Node n = new Node(attributeNames[atributoClase] + "=" + domains[atributoClase].elementAt(value),
+                            null, node);
+                    node.children.add(new Children(n, " = " +
+                            domains[treeNode.decompositionAttribute].elementAt(i)));
+                } else {
+                    Node n = new Node(attributeNames[treeNode.children[i].decompositionAttribute], null, node);
+                    node.children.add(new Children(n, " = " +
+                            domains[treeNode.decompositionAttribute].elementAt(i)));
+                    getTreeYizhao(treeNode.children[i], node.children.get(i).getValue());
+                }
+            }
+        }
+    }
 
-    public void printTree(TreeNode node, String tab, int depth) {
+    public void printTreeYizhao(TreeNode node, String stringNow) {
+        if (node.children == null || node.children.length == 0) {
+            canShowOutput.showOutputString("End, band ending.");
+        } else if (node.children.length == 2) {
+            for (int i = 0; i < 2; i++) {
+                if (node.children[i].children == null || node.children[i].children.length == 0) {
+                    int value = getMostValues(node.children[i].data, atributoClase);
+                    canShowOutput.showOutputString(stringNow +
+                            attributeNames[node.decompositionAttribute] + " = " +
+                            domains[node.decompositionAttribute].elementAt(i) +
+                            " " + attributeNames[atributoClase] + "=" + domains[atributoClase].elementAt(value));
+                } else {
+                    canShowOutput.showOutputString(stringNow +
+                            attributeNames[node.decompositionAttribute] + " = " +
+                            domains[node.decompositionAttribute].elementAt(i));
+                    printTreeYizhao(node.children[i], stringNow + "|   ");
+                }
+            }
+        } else {
+            canShowOutput.showOutputString("This node does not has two children."
+                    + attributeNames[node.decompositionAttribute]);
+        }
+    }
+
+    public void printTree(TreeNode node, String tab) {
 
         int outputattr = atributoClase;
         pathVarInd++;
@@ -1006,7 +1063,7 @@ public class CDT {
             pathVarValRecord[pathVarInd] = Integer.parseInt((String) domains[node.decompositionAttribute].elementAt(i));
             fprintf(fp, tab + "if( " + attributeNames[node.decompositionAttribute] + " == \"" +
                     domains[node.decompositionAttribute].elementAt(i) + "\") (" + node.PA + ") {\n");
-            printTree(node.children[i], tab + ",", depth + 1);
+            printTree(node.children[i], tab + ",");
             if (i != numvalues - 1) fprintf(fp, tab + "} else ");
             else fprintf(fp, tab + "}\n");
         }
@@ -1055,7 +1112,6 @@ public class CDT {
         this.canShowOutput = showArea;
         fileName = fileNameWithoutExtension;
         hmax = config.getHeight();
-        improving = config.isTest_improve_PA() ? 1 : 0;
         pruning = config.isPruned() ? 1 : 0;
 
         pathTmpVar = new int[hmax];
@@ -1082,10 +1138,12 @@ public class CDT {
 
 
     public void fprintf(BufferedWriter out, String s) {
-        try {
-            out.write(s);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (out != null) {
+            try {
+                out.write(s);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

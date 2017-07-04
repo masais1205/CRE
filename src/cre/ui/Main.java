@@ -2,6 +2,7 @@ package cre.ui;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
+import javax.swing.plaf.InsetsUIResource;
 import java.awt.*;
 import java.util.Map;
 
@@ -21,12 +22,32 @@ public class Main {
 
         for (Map.Entry<Object, Object> i : UIManager.getDefaults().entrySet()) {
             if (i.getKey() instanceof String) {
+                {
+                    Object key = i.getKey();
+                    Object value = UIManager.get(key);
+                    if (value != null) {
+                        if (!(value instanceof Color) && !(value instanceof Font) && !(((String) key).contains("Icon"))) {
+                            if (value instanceof InsetsUIResource) {
+                                InsetsUIResource oldUi = (InsetsUIResource) value;
+                                InsetsUIResource newUi = new InsetsUIResource(Tool.HighResolution(oldUi.top),
+                                        Tool.HighResolution(oldUi.left),
+                                        Tool.HighResolution(oldUi.bottom),
+                                        Tool.HighResolution(oldUi.right));
+                                UIManager.put(i.getKey(), newUi);
+                            }
+                        }
+                    }
+
+
+                }
                 if (((String) i.getKey()).endsWith(".font")) {
                     Object value = UIManager.get(i.getKey());
                     if (value instanceof FontUIResource) {
                         FontUIResource fontValue = (FontUIResource) value;
-                        FontUIResource newFont = new FontUIResource(fontValue.getName(), fontValue.getStyle(), Tool.HighResolution(fontValue.getSize()));
-                        UIManager.put(i.getKey(), newFont);
+                        if (fontValue.getSize() < 15) {
+                            FontUIResource newFont = new FontUIResource(fontValue.getName(), fontValue.getStyle(), Tool.HighResolution(fontValue.getSize()));
+                            UIManager.put(i.getKey(), newFont);
+                        }
                     }
                 }
             }

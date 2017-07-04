@@ -7,5 +7,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="common-math" level="project" />
+    <orderEntry type="library" name="batik-1.9" level="project" />
   </component>
 </module>

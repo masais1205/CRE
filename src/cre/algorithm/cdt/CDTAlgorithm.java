@@ -4,13 +4,18 @@ import cre.Config.OtherConfig;
 import cre.algorithm.AbstractAlgorithm;
 import cre.algorithm.CanShowOutput;
 import cre.algorithm.CanShowStatus;
+import cre.view.ResizablePanel;
+import cre.view.tree.Node;
+import cre.view.tree.TreePanel;
 
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Created by HanYizhao on 2017/4/7.
@@ -26,7 +31,6 @@ public class CDTAlgorithm extends AbstractAlgorithm {
             config = new CDTConfig();
             config.setHeight(5);
             config.setPruned(true);
-            config.setTest_improve_PA(false);
         } else {
             config = oldConfig;
         }
@@ -43,7 +47,13 @@ public class CDTAlgorithm extends AbstractAlgorithm {
 
     @Override
     public String getIntroduction() {
-        return "Class for generating a causal decision tree.";
+        return "NAME\n" +
+                "cre.algorithm.CDT\n" +
+                "\n" +
+                "SYNOPSIS\n" +
+                "Class for generating a causal decision tree. For more information, see\n" +
+                "\n" +
+                "J. Li, S. Ma, T. Le, L. Liu, J. Liu (2015). CDT: Programs for Causal Decision Tree (Coded by S. Ma). .\n";
     }
 
     @Override
@@ -65,7 +75,7 @@ public class CDTAlgorithm extends AbstractAlgorithm {
     }
 
     @Override
-    public void doAlgorithm(CanShowOutput outPutArea, CanShowStatus canShowStatus, OtherConfig otherConfig) {
+    public List<ResizablePanel> doAlgorithm(CanShowOutput outPutArea, CanShowStatus canShowStatus, OtherConfig otherConfig) {
         shouldStop = false;
         String fileName = filePath.getAbsolutePath();
         if (fileName.toLowerCase().endsWith(".csv")) {
@@ -103,7 +113,12 @@ public class CDTAlgorithm extends AbstractAlgorithm {
         }
 
         outPutArea.showOutputString("==== full training set ===");
-        new CDT(config, fileName, outPutArea);
+
+        CDT nCDT = new CDT(config, fileName, outPutArea);
+        List<ResizablePanel> result = new ArrayList<>();
+        if (nCDT != null) {
+            result.add(new TreePanel(nCDT.rootYizhao));
+        }
 
 
         switch (otherConfig.getValidation()) {
@@ -114,7 +129,8 @@ public class CDTAlgorithm extends AbstractAlgorithm {
             case NONE:
                 break;
         }
-        new CDT(config, fileName, outPutArea);
+        //new CDT(config, fileName, outPutArea);
+        return result;
     }
 
     @Override
