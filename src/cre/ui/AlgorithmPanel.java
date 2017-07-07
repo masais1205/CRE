@@ -310,10 +310,9 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
             try {
                 calculatingAlgorithm = (AbstractAlgorithm) algorithm.clone();
                 nowOtherConfig = new OtherConfig(
-                        validationRadio.isSelected() ?
-                                OtherConfig.Validation.VALIDATION :
-                                (crossValidationRadio.isSelected() ?
-                                        OtherConfig.Validation.CROSS_VALIDATION : OtherConfig.Validation.NONE),
+                        algorithmOnlyRadio.isSelected() ? OtherConfig.Validation.NONE :
+                                (validationRadio.isSelected() ? OtherConfig.Validation.VALIDATION :
+                                        OtherConfig.Validation.CROSS_VALIDATION),
                         Integer.parseInt(validationRepeatTimeTextField.getText()),
                         Integer.parseInt(validationTestingRatioTextField.getText()),
                         (Integer) crossValidationComboBox.getSelectedItem());

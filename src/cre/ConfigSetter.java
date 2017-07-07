@@ -53,7 +53,6 @@ public class ConfigSetter {
                         if (e.getStateChange() == ItemEvent.SELECTED) {
                             ConfigSetter.setFieldValue(config, nowConfig.getName(),
                                     boolean.class, e.getItem());
-                            System.out.println(config);
                         }
                     }
                 });
@@ -73,7 +72,6 @@ public class ConfigSetter {
                         try {
                             ConfigSetter.setFieldValue(config, nowConfig.getName(), int.class,
                                     Integer.parseInt(newValue));
-                            System.out.println(config);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -94,7 +92,6 @@ public class ConfigSetter {
                         try {
                             ConfigSetter.setFieldValue(config, nowConfig.getName(), double.class,
                                     Double.parseDouble(newValue));
-                            System.out.println(config);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -117,7 +114,6 @@ public class ConfigSetter {
                             try {
                                 ConfigSetter.setFieldValue(config, nowConfig.getName(), String.class,
                                         newValue);
-                                System.out.println(config);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -136,7 +132,6 @@ public class ConfigSetter {
                             if (e.getStateChange() == ItemEvent.SELECTED) {
                                 ConfigSetter.setFieldValue(config, nowConfig.getName(),
                                         String.class, e.getItem());
-                                System.out.println(config);
                             }
                         }
                     });
@@ -163,7 +158,6 @@ public class ConfigSetter {
                             tf.setTag(map);
                             tf.setValue(ConfigClassify.toString(map, classify));
                             ConfigSetter.setFieldValue(config, classify.getName(), TreeMap.class, map);
-                            System.out.println(config);
                         }
                     }
                 });

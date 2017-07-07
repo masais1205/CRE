@@ -5,12 +5,12 @@ import cre.view.tree.LineBreakerTool.TextLayoutAndContent;
 import org.apache.commons.math3.geometry.euclidean.twod.Line;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
-import java.util.List;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.List;
 
 /**
  * Created by HanYizhao on 2017/7/3.
@@ -19,9 +19,9 @@ public class TreePanel extends ResizablePanel {
 
     private Node root;
 
-    private static Font font = new Font("Serif", Font.PLAIN, 12);
-    private static Font contentFont = new Font("Serif", Font.PLAIN, 10);
-    private static Font conditionFont = new Font("Serif", Font.PLAIN, 11);
+    private static Font font = new Font(null, Font.BOLD, 12);
+    private static Font contentFont = new Font(null, Font.PLAIN, 10);
+    private static Font conditionFont = new Font(null, Font.PLAIN, 11);
     private static Color borderColor = Color.black;
     private static Color fontColor = Color.black;
     private static Color contentFontColor = Color.black;
@@ -29,7 +29,7 @@ public class TreePanel extends ResizablePanel {
     private float allWidth;
     private float allHeight;
 
-    public TreePanel(Node root) {
+    public TreePanel(Node root) throws Exception {
         this.root = root;
         Dimension d = TreeRefresher.refreshTree(root, new TreeConfig(font, contentFont, 100,
                 new Margin(5, 10, 5, 10),
@@ -89,38 +89,81 @@ public class TreePanel extends ResizablePanel {
                         g2.setColor(borderColor);
                         g2.draw(new Line2D.Float(start, end));
                     } else {
+                        double tolerance = 1.0e-10;
                         condition = condition.trim();
                         FontMetrics fm = g2.getFontMetrics(conditionFont);
-                        float stringWidth = fm.stringWidth(condition);
-                        float stringHeight = fm.getLeading() + fm.getAscent() + fm.getDescent() + fm.getLeading();
+                        float leading = (float) (fm.getAscent() + fm.getDescent()) / 4;
+                        float stringWidth = fm.stringWidth(condition) + 2 * leading;
+                        float stringHeight = leading + fm.getAscent() + fm.getDescent() + leading;
                         Point2D.Float center = new Point2D.Float((start.x + end.x) / 2, (start.y + end.y) / 2);
                         Rectangle2D.Float rectangle = new Rectangle2D.Float(center.x - stringWidth / 2,
                                 center.y - stringHeight / 2, stringWidth, stringHeight);
-                        Vector2D end1 = new Line(new Vector2D(rectangle.x, rectangle.y),
-                                new Vector2D(rectangle.x + rectangle.width, rectangle.y), 1.0e-10)
-                                .intersection(new Line(new Vector2D(center.x, center.y),
-                                        new Vector2D(start.x, start.y), 1.0e-10));
+                        Vector2D end1 = getLineIntersectRectangle(rectangle, new Point2D.Float(start.x, start.y),
+                                new Point2D.Float(center.x, center.y), tolerance);
                         if (end1 != null) {
                             g2.setColor(borderColor);
                             g2.draw(new Line2D.Float(start.x, start.y, (float) end1.getX(), (float) end1.getY()));
                         }
-                        end1 = new Line(new Vector2D(rectangle.x, rectangle.y + rectangle.height),
-                                new Vector2D(rectangle.x + rectangle.width, rectangle.y + rectangle.height), 1.0e-10)
-                                .intersection(new Line(new Vector2D(center.x, center.y),
-                                        new Vector2D(end.x, end.y), 1.0e-10));
+                        end1 = getLineIntersectRectangle(rectangle, new Point2D.Float(end.x, end.y),
+                                new Point2D.Float(center.x, center.y), tolerance);
                         if (end1 != null) {
                             g2.setColor(borderColor);
                             g2.draw(new Line2D.Float((float) end1.getX(), (float) end1.getY(), end.x, end.y));
                         }
+
                         g2.setFont(conditionFont);
                         g2.setColor(conditionFontColor);
-                        g2.drawString(condition, rectangle.x, rectangle.y + fm.getLeading() + fm.getAscent());
+                        g2.drawString(condition, rectangle.x + leading, rectangle.y + leading + fm.getAscent());
                     }
                     paintNode(ch, g2);
                 }
             }
         }
     }
+
+    private Vector2D getLineIntersectRectangle(Rectangle2D rectangle,
+                                               Point2D start, Point2D end, double tolerance) {
+        Line line = new Line(new Vector2D(start.getX(), start.getY()), new Vector2D(end.getX(), end.getY()), tolerance);
+        double leftTopX = rectangle.getX(), leftTopY = rectangle.getY();
+        double leftBottomX = rectangle.getX(), leftBottomY = rectangle.getY() + rectangle.getHeight();
+        double rightTopX = rectangle.getX() + rectangle.getWidth(), rightTopY = rectangle.getY();
+        double rightBottomX = rectangle.getX() + rectangle.getWidth(),
+                rightBottomY = rectangle.getY() + rectangle.getHeight();
+        double[][] lines = new double[4][4];
+        lines[0][0] = leftTopX;
+        lines[0][1] = leftTopY;
+        lines[0][2] = rightTopX;
+        lines[0][3] = rightTopY;
+
+        lines[1][0] = leftBottomX;
+        lines[1][1] = leftBottomY;
+        lines[1][2] = rightBottomX;
+        lines[1][3] = rightBottomY;
+
+        lines[2][0] = leftTopX;
+        lines[2][1] = leftTopY;
+        lines[2][2] = leftBottomX;
+        lines[2][3] = leftBottomY;
+
+        lines[3][0] = rightTopX;
+        lines[3][1] = rightTopY;
+        lines[3][2] = rightBottomX;
+        lines[3][3] = rightBottomY;
+        Line another = null;
+        for (int i = 0; i < 4; i++) {
+            if (Line2D.linesIntersect(lines[i][0], lines[i][1], lines[i][2], lines[i][3],
+                    start.getX(), start.getY(), end.getX(), end.getY())) {
+                another = new Line(new Vector2D(lines[i][0], lines[i][1]),
+                        new Vector2D(lines[i][2], lines[i][3]), tolerance);
+                break;
+            }
+        }
+        if (another != null) {
+            return line.intersection(another);
+        }
+        return null;
+    }
+
 
     @Override
     protected void doMyPaint(Graphics2D g2, int left, int top, double scale) {

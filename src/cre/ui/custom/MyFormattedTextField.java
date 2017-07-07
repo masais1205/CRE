@@ -4,7 +4,9 @@ import javax.swing.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.Format;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by 16502 on 2017/6/28.
@@ -12,7 +14,7 @@ import java.util.Iterator;
 public class MyFormattedTextField extends JFormattedTextField {
 
     private Object tag;
-    private WeakReferenceQueue<TextFieldChangeListener> listeners = new WeakReferenceQueue<>();
+    private List<TextFieldChangeListener> listeners = new ArrayList<>();
     private PropertyChangeListener doubleListener, intListener;
 
     /**

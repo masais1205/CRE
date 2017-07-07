@@ -16,6 +16,42 @@ public class CDT {
      */
     public Node rootYizhao;
 
+    /**
+     * Yizhao Han
+     */
+    private boolean doTest;
+
+    /**
+     * Yizhao Han
+     * Split data to several group.
+     * For each line, there will be a group ID.
+     */
+    private int[] lineGroup;
+
+    /**
+     * Yizhao Han
+     * The group ID used to do test.
+     */
+    private int testingGroupId;
+
+    /**
+     * Yizhao Han
+     * Data used to do test.
+     */
+    private List<int[]> testingData = new ArrayList<>();
+
+    /**
+     * Yizhao Han
+     * the real data for the testing set.
+     */
+    private List<String> realResult;
+
+    /**
+     * Yizhao Han
+     * the classifier result for the testing set.
+     */
+    private List<String> testResult;
+
     int numAttributes;              // The number of attributes including the output attribute
     String[] attributeNames;        // The names of all attributes.  It is an array of dimension numAttributes.  The last attribute is the output attribute
     private int atributoClase;
@@ -24,7 +60,7 @@ public class CDT {
             domains[0] is a vector containing the values of the 0-th attribute, etc..
             The last attribute is the output attribute
     */
-    Vector[] domains;
+    Vector<String>[] domains;
 
 
     String fileName;
@@ -88,7 +124,7 @@ public class CDT {
     */
     class TreeNode {
         public double entropy;                  // The entropy of data points if this node is a leaf node
-        public Vector data;                     // The set of data points if this is a leaf node
+        public Vector<DataPoint> data;                     // The set of data points if this is a leaf node
         public int[][] dataArray;
         public int decompositionAttribute;      // If this is not a leaf node, the attribute that is used to divide the set of data points
         public int decompositionValue;          // the attribute-value that is used to divide the parent node
@@ -97,7 +133,7 @@ public class CDT {
         public double PA;
 
         public TreeNode() {
-            data = new Vector();
+            data = new Vector<>();
         }
 
     }
@@ -894,9 +930,8 @@ public class CDT {
         System.out.println("The class attribute is: " + attributeNames[atributoClase]);
 
 
-        while (true) {
-            input = bin.readLine();
-            if (input == null) break;
+        int nowDataLineCount = 0;
+        while ((input = bin.readLine()) != null) {
             if (input.startsWith("//")) continue;
             if (input.equals("")) continue;
 
@@ -913,7 +948,12 @@ public class CDT {
             for (int i = 0; i < numAttributes; i++) {
                 point.attributes[i] = getSymbolValue(i, tokenizer.nextToken());
             }
-            root.data.addElement(point);
+            if (!doTest || lineGroup[nowDataLineCount] != testingGroupId) {
+                root.data.addElement(point);
+            } else {
+                testingData.add(point.attributes);
+            }
+            nowDataLineCount++;
         }
 
         bin.close();
@@ -950,7 +990,6 @@ public class CDT {
             rootYizhao = new Node(attributeNames[node.decompositionAttribute],
                     "ROOT", null);
             getTreeYizhao(node, rootYizhao);
-
         } catch (Exception e) {
             e.printStackTrace();
             canShowOutput.showOutputString(e.getMessage());
@@ -1075,7 +1114,7 @@ public class CDT {
 
     /*  This function creates the decision tree and prints it in the form of rules on the console
     */
-    public void createDecisionTree() {
+    public void createDecisionTree() throws Exception {
 
         long startTime = System.currentTimeMillis();
 
@@ -1093,7 +1132,11 @@ public class CDT {
         System.out.println();
         System.out.println("Run time: " + (endTime - startTime));
 
-        output2Treefile(root, "");
+        if (!doTest) {
+            output2Treefile(root, "");
+        } else {
+            validation(root);
+        }
 
 //            System.out.println("\n All leaf nodes are: ");
 //            unique();
@@ -1105,10 +1148,39 @@ public class CDT {
 //            }
     }
 
+    private void validation(TreeNode root) {
+        for (int[] line : testingData) {
+            realResult.add(domains[atributoClase].elementAt(line[atributoClase]));
+            testResult.add(getValidationForOneLine(root, line));
+        }
+    }
+
+    private String getValidationForOneLine(TreeNode node, int[] data) {
+        if (node.children == null) {
+            int value = getMostValues(node.data, atributoClase);
+            return domains[atributoClase].elementAt(value);
+        } else {
+            int nowDividerValue = data[node.decompositionAttribute];
+            if (node.children[0].decompositionValue == nowDividerValue) {
+                return getValidationForOneLine(node.children[0], data);
+            } else {
+                return getValidationForOneLine(node.children[1], data);
+            }
+        }
+    }
+
+
     private CanShowOutput canShowOutput;
 
-    public CDT(CDTConfig config, String fileNameWithoutExtension, CanShowOutput showArea) {
+    public CDT(CDTConfig config, String fileNameWithoutExtension, CanShowOutput showArea,
+               int[] lineGroup, int testGroupNumber,
+               List<String> realResult, List<String> testResult, boolean doTest) {
 
+        this.realResult = realResult;
+        this.testResult = testResult;
+        this.doTest = doTest;
+        this.lineGroup = lineGroup;
+        this.testingGroupId = testGroupNumber;
         this.canShowOutput = showArea;
         fileName = fileNameWithoutExtension;
         hmax = config.getHeight();
@@ -1132,8 +1204,6 @@ public class CDT {
         } catch (Exception e) {
             System.err.println("Unable to open data file: " + namebase + "\n" + e);
         }
-
-        createDecisionTree();
     }
 
 

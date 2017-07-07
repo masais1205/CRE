@@ -8,6 +8,7 @@ import java.awt.event.AWTEventListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.Dimension2D;
 import java.awt.geom.Point2D;
 import java.beans.EventHandler;
 

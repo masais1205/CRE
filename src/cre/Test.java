@@ -2,8 +2,15 @@ package cre;
 
 import com.sun.deploy.panel.TreeRenderers;
 import cre.view.tree.*;
+import org.apache.commons.math3.geometry.euclidean.twod.Line;
+import org.apache.commons.math3.geometry.euclidean.twod.PolygonsSet;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 
 import java.awt.*;
+import java.awt.geom.Area;
+import java.awt.geom.Line2D;
+import java.awt.geom.PathIterator;
+import java.awt.geom.Rectangle2D;
 import java.util.*;
 
 /**
@@ -20,35 +27,19 @@ public class Test {
 //            e.printStackTrace();
 //        }
         //System.out.println(new Integer("5sfesfsf"));
+        System.out.println(Line2D.linesIntersect(1, 1, 4, 1, 3, 0, 2, 0.5));
+        Line lineA = new Line(new Vector2D(1, 1), new Vector2D(2, 1));
+        Line lineB = new Line(new Vector2D(3, 0), new Vector2D(3, 1));
+        Area a = new Area(new Line2D.Float(-1, -1, 2, 1));
+        a.subtract(new Area(new Rectangle2D.Float(0, 1, 2, 1)));
+        PathIterator i = a.getPathIterator(null);
+        while (!i.isDone()) {
+            double[] d = new double[6];
+            System.out.print(i.currentSegment(d));
+            System.out.println(Arrays.toString(d));
+            i.next();
+        }
+        System.out.println(lineA.intersection(lineB));
 
-        Font font = new Font("Serif", Font.PLAIN, 12);
-
-        Node G = new Node("G", "FSEFESf,sfseFE,sfsefes,", null);
-        Node H = new Node("H", null, null);
-        Node E = new Node("E", null, null);
-        Node A = new Node("A", null, null);
-        Node F = new Node("F", null, null);
-        Node C = new Node("C", null, null);
-        Node D = new Node("D", null, null);
-        Node B = new Node("B", null, null);
-        G.parent = E;
-        H.parent = E;
-        E.children.add(new Children(G, ""));
-        E.children.add(new Children(H, ""));
-        E.parent = C;
-        F.parent = C;
-        C.children.add(new Children(E, ""));
-        C.children.add(new Children(F, ""));
-        C.parent = A;
-        B.parent = A;
-        D.parent = B;
-        A.children.add(new Children(B, ""));
-        A.children.add(new Children(C, ""));
-        B.children.add(new Children(D, ""));
-        TreeRefresher.refreshTree(A, new TreeConfig(font, font, 100,
-                new Margin(10, 10, 10, 10),
-                new Margin(20, 20, 20, 20), 50, 50));
-
-        System.out.println();
     }
 }
