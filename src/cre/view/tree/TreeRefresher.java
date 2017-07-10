@@ -120,7 +120,7 @@ public class TreeRefresher {
             }
             temp.node.selfX += space;
             for (Children i : temp.node.children) {
-                queue.offer(new T(i.getValue(), nowDepth + 1));
+                queue.offer(new T(i.getValue(), temp.level + 1));
             }
         }
         return maxDepth;
@@ -154,7 +154,7 @@ public class TreeRefresher {
                     realMove = -moveNow;
                 }
                 if (realMove != 0) {
-                    int maxDepth = moveTreeHorizontal(node, brotherSpace - brotherSpaceNow, nowDepth);
+                    int maxDepth = moveTreeHorizontal(node, realMove, nowDepth);
                     for (int i = nowDepth; i <= maxDepth; i++) {
                         maxRightNow[i] += realMove;
                     }

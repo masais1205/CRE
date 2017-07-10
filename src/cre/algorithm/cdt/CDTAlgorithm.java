@@ -4,16 +4,13 @@ import cre.algorithm.*;
 import cre.algorithm.Validation.StratifiedSampleHelper;
 import cre.Config.OtherConfig;
 import cre.view.ResizablePanel;
-import cre.view.tree.Node;
 import cre.view.tree.TreePanel;
 
-import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -23,7 +20,7 @@ import java.util.List;
 public class CDTAlgorithm extends AbstractAlgorithm {
 
     public CDTConfig config;
-    public Boolean shouldStop = false;
+    private boolean shouldStop = false;
 
     public CDTAlgorithm(File filePath, CDTConfig oldConfig) {
         super(filePath);
@@ -70,18 +67,13 @@ public class CDTAlgorithm extends AbstractAlgorithm {
 
     @Override
     public AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile) {
-        CDTAlgorithm a = new CDTAlgorithm(newFile, this.config);
-        return a;
+        return new CDTAlgorithm(newFile, this.config);
     }
 
     @Override
     public List<ResizablePanel> doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus, OtherConfig otherConfig) {
-        shouldStop = false;
+        setShouldStop(false);
         String fileName = filePath.getAbsolutePath();
-        if (fileName.toLowerCase().endsWith(".csv")) {
-            fileName = fileName.substring(0, fileName.length() - 4);
-        }
-
         String[] attributes = null;
         int instancesCount = 0;
         canShowOutput.showOutputString("Scheme: " + config.toString());
@@ -114,6 +106,7 @@ public class CDTAlgorithm extends AbstractAlgorithm {
 
         canShowOutput.showOutputString("==== full training set ===");
 
+        canShowStatus.showStatus("Building...");
         CDT nCDT = new CDT(config, fileName, canShowOutput, null,
                 -1, null, null, false);
         try {
@@ -124,7 +117,9 @@ public class CDTAlgorithm extends AbstractAlgorithm {
         }
         List<ResizablePanel> result = new ArrayList<>();
         try {
-            result.add(new TreePanel(nCDT.rootYizhao));
+            if (nCDT.rootYizhao != null) {
+                result.add(new TreePanel(nCDT.rootYizhao));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -142,15 +137,21 @@ public class CDTAlgorithm extends AbstractAlgorithm {
                             new StratifiedSampleHelper(filePath.getAbsolutePath(),
                                     ",", attributes.length - 1, true, folds, attributes.length, canShowOutput);
                     statistics = new ArrayList<>();
+                    outer:
                     for (int i = 0; i < repeat; i++) {
                         List<String> real = new ArrayList<>();
                         List<String> test = new ArrayList<>();
                         int[] group = helper.nextLines();
                         for (int l = 0; l < folds; l++) {
+                            if (isShouldStop()) {
+                                statistics = null;
+                                break outer;
+                            }
+                            canShowStatus.showStatus("times: " + (i + 1) + " fold: " + (l + 1));
                             CDT tempCDT = new CDT(config, fileName, canShowOutput, group,
                                     l, real, test, true);
                             try {
-                                nCDT.createDecisionTree();
+                                tempCDT.createDecisionTree();
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 return null;
@@ -177,6 +178,11 @@ public class CDTAlgorithm extends AbstractAlgorithm {
                                     ",", attributes.length - 1, false, (double) testing / 100, attributes.length, canShowOutput);
                     statistics = new ArrayList<>();
                     for (int i = 0; i < repeat; i++) {
+                        if (isShouldStop()) {
+                            statistics = null;
+                            break;
+                        }
+                        canShowStatus.showStatus("times: " + (i + 1));
                         List<String> real = new ArrayList<>();
                         List<String> test = new ArrayList<>();
 
@@ -184,7 +190,7 @@ public class CDTAlgorithm extends AbstractAlgorithm {
                         CDT tempCDT = new CDT(config, fileName, canShowOutput, group,
                                 0, real, test, true);
                         try {
-                            nCDT.createDecisionTree();
+                            tempCDT.createDecisionTree();
                         } catch (Exception e) {
                             e.printStackTrace();
                             return null;
@@ -208,8 +214,16 @@ public class CDTAlgorithm extends AbstractAlgorithm {
         return result;
     }
 
+    private synchronized void setShouldStop(boolean shouldStop) {
+        this.shouldStop = shouldStop;
+    }
+
+    public synchronized boolean isShouldStop() {
+        return shouldStop;
+    }
+
     @Override
-    public void setShouldStop() {
+    public synchronized void setShouldStop() {
         shouldStop = true;
     }
 

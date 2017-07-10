@@ -195,6 +195,12 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
                 startButtonClicked();
             }
         });
+        stopButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                stopButtonClicked();
+            }
+        });
         rightPanel.setBorder(new TitledBorder("Output"));
         rightPanel.addTab("Text", new JScrollPane(textArea));
         textArea.setEditable(false);
@@ -208,6 +214,14 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
             }
         });
 
+    }
+
+    private void stopButtonClicked() {
+        stopButton.setEnabled(false);
+        if (calculatingAlgorithm != null) {
+            mainFrame.getCanShowStatus().showStatus("Stopping...");
+            calculatingAlgorithm.setShouldStop();
+        }
     }
 
     public void setAlgorithm(AbstractAlgorithm algorithm) {
@@ -295,6 +309,7 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
         runningThread = null;
+        calculatingAlgorithm = null;
     }
 
     /**
@@ -305,7 +320,6 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
             JOptionPane.showMessageDialog(mainFrame.getFrame(),
                     "algorithm is null.");
         } else {
-            final AbstractAlgorithm calculatingAlgorithm;
             final OtherConfig nowOtherConfig;
             try {
                 calculatingAlgorithm = (AbstractAlgorithm) algorithm.clone();
@@ -379,6 +393,8 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
      * which is not related to the running.
      */
     private AbstractAlgorithm algorithm;
+
+    private AbstractAlgorithm calculatingAlgorithm;
 
     private JSplitPane leftPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     private JTabbedPane rightPanel = new JTabbedPane();
