@@ -8,7 +8,7 @@ import java.util.*;
 /**
  * Created by HanYizhao on 2017/4/24.
  */
-public class TestConfig implements Cloneable {
+public class TestConfig extends TestConfigBase implements Cloneable {
     private double ZC;
     private double oddsRatio;
     private int mergeDepth;
@@ -18,7 +18,7 @@ public class TestConfig implements Cloneable {
     private String[] attributeClasses = {"W", "X", "Y", "remove"};
 
     @Override
-    protected Object clone() {
+    public Object clone() {
         TestConfig c = null;
         try {
             c = (TestConfig) super.clone();
@@ -54,6 +54,13 @@ public class TestConfig implements Cloneable {
     }
 
     public TestConfig(String fileName) {
+        this.setZC(1.96);
+        this.setOddsRatio(2);
+        this.setMergeDepth(1);
+        super.fileName = fileName;
+    }
+
+    public void init() throws Exception {
         BufferedReader br = null;
         try {
             br = new BufferedReader(new FileReader(fileName));
@@ -73,9 +80,11 @@ public class TestConfig implements Cloneable {
                 type.put(attributeClasses[1], t);
                 t = new ArrayList<>();
                 type.put(attributeClasses[3], t);
+            } else {
+                throw new Exception("The count of attributes less than tree.");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw e;
         } finally {
             if (br != null) {
                 try {

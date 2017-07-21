@@ -38,10 +38,12 @@ public class TestAlgorithm extends AbstractAlgorithm {
 
     public TestAlgorithm(File filePath) {
         super(filePath);
+    }
+
+    @Override
+    public void init() throws Exception {
         config = new TestConfig(filePath.getAbsolutePath());
-        config.setZC(1.96);
-        config.setOddsRatio(2);
-        config.setMergeDepth(1);
+        config.init();
     }
 
     @Override
@@ -60,8 +62,9 @@ public class TestAlgorithm extends AbstractAlgorithm {
     }
 
     @Override
-    public AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile) {
+    public AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile) throws Exception {
         TestAlgorithm a = new TestAlgorithm(newFile);
+        a.init();
         a.config.setZC(this.config.getZC());
         a.config.setMergeDepth(this.config.getMergeDepth());
         a.config.setOddsRatio(this.config.getOddsRatio());

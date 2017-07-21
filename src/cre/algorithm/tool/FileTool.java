@@ -4,6 +4,7 @@ import cre.algorithm.CalculatingException;
 import cre.algorithm.CanShowOutput;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -86,5 +87,28 @@ public class FileTool {
         }
         return null;
 
+    }
+
+    public static List<String> getFileContent(File file) {
+        List<String> result = new ArrayList<>();
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(file));
+            String temp;
+            while ((temp = br.readLine()) != null) {
+                result.add(temp);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
     }
 }

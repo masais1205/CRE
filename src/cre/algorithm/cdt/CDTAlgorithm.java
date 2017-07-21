@@ -37,6 +37,7 @@ public class CDTAlgorithm extends AbstractAlgorithm {
         this(filePath, null);
     }
 
+
     @Override
     public String getName() {
         return "CDT";
@@ -51,13 +52,6 @@ public class CDTAlgorithm extends AbstractAlgorithm {
                 "Class for generating a causal decision tree. For more information, see\n" +
                 "\n" +
                 "J. Li, S. Ma, T. Le, L. Liu, J. Liu (2015). CDT: Programs for Causal Decision Tree (Coded by S. Ma). .\n";
-    }
-
-    @Override
-    public Collection<String> getSupportLowerFileExtension() {
-        Collection<String> s = super.getSupportLowerFileExtension();
-        s.add("csv");
-        return s;
     }
 
     @Override
@@ -147,7 +141,7 @@ public class CDTAlgorithm extends AbstractAlgorithm {
                                 statistics = null;
                                 break outer;
                             }
-                            canShowStatus.showStatus("times: " + (i + 1) + " fold: " + (l + 1));
+                            canShowStatus.showStatus("times: " + (i + 1) + "; fold: " + (l + 1));
                             CDT tempCDT = new CDT(config, fileName, canShowOutput, group,
                                     l, real, test, true);
                             try {

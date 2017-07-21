@@ -1,17 +1,9 @@
 package cre;
 
-import com.sun.deploy.panel.TreeRenderers;
-import cre.view.tree.*;
-import org.apache.commons.math3.geometry.euclidean.twod.Line;
-import org.apache.commons.math3.geometry.euclidean.twod.PolygonsSet;
-import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
+import cre.algorithm.crcs.CRCSConfig;
 
-import java.awt.*;
-import java.awt.geom.Area;
-import java.awt.geom.Line2D;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Rectangle2D;
-import java.util.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * Created by HanYizhao on 2017/4/6.
@@ -27,15 +19,16 @@ public class Test {
 //            e.printStackTrace();
 //        }
         //System.out.println(new Integer("5sfesfsf"));
-        outer:
-        for (int i = 0; i < 10; i++) {
-            System.out.println("i:" + i);
-            for (int l = 0; l < 10; l++) {
-                if (l == 1 && i == 1) {
-                    break outer;
-                }
-            }
-            System.out.println("i:" + i);
+
+        try {
+            CRCSConfig crcsConfig = new CRCSConfig(new File("C:/fffsfsesfs"));
+            crcsConfig.init();
+        } catch (FileNotFoundException e) {
+            System.out.println("in");
+            e.printStackTrace();
+        } catch (Exception e){
+            System.out.println("22n");
+            e.printStackTrace();
         }
 
     }

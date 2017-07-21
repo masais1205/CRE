@@ -306,7 +306,7 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
      * Called when the calculation is finished.
      */
     private void calculatingFinished() {
-        startButton.setEnabled(true);
+        startButton.setEnabled(canStart);
         stopButton.setEnabled(false);
         runningThread = null;
         calculatingAlgorithm = null;
@@ -358,7 +358,7 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
                     }
                     final List<ResizablePanel> panels = panelss;
                     long endTime = System.nanoTime();
-                    AlgorithmPanel.this.showOutputString("All Time:" + (endTime - startTime) + "ns");
+                    AlgorithmPanel.this.showOutputString("All Time:" + String.format("%.6f", (double) (endTime - startTime) / 1000000000) + "s");
                     canShowStatus.showStatus("OK");
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
@@ -373,6 +373,13 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
             });
             runningThread = thread;
             thread.start();
+        }
+    }
+
+    public void setCanStart(boolean canStart) {
+        this.canStart = canStart;
+        if (runningThread == null) {
+            startButton.setEnabled(canStart);
         }
     }
 
@@ -393,6 +400,11 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
      * which is not related to the running.
      */
     private AbstractAlgorithm algorithm;
+
+    /**
+     * For some reason, algorithm can not start. For example, algorithm init failed.
+     */
+    private boolean canStart = true;
 
     private AbstractAlgorithm calculatingAlgorithm;
 

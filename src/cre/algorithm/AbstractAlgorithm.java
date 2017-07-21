@@ -20,17 +20,16 @@ public abstract class AbstractAlgorithm implements Cloneable {
         this.filePath = filePath;
     }
 
+    public void init() throws Exception {
+    }
+
     public abstract String getName();
 
     public abstract String getIntroduction();
 
-    public Collection<String> getSupportLowerFileExtension() {
-        return new ArrayList<>();
-    }
-
     public abstract Cloneable getConfiguration();
 
-    public abstract AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile);
+    public abstract AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile) throws Exception;
 
     public abstract List<ResizablePanel> doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus, OtherConfig otherConfig);
 

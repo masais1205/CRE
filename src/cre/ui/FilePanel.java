@@ -53,8 +53,10 @@ public class FilePanel extends JPanel {
     private JButton openFileButton = new JButton("Open file...");
     private JTextField fileTextField = new JTextField(17);
 
-    private void openFileButtonActionPerformed() {
-        JFileChooser fileChooser = new JFileChooser();
+    private static JFileChooser fileChooser;
+
+    static {
+        fileChooser = new JFileChooser();
         fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
         fileChooser.setMultiSelectionEnabled(false);
         FileNameExtensionFilter filter1 = new FileNameExtensionFilter("CSV data file (*.csv)", "csv");
@@ -62,6 +64,9 @@ public class FilePanel extends JPanel {
         fileChooser.addChoosableFileFilter(filter1);
         fileChooser.addChoosableFileFilter(filter2);
         fileChooser.setAcceptAllFileFilterUsed(false);
+    }
+
+    private void openFileButtonActionPerformed() {
         int ch = fileChooser.showDialog(this, null);
         if (ch == JFileChooser.APPROVE_OPTION) {
             File f = fileChooser.getSelectedFile();

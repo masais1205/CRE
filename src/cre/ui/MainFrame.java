@@ -1,9 +1,10 @@
 package cre.ui;
 
 import cre.algorithm.AbstractAlgorithm;
-import cre.algorithm.CanShowOutput;
+import cre.algorithm.crcs.CRCSAlgorithm;
 import cre.algorithm.CanShowStatus;
 import cre.algorithm.cdt.CDTAlgorithm;
+import cre.algorithm.crpa.CRPAAlgorithm;
 import cre.algorithm.test.TestAlgorithm;
 
 import javax.swing.*;
@@ -11,6 +12,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by HanYizhao on 4/13/2017.
@@ -26,7 +30,7 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
             @Override
             public void windowClosing(WindowEvent e) {
                 int inThreadCount = 0;
-                for (AlgorithmPanel i : abstractAlgorithmList) {
+                for (AlgorithmPanel i : abstractAlgorithmList.values()) {
                     if (!i.canCloseSafely()) {
                         inThreadCount++;
                     }
@@ -39,7 +43,7 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
                                     + " still running. Do you want to stop forcedly?",
                             "Confirm", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
                     if (a == JOptionPane.OK_OPTION) {
-                        for (AlgorithmPanel i : abstractAlgorithmList) {
+                        for (AlgorithmPanel i : abstractAlgorithmList.values()) {
                             if (!i.canCloseSafely()) {
                                 i.doForceClose();
                             }
@@ -73,15 +77,14 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
     private JLabel statusLabel = new JLabel();
     JTabbedPane tabbedPane = new JTabbedPane();
 
-    private final String[] algorithmNames = {"CDT", "Test"};
-
-    private boolean isFirstTime = true;
+    private final String[] algorithmNames = {"CDT", "Test", "CR-CS", "CR-PA"};
 
     @Override
     public void selectANewFile(File file) {
-        if (isFirstTime) {
-            isFirstTime = false;
-            for (int i = 0; i < algorithmNames.length; i++) {
+        ArrayList<String> notFitALgorithm = new ArrayList<>();
+        for (int i = 0; i < algorithmNames.length; i++) {
+            AlgorithmPanel panel = abstractAlgorithmList.get(i);
+            if (panel == null) {
                 AbstractAlgorithm abstractAlgorithm = null;
                 switch (i) {
                     case 0:
@@ -90,18 +93,39 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
                     case 1:
                         abstractAlgorithm = new TestAlgorithm(file);
                         break;
+                    case 2:
+                        abstractAlgorithm = new CRCSAlgorithm(file);
+                        break;
+                    case 3:
+                        abstractAlgorithm = new CRPAAlgorithm(file);
+                        break;
                 }
-                AlgorithmPanel algorithmPanel = new AlgorithmPanel(this,
-                        abstractAlgorithm);
-                abstractAlgorithmList.add(algorithmPanel);
-                tabbedPane.setComponentAt(i + 1,
-                        algorithmPanel);
-                tabbedPane.setEnabledAt(i + 1, true);
+                try {
+                    abstractAlgorithm.init();
+                    AlgorithmPanel algorithmPanel = new AlgorithmPanel(this,
+                            abstractAlgorithm);
+                    abstractAlgorithmList.put(i, algorithmPanel);
+                    tabbedPane.setComponentAt(i + 1,
+                            algorithmPanel);
+                    tabbedPane.setEnabledAt(i + 1, true);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                    notFitALgorithm.add(algorithmNames[i]);
+                }
+            } else {
+                try {
+                    panel.setAlgorithm(panel.getAlgorithm().getCloneBecauseChangeOfFile(file));
+                    panel.setCanStart(true);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                    panel.setCanStart(false);
+                    notFitALgorithm.add(algorithmNames[i]);
+                }
             }
-        } else {
-            for (AlgorithmPanel i : abstractAlgorithmList) {
-                i.setAlgorithm(i.getAlgorithm().getCloneBecauseChangeOfFile(file));
-            }
+        }
+        if (notFitALgorithm.size() > 0) {
+            showStatus(notFitALgorithm.size() + " algorithm" + (notFitALgorithm.size() == 1 ? "" : "s")
+                    + " can not handle this file. " + Arrays.toString(notFitALgorithm.toArray()));
         }
     }
 
@@ -126,6 +150,6 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
         });
     }
 
-    private ArrayList<AlgorithmPanel> abstractAlgorithmList = new ArrayList<>();
+    private Map<Integer, AlgorithmPanel> abstractAlgorithmList = new HashMap<>();
 }
 
