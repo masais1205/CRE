@@ -2,8 +2,7 @@ package cre;
 
 import cre.algorithm.crcs.CRCSConfig;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 
 /**
  * Created by HanYizhao on 2017/4/6.
@@ -20,16 +19,6 @@ public class Test {
 //        }
         //System.out.println(new Integer("5sfesfsf"));
 
-        try {
-            CRCSConfig crcsConfig = new CRCSConfig(new File("C:/fffsfsesfs"));
-            crcsConfig.init();
-        } catch (FileNotFoundException e) {
-            System.out.println("in");
-            e.printStackTrace();
-        } catch (Exception e){
-            System.out.println("22n");
-            e.printStackTrace();
-        }
 
     }
 }

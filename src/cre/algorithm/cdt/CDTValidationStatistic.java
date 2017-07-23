@@ -7,6 +7,7 @@ import java.util.List;
 
 /**
  * Created by HanYizhao on 2017/7/6.
+ * <p>This class is used to do validation. Store some variables returned from validation.</p>
  */
 public class CDTValidationStatistic {
     public int correctCount;

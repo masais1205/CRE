@@ -16,6 +16,7 @@ import java.util.List;
 
 /**
  * Created by HanYizhao on 2017/4/7.
+ * <p>There are more instructions in {@link AbstractAlgorithm}</p>
  */
 public class CDTAlgorithm extends AbstractAlgorithm {
 

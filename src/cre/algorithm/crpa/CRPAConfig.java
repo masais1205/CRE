@@ -12,6 +12,7 @@ import java.util.TreeMap;
 
 /**
  * Created by HanYizhao on 2017/7/19.
+ * <p>The configuration file of CRPA algorithm</p>
  */
 public class CRPAConfig extends CRPAConfigBase {
     public class P {
@@ -65,10 +66,10 @@ public class CRPAConfig extends CRPAConfigBase {
         for (int i = 0; i < attributeNames.length; i++) {
             l1.add(i);
         }
-        type.put(attributeClasses[0], l1);
+        type.put(attributeClasses[0], new ArrayList<Integer>());
         type.put(attributeClasses[1], new ArrayList<Integer>());
         type.put(attributeClasses[2], new ArrayList<Integer>());
-        type.put(attributeClasses[3], new ArrayList<Integer>());
+        type.put(attributeClasses[3], l1);
     }
 
     public String[] getPaValueList() {
@@ -288,6 +289,15 @@ public class CRPAConfig extends CRPAConfigBase {
 
     public void setPaValue(String paValue) {
         this.paValue = paValue;
+    }
+
+    @Override
+    public String toString() {
+        return "max Rules=" + maxRules +
+                ", oddsRatioOrChiSquare=" + oddsRatioOrChiSquare +
+                ", minSupport=" + minSupport +
+                ", paValue=" + paValue +
+                ", recommend=" + recommend;
     }
 
 }

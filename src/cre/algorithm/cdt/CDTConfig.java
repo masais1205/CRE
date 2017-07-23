@@ -2,6 +2,8 @@ package cre.algorithm.cdt;
 
 /**
  * Created by HanYizhao on 2017/4/7.
+ * <p>The configuration class of CDT algorithm.</p>
+ *
  */
 public class CDTConfig implements Cloneable {
     private int height;

@@ -7,6 +7,8 @@ import java.util.List;
 
 /**
  * Created by HanYizhao on 2017/7/14.
+ * <p>This class is the background class of {@link CRCSConfig}.</p>
+ * <p>Store some options and some parameters which can not be modified by user.</p>
  */
 public class CRCSConfigBase implements Cloneable {
 

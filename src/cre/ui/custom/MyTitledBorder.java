@@ -19,6 +19,7 @@ import java.net.URL;
 
 /**
  * Created by HanYizhao on 2017/6/27.
+ * <p>This TitleBorder will show a image on right of the title.</p>
  */
 public class MyTitledBorder extends TitledBorder implements MouseListener, MouseMotionListener {
 
@@ -33,12 +34,14 @@ public class MyTitledBorder extends TitledBorder implements MouseListener, Mouse
     private boolean nowMouseIsIn = false;
 
     /**
-     * Yizhao Han Add.
+     * If call this function, there will be a image right of the title.
      *
-     * @param image
-     * @param toolTip
-     * @param clickMessage
-     * @return
+     * @param image        the image
+     * @param activeImage  the image when mouse is in.
+     * @param toolTip      The message when mouse is in.
+     * @param clickTitle   The title of shown dialog when user clicks image.
+     * @param clickMessage The content of shown dialog when user clicks image.
+     * @return this
      */
     public MyTitledBorder setOtherInfo(URL image, URL activeImage, String toolTip, String clickTitle, Document clickMessage) {
         this.image = image;

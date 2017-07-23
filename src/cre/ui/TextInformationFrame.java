@@ -14,7 +14,7 @@ import java.net.URL;
 public class TextInformationFrame extends JFrame {
     public TextInformationFrame(String title, Document document) {
         this.setTitle(title);
-        this.setSize(Tool.HighResolution(400), Tool.HighResolution(600));
+        this.setSize(Tool.HighResolution(600), Tool.HighResolution(400));
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         JTextPane textPane = new JTextPane();
         JScrollPane scrollPane = new JScrollPane(textPane);

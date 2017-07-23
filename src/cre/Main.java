@@ -1,4 +1,7 @@
-package cre.ui;
+package cre;
+
+import cre.ui.MainFrame;
+import cre.ui.Tool;
 
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;

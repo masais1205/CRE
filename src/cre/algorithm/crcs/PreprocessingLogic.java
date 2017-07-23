@@ -96,6 +96,7 @@ public class PreprocessingLogic {
 
     /**
      * Yizhao Han
+     * <p>Another implement of {@linkplain #readData()}</p>
      * <p>
      * Only read .names file to get attributes.
      *
@@ -133,6 +134,14 @@ public class PreprocessingLogic {
         rc.specialStatus = specialStatus;
     }
 
+    /**
+     * Yizhao Han
+     * <p>Another implement of {@linkplain #loadData(String)}.</p>
+     *
+     * @param nameFileContent The content of "*.name" file.
+     * @param dataFile        The file whose extension is "data".
+     * @throws Exception may throw exception
+     */
     public void loadData(String nameFileContent, File dataFile) throws Exception {
         String f = dataFile.getAbsolutePath();
         f = f.substring(0, f.length() - 5);

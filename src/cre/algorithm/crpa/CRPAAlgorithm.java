@@ -12,6 +12,7 @@ import java.util.List;
 
 /**
  * Created by HanYizhao on 2017/7/14.
+ * <p>There are more instructions in {@link AbstractAlgorithm}</p>
  */
 public class CRPAAlgorithm extends AbstractAlgorithm {
 

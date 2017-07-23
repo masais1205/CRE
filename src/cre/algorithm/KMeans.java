@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 /**
+ * This class is copied from internet.
  * K均值聚类算法
  */
 public class KMeans {

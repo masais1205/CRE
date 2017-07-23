@@ -17,6 +17,7 @@ import java.util.TreeMap;
 
 /**
  * Created by HanYizhao on 2017/4/24.
+ * <p>There are more instructions in {@link AbstractAlgorithm}</p>
  */
 public class TestAlgorithm extends AbstractAlgorithm {
 

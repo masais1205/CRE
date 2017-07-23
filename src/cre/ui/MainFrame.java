@@ -1,5 +1,6 @@
 package cre.ui;
 
+import cre.MyStringOutputStream;
 import cre.algorithm.AbstractAlgorithm;
 import cre.algorithm.crcs.CRCSAlgorithm;
 import cre.algorithm.CanShowStatus;
@@ -8,9 +9,11 @@ import cre.algorithm.crpa.CRPAAlgorithm;
 import cre.algorithm.test.TestAlgorithm;
 
 import javax.swing.*;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,6 +28,8 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
         this.setSize(Tool.HighResolution(800), Tool.HighResolution(600));
         this.setTitle("Causal Rule Explorer");
         this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+        int two = Tool.HighResolution(2);
 
         this.addWindowListener(new WindowAdapter() {
             @Override
@@ -65,16 +70,38 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
             tabbedPane.addTab(algorithmNames[i], new JPanel());
             tabbedPane.setEnabledAt(i + 1, false);
         }
-        root.add(toolBar, BorderLayout.SOUTH);
-        toolBar.add(new JLabel("Status: "));
-        toolBar.add(statusLabel);
+        JPanel southPanel = new JPanel();
+        southPanel.setLayout(new GridBagLayout());
+        GridBagConstraints s = new GridBagConstraints();
+        root.add(southPanel, BorderLayout.SOUTH);
+        s.gridwidth = 1;
+        s.anchor = GridBagConstraints.WEST;
+        s.insets.set(two, two, two, two);
+        southPanel.add(new JLabel("Status: "), s);
+        s.weightx = 1;
+        southPanel.add(statusLabel, s);
+        s.weightx = 0;
+        s.gridwidth = GridBagConstraints.REMAINDER;
+        JButton logButton = new JButton("Log");
+        logButton.setMargin(new Insets(0, two, 0, two));
+        southPanel.add(logButton, s);
         Tool.moveToCenter(this);
-
+        System.out.println("Reassigns the \"standard\" input stream.");
+        System.setOut(new PrintStream(outPutBuffer, true));
+        System.err.println("Reassigns the \"standard\" error output stream.");
+        System.setErr(new PrintStream(outPutBuffer, true));
+        logButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                LogFrame lf = new LogFrame("Log", outPutBuffer);
+                lf.setVisible(true);
+            }
+        });
     }
 
     private FilePanel filePanel = new FilePanel(this);
-    private JToolBar toolBar = new JToolBar();
     private JLabel statusLabel = new JLabel();
+    private MyStringOutputStream outPutBuffer = new MyStringOutputStream();
     JTabbedPane tabbedPane = new JTabbedPane();
 
     private final String[] algorithmNames = {"CDT", "Test", "CR-CS", "CR-PA"};

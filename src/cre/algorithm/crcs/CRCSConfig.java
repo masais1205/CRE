@@ -11,6 +11,7 @@ import java.util.TreeMap;
 
 /**
  * Created by HanYizhao on 2017/7/14.
+ * <p>The configuration class of CRCS algorithm.</p>
  */
 public class CRCSConfig extends CRCSConfigBase implements Cloneable {
 
@@ -64,10 +65,10 @@ public class CRCSConfig extends CRCSConfigBase implements Cloneable {
         for (int i = 0; i < attributeNames.length; i++) {
             l1.add(i);
         }
-        type.put(attributeClasses[0], l1);
+        type.put(attributeClasses[0], new ArrayList<Integer>());
         type.put(attributeClasses[1], new ArrayList<Integer>());
         type.put(attributeClasses[2], new ArrayList<Integer>());
-        type.put(attributeClasses[3], new ArrayList<Integer>());
+        type.put(attributeClasses[3], l1);
     }
 
     public String[] getRecommendList() {
@@ -257,5 +258,13 @@ public class CRCSConfig extends CRCSConfigBase implements Cloneable {
 
     public String getRecommend() {
         return recommend;
+    }
+
+    @Override
+    public String toString() {
+        return "max Rules=" + maxRules +
+                ", oddsRatioOrChiSquare=" + oddsRatioOrChiSquare +
+                ", minSupport=" + minSupport +
+                ", recommend=" + recommend;
     }
 }

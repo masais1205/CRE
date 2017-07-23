@@ -5,6 +5,8 @@ import cre.ConfigSetter;
 import cre.algorithm.AbstractAlgorithm;
 import cre.algorithm.CanShowOutput;
 import cre.algorithm.CanShowStatus;
+import cre.algorithm.crcs.CRCSAlgorithm;
+import cre.algorithm.crpa.CRPAAlgorithm;
 import cre.ui.custom.MyFormattedTextField;
 import cre.ui.custom.MyTitledBorder;
 import cre.view.ResizablePanel;
@@ -213,6 +215,10 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
                 }
             }
         });
+
+        if (algorithm instanceof CRPAAlgorithm || algorithm instanceof CRCSAlgorithm) {
+            testOptionPanel.setVisible(false);
+        }
 
     }
 

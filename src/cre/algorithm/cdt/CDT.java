@@ -13,11 +13,15 @@ import java.util.List;
 
 /**
  * Created by HanYizhao on 2017/7/7.
+ * <p>
+ * This class is created by Yizhao Han and Saisai Ma.
+ * This class is the same as the version in Weka.
  */
 public class CDT {
 
     /**
      * Yizhao Han
+     * <p>
      * This attribute is used to store the treeview.
      */
     public Node rootYizhao;
@@ -29,6 +33,7 @@ public class CDT {
 
     /**
      * Yizhao Han
+     * <p>
      * Split data to several group.
      * For each line, there will be a group ID.
      */
@@ -36,12 +41,14 @@ public class CDT {
 
     /**
      * Yizhao Han
+     * <p>
      * The group ID used to do test.
      */
     private int testingGroupId;
 
     /**
      * Yizhao Han
+     * <p>
      * Data used to do test.
      */
     private List<int[]> testingData = new ArrayList<>();
@@ -84,6 +91,20 @@ public class CDT {
 
     private TreeNode root;
 
+    /**
+     * Constructor of CDT.
+     *
+     * @param config          Basic config of this algorithm
+     * @param fileName        The path of CSV file
+     * @param showArea        Use this parameter to show output.
+     * @param lineGroup       May be null. If want to do validation, this parameter is used to split the lines in CSV file.
+     * @param testGroupNumber May be useless. If want to do validation, this parameter indicates which group is test group.
+     * @param realResult      May be null. If want to do validation,
+     *                        this parameter should be clear and will be used to store real-world result later.
+     * @param testResult      May be null. If want to do validation,
+     *                        this parameter should be clear and will be used to store test result later.
+     * @param doTest          whether do validation.If true, do validation. If false, just show output.
+     */
     public CDT(CDTConfig config, String fileName, CanShowOutput showArea,
                int[] lineGroup, int testGroupNumber,
                List<String> realResult, List<String> testResult, boolean doTest) {
@@ -105,6 +126,11 @@ public class CDT {
         }
     }
 
+    /**
+     * Build tree. May output the tree or do validation.
+     *
+     * @throws Exception may throw exception
+     */
     public void createDecisionTree() throws Exception {
         root = new TreeNode();
         makeTree(instanceData, 0, root);
