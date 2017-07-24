@@ -23,6 +23,15 @@ import java.util.Date;
 
 /**
  * Created by HanYizhao on 2017/6/8.
+ * <p>
+ * ResizablePanel is a kind of panel which can draw itself when size is modified by {@linkplain ResizableScrollPane}.
+ * <p>
+ * To implement a ResizablePanel, you need to implement
+ * {@linkplain #getOriginalWidth()}, {@linkplain #getOriginalHeight()}
+ * and {@linkplain #doMyPaint(Graphics2D, int, int, double)}
+ * <p>
+ * Because we are drawing vector diagram, the measurement unit of {@link #getOriginalWidth()} or {@link #getOriginalHeight()} is relative, just a number.
+ * When user scroll the panel, this panel will repaint. So in order to reduce repainting, we use {@link #bufferedImage} as a buffer.
  */
 public abstract class ResizablePanel extends JPanel {
 
@@ -44,9 +53,23 @@ public abstract class ResizablePanel extends JPanel {
         fileChooser.setAcceptAllFileFilterUsed(false);
     }
 
+    /**
+     * buffer
+     */
     protected BufferedImage bufferedImage;
+    /**
+     * We can attach some information by using this field.
+     */
     private Object tag;
+    /**
+     * The drawing area is not the same as this panel. The drawing area is smaller.
+     * So, these fields indicate where the drawing area is.
+     */
     protected int top, left;
+    /**
+     * Because the measurement unit of original is relative, we use this field to know how big the real image is.
+     * The pixel height of image is scale * {@link #getOriginalHeight()}. The pixel width of image is scale * {@link #getOriginalWidth()}.
+     */
     protected double scale;
 
     public Object getTag() {
@@ -57,6 +80,16 @@ public abstract class ResizablePanel extends JPanel {
         this.tag = tag;
     }
 
+    /**
+     * Get the relative location of one point.
+     * This function and {@link #getShowPointFromTruePosition(Point2D.Double)}
+     * are now used together to make sure that the focus points are the same point when user resize the panel.
+     * <p>
+     * It is good if you do not modify these two functions. Or you understand what you are doing.
+     *
+     * @param old the point in this panel.
+     * @return The relative location of this point, like (0.5, 0.5), center of diagram.
+     */
     protected Point2D.Double getPointTruePositionFromShownPoint(Point old) {
         double x = ((double) (old.x - left)) / (getOriginalWidth() * scale);
         double y = ((double) (old.y - top)) / (getOriginalHeight() * scale);
@@ -75,6 +108,12 @@ public abstract class ResizablePanel extends JPanel {
         return new Point2D.Double(x, y);
     }
 
+    /**
+     * Get the absolute location from a relative position.
+     *
+     * @param old the relative location of one point. (0-1)
+     * @return the absolute location of this point.
+     */
     protected Point getShowPointFromTruePosition(Point2D.Double old) {
         return new Point((int) Math.round(left + old.x * getOriginalWidth() * scale),
                 (int) (Math.round(top + old.y * getOriginalHeight() * scale)));
@@ -129,6 +168,9 @@ public abstract class ResizablePanel extends JPanel {
 
     protected abstract void doMyPaint(Graphics2D g2, int left, int top, double scale);
 
+    /**
+     * It is called when user wants to save this diagram.
+     */
     public void doSaveAs() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss-SSSZ");
         String fileName = sdf.format(new Date()) + ".svg";
@@ -226,5 +268,4 @@ public abstract class ResizablePanel extends JPanel {
     private void saveAsJPEG(File f) throws Exception {
         ImageIO.write(bufferedImage, "JPEG", f);
     }
-
 }

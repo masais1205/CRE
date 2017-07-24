@@ -1,5 +1,9 @@
 package cre.view.tree;
 
+/**
+ * Created by HanYizhao on 2017/6/22.
+ * One child of a tree node {@link Node}.
+ */
 public class Children {
     private Node value;
     private String edge;

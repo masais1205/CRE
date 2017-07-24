@@ -14,9 +14,14 @@ import java.util.List;
 
 /**
  * Created by HanYizhao on 2017/6/30.
+ * <p>This tool is used to break a string to several strings.
+ * Thus, these strings can be shown line by line.</p>
  */
 public class LineBreakerTool {
 
+    /**
+     * One line of string.
+     */
     public static class TextLayoutAndContent {
         private TextLayout layout;
         private String content;
@@ -35,6 +40,15 @@ public class LineBreakerTool {
         }
     }
 
+    /**
+     * Break a long string to several strings.
+     *
+     * @param content The long string (maybe long).
+     * @param width   Max width.
+     * @param font    The font used to draw string.
+     * @param g2      The painter.
+     * @return Several strings.
+     */
     public static List<TextLayoutAndContent> getStringLayout(@NotNull String content, @NotNull float width, Font font,
                                                              @Nullable Graphics2D g2) {
         List<TextLayoutAndContent> result = new ArrayList<>();

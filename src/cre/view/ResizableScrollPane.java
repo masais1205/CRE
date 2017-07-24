@@ -14,6 +14,7 @@ import java.beans.EventHandler;
 
 /**
  * Created by HanYizhao on 2017/6/8.
+ * This class is used to show the {@link ResizablePanel}.
  */
 public class ResizableScrollPane extends JScrollPane {
 
@@ -43,6 +44,12 @@ public class ResizableScrollPane extends JScrollPane {
         });
     }
 
+    /**
+     * Try to zoom the panel.
+     *
+     * @param larger     Larger or not.
+     * @param mousePoint The focus of user, may be null.
+     */
     public void zoom(boolean larger, @Nullable Point mousePoint) {
         double rate = panel.getOriginalWidth() / panel.getOriginalHeight();
         float change = larger ? 1.5f : 0.67f;

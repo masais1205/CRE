@@ -8,7 +8,11 @@ import java.util.List;
 import cre.view.tree.LineBreakerTool.*;
 
 /**
- * Created by 16502 on 2017/6/22.
+ * Created by HanYizhao on 2017/6/22.
+ * <p>
+ * A tree node is constitute of border, name and content.
+ * The content is just an option.
+ * If there is content, there will be a separator between name and content.
  */
 public class Node {
     public String name;
@@ -23,14 +27,29 @@ public class Node {
         children = new ArrayList<>();
     }
 
-    public float selfX;
-    public float selfY;
-    public float selfWidth;
-    public float selfHeight;
+    /**
+     * The location and size of this node.
+     */
+    public float selfX, selfY, selfWidth, selfHeight;
+    /**
+     * How to draw name.
+     */
     public List<TextLayoutAndContent> nameLayout;
+    /**
+     * How to draw content.
+     */
     public List<TextLayoutAndContent> contentLayout;
+    /**
+     * The relative location of name.
+     */
     public List<Point2D.Float> namePoint;
+    /**
+     * The relative location of content.
+     */
     public List<Point2D.Float> contentPoint;
+    /**
+     * The location of separator.
+     */
     public float divisionLocation;
 
     public boolean hasContent() {

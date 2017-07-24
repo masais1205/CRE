@@ -5,6 +5,7 @@ import java.util.TreeMap;
 
 /**
  * Created by HanYizhao on 2017/4/6.
+ * An example of the object as configurations.
  */
 public class ConfigSample {
     private int aaaaaaaaaaaaaaaaaa;

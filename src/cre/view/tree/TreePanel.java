@@ -14,6 +14,7 @@ import java.util.List;
 
 /**
  * Created by HanYizhao on 2017/7/3.
+ * TreePanel is used draw a tree.
  */
 public class TreePanel extends ResizablePanel {
 
@@ -121,6 +122,15 @@ public class TreePanel extends ResizablePanel {
         }
     }
 
+    /**
+     * Get intersection of a line segment and a rectangle.
+     *
+     * @param rectangle The rectangle.
+     * @param start     The start point of the line segment.
+     * @param end       The end point of the line segment.
+     * @param tolerance precision. like 1.0E-10D.
+     * @return Intersection or null.
+     */
     private Vector2D getLineIntersectRectangle(Rectangle2D rectangle,
                                                Point2D start, Point2D end, double tolerance) {
         Line line = new Line(new Vector2D(start.getX(), start.getY()), new Vector2D(end.getX(), end.getY()), tolerance);

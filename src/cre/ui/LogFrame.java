@@ -18,6 +18,7 @@ public class LogFrame extends JFrame {
         this.setSize(Tool.HighResolution(600), Tool.HighResolution(400));
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         this.setLayout(new BorderLayout());
+        textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
         this.add(scrollPane, BorderLayout.CENTER);
         JPanel southPanel = new JPanel();

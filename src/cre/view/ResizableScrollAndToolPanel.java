@@ -8,6 +8,8 @@ import java.awt.event.KeyEvent;
 
 /**
  * Created by HanYizhao on 2017/7/4.
+ * <p>This class looks like {@link ResizableScrollPane}.
+ * But it has three more buttons than {@link ResizableScrollPane} </p>
  */
 public class ResizableScrollAndToolPanel extends JPanel {
     public ResizableScrollAndToolPanel(final ResizablePanel resizablePanel) {

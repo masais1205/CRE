@@ -42,6 +42,7 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
                 }
                 if (inThreadCount == 0) {
                     MainFrame.this.dispose();
+                    Runtime.getRuntime().exit(0);
                 } else {
                     int a = JOptionPane.showConfirmDialog(MainFrame.this,
                             "There " + (inThreadCount == 1 ? "is one thread" : ("are " + inThreadCount + " threads"))

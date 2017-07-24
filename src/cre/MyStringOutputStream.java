@@ -10,6 +10,7 @@ import java.util.LinkedList;
 
 /**
  * Created by HanYizhao on 2017/7/23.
+ * This class is a buffer of standard output stream and standard error output stream.
  */
 public class MyStringOutputStream extends OutputStream {
 

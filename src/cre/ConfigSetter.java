@@ -17,9 +17,18 @@ import java.util.*;
 
 /**
  * Created by HanYizhao on 2017/4/6.
+ * Some tools about configurations of an algorithm.
  */
 public class ConfigSetter {
 
+    /**
+     * create a JPanel from which user can modify configurations
+     *
+     * @param frame  owner. In order to show a dialog.
+     * @param config the object.
+     * @return The view
+     * @throws ConfigException
+     */
     public static JPanel createAJPanel(final Window frame, final Object config) throws ConfigException {
         final ArrayList<ConfigBase> configBases = getConfigsFromObject(config);
 
@@ -170,6 +179,13 @@ public class ConfigSetter {
     }
 
 
+    /**
+     * Get fields of a Object. These fields will be configurations.
+     *
+     * @param config The object
+     * @return The list of configuration
+     * @throws ConfigException
+     */
     public static ArrayList<ConfigBase> getConfigsFromObject(Object config) throws ConfigException {
         ArrayList<ConfigBase> configBases = new ArrayList<>();
         Class<?> c = config.getClass();

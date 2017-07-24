@@ -2,6 +2,7 @@ package cre.view.tree;
 
 /**
  * Created by HanYizhao on 2017/6/30.
+ * A simple class
  */
 public class Margin {
     public float top, left, bottom, right;

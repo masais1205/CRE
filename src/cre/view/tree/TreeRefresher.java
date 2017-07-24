@@ -10,10 +10,10 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 /**
- * Created by 16502 on 2017/6/22.
+ * Created by HanYizhao on 2017/6/22.
+ * <p>This tool is used to calculate the details of a tree, like location and size of each node</p>
  */
 public class TreeRefresher {
-
 
     private static class GetHeightResult {
         int depth;
@@ -191,6 +191,13 @@ public class TreeRefresher {
         return max;
     }
 
+    /**
+     * Calculate the details of a tree.
+     *
+     * @param root   Root of the tree.
+     * @param config Configuration of the tree.
+     * @return the size of this tree.
+     */
     public static Dimension refreshTree(Node root, TreeConfig config) {
         Dimension d = new Dimension();
         // calculate size of each node
