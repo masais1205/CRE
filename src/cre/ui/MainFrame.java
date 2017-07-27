@@ -174,6 +174,7 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
             @Override
             public void run() {
                 statusLabel.setText(value);
+                System.out.println(value);
             }
         });
     }

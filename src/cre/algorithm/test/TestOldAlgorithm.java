@@ -21,9 +21,9 @@ public class TestOldAlgorithm {
     private static String delimiter = ",";
 
     public static Statistic do_it(String fileName, double ZC, double odd_ratio, int mergeDepth, int WP, int YP, int[] XPArray,
-                                  int[] crossValidationGroup, int nowFold,
+                                  int[] group, int testGroupId,
                                   CanShowStatus canShowStatus,
-                                  CanShowOutput canShowOutput) throws CalculatingException {
+                                  CanShowOutput canShowOutput, boolean isTesting) throws CalculatingException {
 
         BufferedReader br = null;
         int[] XPSorted;
@@ -44,7 +44,7 @@ public class TestOldAlgorithm {
             double YMedian = 0;
 
             Double YMedianResult = FileTool.getMedianOfAttribute(fileName,
-                    delimiter, YP, names.length, crossValidationGroup, nowFold, canShowOutput);
+                    delimiter, YP, names.length, group, testGroupId, canShowOutput);
             if (YMedianResult == null) {
                 simpleTrueFalse = true;
             } else {
@@ -61,7 +61,7 @@ public class TestOldAlgorithm {
             HashMap<String, LineValue> testingData = new HashMap<>();
             int testingDataCount = 0;
             while ((tempS = br.readLine()) != null) {
-                isTrainingSet = crossValidationGroup[count - 2] != nowFold;
+                isTrainingSet = group == null || (group[count - 2] != testGroupId);
                 String[] tempSS = tempS.split(delimiter);
                 if (tempSS.length == names.length) {
                     double yValue = Double.parseDouble(tempSS[YP]);
@@ -122,11 +122,10 @@ public class TestOldAlgorithm {
                     sb.append(String.format(Locale.ENGLISH, "%.2f", orWX[i].getOR(false)));
                     sb.append("\n");
                 }
-                canShowOutput.showOutputString("Odd Ratio");
-                canShowOutput.showOutputString(sb.toString());
+                canShowOutput.showLogString("Odd Ratio");
+                canShowOutput.showLogString(sb.toString());
             }
             ///////////////
-
 
             HashSet<Integer> orYXPNoFitOddsRatio = new HashSet<>();
             HashSet<Integer> orWXPNoFitOddsRatio = new HashSet<>();
@@ -191,8 +190,8 @@ public class TestOldAlgorithm {
                         break;
                 }
             }
-            canShowOutput.showOutputString("PLUS\tMINUS\tQUESTION");
-            canShowOutput.showOutputString(countPlus + "(" + countPlusInstanceCount + ")\t"
+            canShowOutput.showLogString("PLUS\tMINUS\tQUESTION");
+            canShowOutput.showLogString(countPlus + "(" + countPlusInstanceCount + ")\t"
                     + countMinus + "(" + countMinusInstanceCount + ")\t"
                     + countQuestion + "(" + countQuestionInstanceCount + ")");
             /////////////
@@ -224,15 +223,15 @@ public class TestOldAlgorithm {
                 }
             }
             trainPlusMinusCount = countMinus + countPlus;
-            canShowOutput.showOutputString("After");
-            canShowOutput.showOutputString("PLUS\tMINUS\tQUESTION");
-            canShowOutput.showOutputString(countPlus + "(" + countPlusInstanceCount + ")\t"
+            canShowOutput.showLogString("After");
+            canShowOutput.showLogString("PLUS\tMINUS\tQUESTION");
+            canShowOutput.showLogString(countPlus + "(" + countPlusInstanceCount + ")\t"
                     + countMinus + "(" + countMinusInstanceCount + ")\t"
                     + countQuestion + "(" + countQuestionInstanceCount + ")");
             //////////////////
 
             //Log training result.
-            {
+            if (!isTesting) {
                 StringBuilder sb = new StringBuilder();
                 sb.append(mergeResult.size());
                 sb.append("\n");
@@ -251,92 +250,94 @@ public class TestOldAlgorithm {
                     sb.append(i.toString());
                     sb.append("\n");
                 }
-                canShowOutput.showLogString(sb.toString());
-            }
+                canShowOutput.showOutputString(sb.toString());
+            } else {
 
-            // Training is finished. Start testing.
-            CESearchTool searchTool = new CESearchTool(mergeResult);
-            int notMatch = 0;
-            HashMap<String, LineValue> testDataStatistic = new HashMap<>();
-            for (LineValue lv : testingData.values()) {
-                char[] charValue = searchTool.getCharValue(lv.getValue());
-                if (charValue != null) {
-                    String tS = new String(charValue);
-                    LineValue testLv = testDataStatistic.get(tS);
-                    if (testLv == null) {
-                        testLv = new LineValue(charValue);
-                        testDataStatistic.put(tS, testLv);
-                    }
-                    testLv.addSomeItem(lv.getWYValues());
-                } else {
-                    for (int i = 0; i < 4; i++) {
-                        notMatch += lv.getWYValues()[i];
-                    }
-                    canShowOutput.showLogString("CESearchTool#getCEValue return null");
-                }
-            }
-
-            int success = 0;
-            int successInstance = 0;
-            int allInstance = 0;
-            int allInstanceIncludeQuestion = 0;
-            int failed = 0;
-            canShowOutput.showLogString("\n===Testing process===");
-            int testPlusMinusCount = 0;
-            for (LineValue lv : testDataStatistic.values()) {
-                double[] dData = OtherTool.fromIntArrayToNoZeroArray(lv.getWYValues());
-                double ATE = dData[0] / (dData[0] + dData[1]) - dData[2] / (dData[2] + dData[3]);
-                int instanceCount = lv.getWYSum();
-                allInstanceIncludeQuestion += instanceCount;
-                CEValue ceValue = searchTool.getCEValue(lv.getValue());
-                {
-                    if (ceValue != null && (ceValue.compareTo(CEValue.MINUS) == 0
-                            || ceValue.compareTo(CEValue.PLUS) == 0)) {
-                        StringBuilder sbs = new StringBuilder();
-                        for (int i = 0; i < lv.getValue().length; i++) {
-                            sbs.append(lv.getValue()[i]);
-                            sbs.append('\t');
+                // Training is finished. Start testing.
+                CESearchTool searchTool = new CESearchTool(mergeResult);
+                int notMatch = 0;
+                HashMap<String, LineValue> testDataStatistic = new HashMap<>();
+                for (LineValue lv : testingData.values()) {
+                    char[] charValue = searchTool.getCharValue(lv.getValue());
+                    if (charValue != null) {
+                        String tS = new String(charValue);
+                        LineValue testLv = testDataStatistic.get(tS);
+                        if (testLv == null) {
+                            testLv = new LineValue(charValue);
+                            testDataStatistic.put(tS, testLv);
                         }
-                        sbs.append(ceValue);
-                        sbs.append('\t');
+                        testLv.addSomeItem(lv.getWYValues());
+                    } else {
                         for (int i = 0; i < 4; i++) {
-                            sbs.append(dData[i]);
-                            sbs.append("\t");
+                            notMatch += lv.getWYValues()[i];
                         }
-                        sbs.append(ATE);
-                        canShowOutput.showLogString(sbs.toString());
-                        testPlusMinusCount++;
+                        canShowOutput.showLogString("CESearchTool#getCEValue return null");
                     }
                 }
-                if (ceValue != null) {
-                    if (ceValue.compareTo(CEValue.PLUS) == 0) {
-                        allInstance += instanceCount;
-                        if (ATE > 0) {
-                            success++;
-                            successInstance += instanceCount;
-                        } else {
-                            failed++;
+
+                int success = 0;
+                int successInstance = 0;
+                int allInstance = 0;
+                int allInstanceIncludeQuestion = 0;
+                int failed = 0;
+                canShowOutput.showLogString("\n===Testing process===");
+                int testPlusMinusCount = 0;
+                for (LineValue lv : testDataStatistic.values()) {
+                    double[] dData = OtherTool.fromIntArrayToNoZeroArray(lv.getWYValues());
+                    double ATE = dData[0] / (dData[0] + dData[1]) - dData[2] / (dData[2] + dData[3]);
+                    int instanceCount = lv.getWYSum();
+                    allInstanceIncludeQuestion += instanceCount;
+                    CEValue ceValue = searchTool.getCEValue(lv.getValue());
+                    {
+                        if (ceValue != null && (ceValue.compareTo(CEValue.MINUS) == 0
+                                || ceValue.compareTo(CEValue.PLUS) == 0)) {
+                            StringBuilder sbs = new StringBuilder();
+                            for (int i = 0; i < lv.getValue().length; i++) {
+                                sbs.append(lv.getValue()[i]);
+                                sbs.append('\t');
+                            }
+                            sbs.append(ceValue);
+                            sbs.append('\t');
+                            for (int i = 0; i < 4; i++) {
+                                sbs.append(dData[i]);
+                                sbs.append("\t");
+                            }
+                            sbs.append(ATE);
+                            canShowOutput.showLogString(sbs.toString());
+                            testPlusMinusCount++;
                         }
-                    } else if (ceValue.compareTo(CEValue.MINUS) == 0) {
-                        allInstance += instanceCount;
-                        if (ATE < 0) {
-                            success++;
-                            successInstance += instanceCount;
-                        } else {
-                            failed++;
+                    }
+                    if (ceValue != null) {
+                        if (ceValue.compareTo(CEValue.PLUS) == 0) {
+                            allInstance += instanceCount;
+                            if (ATE > 0) {
+                                success++;
+                                successInstance += instanceCount;
+                            } else {
+                                failed++;
+                            }
+                        } else if (ceValue.compareTo(CEValue.MINUS) == 0) {
+                            allInstance += instanceCount;
+                            if (ATE < 0) {
+                                success++;
+                                successInstance += instanceCount;
+                            } else {
+                                failed++;
+                            }
                         }
                     }
                 }
+                canShowOutput.showLogString("accuracy: " + (double) successInstance / allInstance);
+                canShowOutput.showLogString("Testing Data not matched: " + notMatch + "/" + testingDataCount);
+                canShowOutput.showLogString("Pattern(testing / training): " + testPlusMinusCount + "/" + trainPlusMinusCount);
+                Statistic statistic = new Statistic();
+                statistic.accuracy = (double) successInstance / allInstance;
+                statistic.recall = (double) successInstance / allInstanceIncludeQuestion;
+                statistic.testNoMatch = (double) notMatch / testingDataCount;
+                statistic.patternMatch = (double) testPlusMinusCount / trainPlusMinusCount;
+                canShowOutput.showLogString(statistic.toString());
+                return statistic;
             }
-            canShowOutput.showOutputString("accuracy: " + (double) successInstance / allInstance);
-            canShowOutput.showOutputString("Testing Data not matched: " + notMatch + "/" + testingDataCount);
-            canShowOutput.showOutputString("Pattern(testing / training): " + testPlusMinusCount + "/" + trainPlusMinusCount);
-            Statistic statistic = new Statistic();
-            statistic.accuracy = (double) successInstance / allInstance;
-            statistic.recall = (double) successInstance / allInstanceIncludeQuestion;
-            statistic.testNoMatch = (double) notMatch / testingDataCount;
-            statistic.patternMatch = (double) testPlusMinusCount / trainPlusMinusCount;
-            return statistic;
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

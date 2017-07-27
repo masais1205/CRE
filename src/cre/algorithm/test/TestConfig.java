@@ -14,9 +14,6 @@ public class TestConfig extends TestConfigBase implements Cloneable {
     private int mergeDepth;
     private TreeMap<String, List<Integer>> type;
 
-    private String[] attributeNames;
-    private String[] attributeClasses = {"W", "X", "Y", "remove"};
-
     @Override
     public Object clone() {
         TestConfig c = null;

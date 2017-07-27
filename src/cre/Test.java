@@ -1,6 +1,7 @@
 package cre;
 
 import cre.algorithm.crcs.CRCSConfig;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
 import java.io.*;
 
@@ -9,16 +10,10 @@ import java.io.*;
  */
 public class Test {
     public static void main(String[] args) {
-//        try {
-//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//        } catch (ClassNotFoundException
-//                | InstantiationException
-//                | IllegalAccessException
-//                | UnsupportedLookAndFeelException e) {
-//            e.printStackTrace();
-//        }
-        //System.out.println(new Integer("5sfesfsf"));
 
+
+        Percentile percentile = new Percentile();
+        System.out.println(percentile.evaluate(new double[]{1, 2, 3, 4, 5, 6}, 50));
 
     }
 }

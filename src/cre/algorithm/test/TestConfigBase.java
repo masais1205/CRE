@@ -7,4 +7,7 @@ package cre.algorithm.test;
  */
 public class TestConfigBase {
     protected String fileName;
+
+    protected String[] attributeNames;
+    protected String[] attributeClasses = {"W", "X", "Y", "ignore"};
 }

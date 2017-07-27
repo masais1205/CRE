@@ -57,7 +57,7 @@ public class Statistic {
 
     @Override
     public String toString() {
-        return "Average:\nAccuracy:\t" + String.format(Locale.ENGLISH, "%.2f", accuracy * 100) + "%\n"
+        return "Accuracy:\t" + String.format(Locale.ENGLISH, "%.2f", accuracy * 100) + "%\n"
                 + "Accuracy SD:\t" + String.format(Locale.ENGLISH, "%f", sd) + "\n"
                 + "Recall:\t" + String.format(Locale.ENGLISH, "%.2f", recall * 100) + "%\n"
                 + "Testing Data not matched:\t" + String.format(Locale.ENGLISH, "%.2f", testNoMatch * 100) + "%\n"

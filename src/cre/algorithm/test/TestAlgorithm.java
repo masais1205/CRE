@@ -4,16 +4,12 @@ import cre.Config.OtherConfig;
 import cre.algorithm.AbstractAlgorithm;
 import cre.algorithm.CanShowOutput;
 import cre.algorithm.CanShowStatus;
-import cre.algorithm.Validation;
-import cre.algorithm.Validation.SliceLinesHelper;
+import cre.algorithm.StratifiedSampleHelper;
 import cre.algorithm.tool.OtherTool;
 import cre.view.ResizablePanel;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created by HanYizhao on 2017/4/24.
@@ -25,14 +21,9 @@ public class TestAlgorithm extends AbstractAlgorithm {
 
     @Override
     public Object clone() {
-        TestAlgorithm algorithm = null;
-        try {
-            algorithm = (TestAlgorithm) super.clone();
-            if (this.config != null) {
-                algorithm.config = (TestConfig) this.config.clone();
-            }
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+        TestAlgorithm algorithm = new TestAlgorithm(super.filePath);
+        if (this.config != null) {
+            algorithm.config = (TestConfig) this.config.clone();
         }
         return algorithm;
     }
@@ -75,6 +66,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
     @Override
     public List<ResizablePanel> doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus, OtherConfig otherConfig) {
         try {
+            String lineSeparator = OtherTool.getLineSeparator();
             TreeMap<String, List<Integer>> configTreeMap = config.getType();
             String[] configAttributeNames = config.getTypeNames();
             String[] configAttributeClasses = config.getTypeClasses();
@@ -105,50 +97,99 @@ public class TestAlgorithm extends AbstractAlgorithm {
             Arrays.sort(XPArray);
 
             String fileName = filePath.getAbsolutePath();
+            {
+                HashMap<String, String> map = new HashMap<>();
+                for (String configAttributeClass : configAttributeClasses) {
+                    List<Integer> l = config.getType().get(configAttributeClass);
+                    for (int i : l) {
+                        map.put(configAttributeNames[i], configAttributeClass);
+                    }
+                }
+                StringBuilder sb = new StringBuilder();
+                sb.append("File:\t").append(fileName)
+                        .append(lineSeparator).append(lineSeparator)
+                        .append("Attributes:").append(lineSeparator);
+                for (String i : configAttributeNames) {
+                    sb.append("\t");
+                    sb.append(i);
+                    sb.append("\t");
+                    sb.append(map.get(i));
+                    sb.append(lineSeparator);
+                }
+                canShowOutput.showOutputString(sb.toString());
+            }
+            canShowOutput.showOutputString("==== full training set ===");
+            canShowStatus.showStatus("Building...");
+            TestOldAlgorithm.do_it(fileName,
+                    config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
+                    WP, YP,
+                    XPArray, null, -1, canShowStatus, canShowOutput, false);
+
+
             List<Statistic> result = new ArrayList<>();
             switch (otherConfig.getValidation()) {
                 case VALIDATION: {
-                    SliceLinesHelper helper = new SliceLinesHelper(fileName, ",", YP,
-                            otherConfig.getTest(), configAttributeNames.length, canShowOutput);
+                    canShowOutput.showOutputString("\n========Validation(testing: "
+                            + otherConfig.getTest() + "%, repeat: "
+                            + otherConfig.getValidationRepeatTimes() + ")=======\n");
+
+                    StratifiedSampleHelper helper = new StratifiedSampleHelper(fileName, ",", YP,
+                            false, (double) otherConfig.getTest() / 100,
+                            configAttributeNames.length, canShowOutput);
                     for (int i = 0; i < otherConfig.getValidationRepeatTimes(); i++) {
-                        canShowStatus.showStatus("Times " + i);
-                        canShowOutput.showOutputString("\nTimes " + i);
-                        int[] group = helper.nextLines(i);
+                        if (isShouldStop()) {
+                            result = null;
+                            break;
+                        }
+                        canShowStatus.showStatus("times: " + (i + 1));
+                        int[] group = helper.nextLines();
                         result.add(TestOldAlgorithm.do_it(fileName,
                                 config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
                                 WP, YP,
-                                XPArray, group, i, canShowStatus, canShowOutput));
+                                XPArray, group, 0, canShowStatus, canShowOutput, true));
                     }
                 }
                 break;
                 case CROSS_VALIDATION: {
-                    int[] crossValidationGroup = Validation.sliceLines(fileName,
-                            ",", YP, otherConfig.getCrossValidationFolds(),
-                            configAttributeNames.length, canShowOutput);
+                    canShowOutput.showOutputString("\n========Cross Validation(folds: "
+                            + otherConfig.getCrossValidationFolds() + ", repeat: "
+                            + otherConfig.getValidationRepeatTimes() + ")=======\n");
 
-                    // check each fold
-                    for (int i = 0; i < otherConfig.getCrossValidationFolds(); i++) {
-                        canShowStatus.showStatus("Fold " + i);
-                        canShowOutput.showOutputString("\nFold " + i);
-                        result.add(TestOldAlgorithm.do_it(fileName,
-                                config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
-                                WP, YP,
-                                XPArray, crossValidationGroup, i, canShowStatus, canShowOutput));
+                    int folds = otherConfig.getCrossValidationFolds();
+                    int repeat = otherConfig.getValidationRepeatTimes();
+
+                    StratifiedSampleHelper helper = new StratifiedSampleHelper(fileName, ",", YP,
+                            true, folds, configAttributeNames.length, canShowOutput);
+
+                    outer:
+                    for (int i = 0; i < repeat; i++) {
+                        int[] group = helper.nextLines();
+                        for (int l = 0; l < folds; l++) {
+                            if (isShouldStop()) {
+                                result = null;
+                                break outer;
+                            }
+                            canShowStatus.showStatus("times: " + (i + 1) + "; fold: " + (l + 1));
+                            result.add(TestOldAlgorithm.do_it(fileName,
+                                    config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
+                                    WP, YP,
+                                    XPArray, group, l, canShowStatus, canShowOutput, true));
+                        }
                     }
                 }
                 break;
+                case NONE:
+                    result = null;
+                    break;
             }
-            Statistic averageResult = Statistic.average(result);
-            canShowOutput.showOutputString(averageResult.toString());
+            if (result != null) {
+                Statistic averageResult = Statistic.average(result);
+                canShowOutput.showOutputString(averageResult.toString());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             canShowOutput.showOutputString(e.getMessage());
         }
         return null;
-    }
-
-    @Override
-    public void setShouldStop() {
-
     }
 }

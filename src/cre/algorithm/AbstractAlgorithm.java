@@ -63,6 +63,11 @@ public abstract class AbstractAlgorithm implements Cloneable {
 
     public abstract AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile) throws Exception;
 
+    public final List<ResizablePanel> doMyAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus, OtherConfig otherConfig) {
+        setShouldStop(false);
+        return doAlgorithm(canShowOutput, canShowStatus, otherConfig);
+    }
+
     /**
      * There will be a thread which is not main thread.
      * The thread will call this function.
@@ -74,16 +79,27 @@ public abstract class AbstractAlgorithm implements Cloneable {
      */
     public abstract List<ResizablePanel> doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus, OtherConfig otherConfig);
 
-    public abstract void setShouldStop();
-
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
-    }
+    public abstract Object clone() throws CloneNotSupportedException;
 
     @Override
     public String toString() {
         Cloneable config = getConfiguration();
         return this.getName() + " " + (config == null ? " no Config" : config);
+    }
+
+
+    protected boolean shouldStop = false;
+
+    protected final synchronized void setShouldStop(boolean shouldStop) {
+        this.shouldStop = shouldStop;
+    }
+
+    public final synchronized boolean isShouldStop() {
+        return shouldStop;
+    }
+
+    public final synchronized void setShouldStop() {
+        shouldStop = true;
     }
 }

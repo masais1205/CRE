@@ -1,7 +1,6 @@
 package cre.algorithm.cdt;
 
 import cre.algorithm.*;
-import cre.algorithm.Validation.StratifiedSampleHelper;
 import cre.Config.OtherConfig;
 import cre.view.ResizablePanel;
 import cre.view.tree.TreePanel;
@@ -21,7 +20,6 @@ import java.util.List;
 public class CDTAlgorithm extends AbstractAlgorithm {
 
     public CDTConfig config;
-    private boolean shouldStop = false;
 
     public CDTAlgorithm(File filePath, CDTConfig oldConfig) {
         super(filePath);
@@ -67,7 +65,6 @@ public class CDTAlgorithm extends AbstractAlgorithm {
 
     @Override
     public List<ResizablePanel> doAlgorithm(CanShowOutput canShowOutput, CanShowStatus canShowStatus, OtherConfig otherConfig) {
-        setShouldStop(false);
         String fileName = filePath.getAbsolutePath();
         String[] attributes = null;
         int instancesCount = 0;
@@ -209,29 +206,12 @@ public class CDTAlgorithm extends AbstractAlgorithm {
         return result;
     }
 
-    private synchronized void setShouldStop(boolean shouldStop) {
-        this.shouldStop = shouldStop;
-    }
-
-    public synchronized boolean isShouldStop() {
-        return shouldStop;
-    }
-
-    @Override
-    public synchronized void setShouldStop() {
-        shouldStop = true;
-    }
 
     @Override
     public Object clone() {
-        CDTAlgorithm algorithm = null;
-        try {
-            algorithm = (CDTAlgorithm) super.clone();
-            if (this.config != null) {
-                algorithm.config = (CDTConfig) this.config.clone();
-            }
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
+        CDTAlgorithm algorithm = new CDTAlgorithm(super.filePath);
+        if (this.config != null) {
+            algorithm.config = (CDTConfig) this.config.clone();
         }
         return algorithm;
     }

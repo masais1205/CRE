@@ -30,12 +30,12 @@ public class CRPAAlgorithm extends AbstractAlgorithm {
 
     @Override
     public String getName() {
-        return "crpa";
+        return "CR-PA";
     }
 
     @Override
     public String getIntroduction() {
-        return "crpa...";
+        return "CR-PA is a causal association rule discovery tool.\nPaper: Discovery of Causal Rules Using Partial Association, (ICDM 2012).";
     }
 
     @Override
@@ -50,7 +50,7 @@ public class CRPAAlgorithm extends AbstractAlgorithm {
         a.config.setOddsRatioOrChiSquare(this.config.getOddsRatioOrChiSquare());
         a.config.setMinSupport(this.config.getMinSupport());
         a.config.setMaxRules(this.config.getMaxRules());
-        a.config.setRecommend(this.config.getMaxRules());
+        a.config.setRecommend(this.config.getRecommend());
         return a;
     }
 
@@ -69,10 +69,13 @@ public class CRPAAlgorithm extends AbstractAlgorithm {
         ret = ppl.getData();
 
         String wholeInput;
-        if (p.oddsratio == 1) {
-            wholeInput = "-f" + " " + ret.fileName + " " + "-x" + " " + "-h";
-        } else if ((p.oddsratio != 1) && (p.oddsratio != 0)) {
-            wholeInput = "-f" + " " + ret.fileName + " " + "-x" + " " + "-t" + " " + "-h";
+        //Yizhao Han modify. The old version is created by HuShu, -h means no Chi Square.
+        if (p.oddsRatioOrChiSquare) {
+            if (p.oddsratio == 1) {
+                wholeInput = "-f" + " " + ret.fileName + " " + "-x" + " " + "-h";
+            } else {
+                wholeInput = "-f" + " " + ret.fileName + " " + "-x" + " " + "-t" + " " + "-h";
+            }
         } else {
             wholeInput = "-f" + " " + ret.fileName + " " + "-x";
         }
@@ -82,7 +85,11 @@ public class CRPAAlgorithm extends AbstractAlgorithm {
     }
 
     @Override
-    public void setShouldStop() {
-
+    public Object clone() throws CloneNotSupportedException {
+        CRPAAlgorithm algorithm = new CRPAAlgorithm(super.filePath);
+        if (this.config != null) {
+            algorithm.config = (CRPAConfig) this.config.clone();
+        }
+        return algorithm;
     }
 }

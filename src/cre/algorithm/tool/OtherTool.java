@@ -37,4 +37,8 @@ public class OtherTool {
         return result;
     }
 
+    public static String getLineSeparator() {
+        return System.getProperty("line.separator", "\n");
+    }
+
 }

@@ -46,7 +46,7 @@ public class FileTool {
             brPre = new BufferedReader(new FileReader(fileName));
             brPre.readLine();
             while ((tempS = brPre.readLine()) != null) {
-                if (crossValidationGroup[count - 2] != nowFold) {
+                if (crossValidationGroup == null || crossValidationGroup[count - 2] != nowFold) {
                     String[] tempSS = tempS.split(delimiter);
                     if (tempSS.length == attributeLength) {
                         if (!tempSS[position].equals("1")

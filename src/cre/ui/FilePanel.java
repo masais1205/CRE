@@ -60,8 +60,10 @@ public class FilePanel extends JPanel {
         fileChooser = new JFileChooser();
         fileChooser.setDialogType(JFileChooser.OPEN_DIALOG);
         fileChooser.setMultiSelectionEnabled(false);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Data file (*.csv, *.names)", "csv", "names");
         FileNameExtensionFilter filter1 = new FileNameExtensionFilter("CSV data file (*.csv)", "csv");
         FileNameExtensionFilter filter2 = new FileNameExtensionFilter("C4.5 data file (*.names)", "names");
+        fileChooser.addChoosableFileFilter(filter);
         fileChooser.addChoosableFileFilter(filter1);
         fileChooser.addChoosableFileFilter(filter2);
         fileChooser.setAcceptAllFileFilterUsed(false);

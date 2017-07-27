@@ -17,6 +17,7 @@ import java.util.TreeMap;
 public class CRPAConfig extends CRPAConfigBase {
     public class P {
         public int num_combinedvariables; // the number of exposure variables
+        public boolean oddsRatioOrChiSquare;
         public double oddsratio;
         public double gsup;
         public double ChisquareValue;
@@ -80,6 +81,10 @@ public class CRPAConfig extends CRPAConfigBase {
         return "PA confidence level";
     }
 
+    public String getPaValueComment() {
+        return "The confidence level for the partial association tests.";
+    }
+
     public String[] getRecommendList() {
         return recommendOptions;
     }
@@ -100,12 +105,26 @@ public class CRPAConfig extends CRPAConfigBase {
         return "Max level of combined rules";
     }
 
+    public String getMaxRulesComment() {
+        return "l(max) in the CR-PA algorithm, the maximum " +
+                "level of combined causes, e.g. select 2 for mining single and " +
+                "combined (level 2) causal rules.";
+    }
+
     public String[] getOddsRatioOrChiSquareList() {
         return oddsRatioOrChiSquareOptions;
     }
 
     public String getOddsRatioOrChiSquareShownName() {
         return "Statistical measures";
+    }
+
+    public String getOddsRatioOrChiSquareComment() {
+        return "Odds Ratio: the odds ratio threshold for mining association rules and " +
+                "causal rules. The default value is \"lower bound\", which uses the lower " +
+                "bound of the confidence interval of the odds ratio as the criterion (see " +
+                "Appendix A for more details).\n" + "Chi Square:" + "Chi-square confidence level, the confidence level of the Chi-square " +
+                "tests";
     }
 
 
@@ -115,6 +134,10 @@ public class CRPAConfig extends CRPAConfigBase {
 
     public String getMinSupportShownName() {
         return "Min support";
+    }
+
+    public String getMinSupportComment() {
+        return "The minimum support, i.e. m(supp) in the CR-PA algorithm.";
     }
 
     @Override
@@ -159,7 +182,7 @@ public class CRPAConfig extends CRPAConfigBase {
             }
         }
         StringBuilder sb = new StringBuilder();
-        String lineSeparator = System.getProperty("line.separator", "\n");
+        String lineSeparator = OtherTool.getLineSeparator();
         for (String i : stringlist) {
             sb.append(i);
             sb.append(lineSeparator);
@@ -208,7 +231,8 @@ public class CRPAConfig extends CRPAConfigBase {
                 p.oddsratio = 1;
             }
             p.ChisquareValue = 0;
-        } else {
+            p.oddsRatioOrChiSquare = true;
+        } else if (this.oddsRatioOrChiSquare.startsWith(ChiSquareName)) {
             String value = this.oddsRatioOrChiSquare.substring(ChiSquareName.length() + oddsOrChiSplit.length());
             switch (value) {
                 case "95%":
@@ -225,6 +249,9 @@ public class CRPAConfig extends CRPAConfigBase {
                     break;
             }
             p.oddsratio = 0;
+            p.oddsRatioOrChiSquare = false;
+        } else {
+            System.out.println("ERROR: oddsRatioOrChiSquare Value :" + this.oddsRatioOrChiSquare);
         }
         switch (paValue) {
             case "90%":

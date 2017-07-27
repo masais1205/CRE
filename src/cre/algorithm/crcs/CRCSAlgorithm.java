@@ -34,7 +34,9 @@ public class CRCSAlgorithm extends AbstractAlgorithm {
 
     @Override
     public String getIntroduction() {
-        return "crcs...";
+        return "This is a causal association rule discovery tool.\n" +
+                "This program was authored by Prof. Jiuyong Li (www.unisanet.unisa.edu.au/staff/homepage.asp?name=jiuyong.li).\n" +
+                "Contact jiuyong@unisa.edu.au to obtain a manual";
     }
 
     @Override
@@ -49,7 +51,7 @@ public class CRCSAlgorithm extends AbstractAlgorithm {
         a.config.setOddsRatioOrChiSquare(this.config.getOddsRatioOrChiSquare());
         a.config.setMinSupport(this.config.getMinSupport());
         a.config.setMaxRules(this.config.getMaxRules());
-        a.config.setRecommend(this.config.getMaxRules());
+        a.config.setRecommend(this.config.getRecommend());
         return a;
     }
 
@@ -68,16 +70,14 @@ public class CRCSAlgorithm extends AbstractAlgorithm {
         ret = ppl.getData();
 
         String wholeInput;
-        if ((p.oddsratio == 1) && (p.ChisquareValue == 0)) {
-            wholeInput = "-f" + " " + ret.fileName + " " + "-x" + " " + "-h" + " " + "-z";
-            //wholeInput = "-f" + " " + ret.fileName + " " + "-x";
-
-        } else if ((p.oddsratio != 1) && (p.oddsratio != 0)) {
-            wholeInput = "-f" + " " + ret.fileName + " " + "-x" + " " + "-h" + " " + "-t" + " " + "-z";
-            //wholeInput = "-f" + " " + ret.fileName + " " + "-x"+" "+"-h"+" "+"-t";
+        if (p.oddsRatioOrChiSquare) {
+            if (p.oddsratio == 1) {
+                wholeInput = "-f" + " " + ret.fileName + " " + "-x" + " " + "-h" + " " + "-z";
+            } else {
+                wholeInput = "-f" + " " + ret.fileName + " " + "-x" + " " + "-h" + " " + "-t" + " " + "-z";
+            }
         } else {
             wholeInput = "-f" + " " + ret.fileName + " " + "-x" + " " + "-h" + " " + "-z" + " " + "-b";
-            //wholeInput = "-f" + " " + ret.fileName + " " + "-x"+" "+"-h"+" "+"-b";
         }
         char[] input2 = wholeInput.toCharArray();
         CRCS crcs = new CRCS(6, input2, ret, p, v, canShowOutput);
@@ -86,7 +86,11 @@ public class CRCSAlgorithm extends AbstractAlgorithm {
     }
 
     @Override
-    public void setShouldStop() {
-
+    public Object clone() throws CloneNotSupportedException {
+        CRCSAlgorithm algorithm = new CRCSAlgorithm(super.filePath);
+        if (this.config != null) {
+            algorithm.config = (CRCSConfig) this.config.clone();
+        }
+        return algorithm;
     }
 }

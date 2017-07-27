@@ -24,11 +24,19 @@ public class LogFrame extends JFrame {
         JPanel southPanel = new JPanel();
         this.add(southPanel, BorderLayout.SOUTH);
         JButton refreshButton = new JButton("Refresh");
+        JButton clearButton = new JButton("Clear");
         southPanel.add(refreshButton);
+        southPanel.add(clearButton);
         refreshButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 refresh();
+            }
+        });
+        clearButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clear();
             }
         });
         refresh();
@@ -36,6 +44,11 @@ public class LogFrame extends JFrame {
 
     private void refresh() {
         textArea.setText(outputStream.toString());
+    }
+
+    private void clear() {
+        outputStream.clear();
+        refresh();
     }
 
     private JTextArea textArea = new JTextArea();

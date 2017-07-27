@@ -70,6 +70,12 @@ public class MyStringOutputStream extends OutputStream {
         return sb.toString();
     }
 
+    public synchronized void clear() {
+        messages.clear();
+        nowSize = 0;
+        nowString.reset();
+    }
+
     @Override
     public synchronized void flush() throws IOException {
         String lastChar = nowString.getLastChar();
