@@ -87,7 +87,7 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
         logButton.setMargin(new Insets(0, two, 0, two));
         southPanel.add(logButton, s);
         Tool.moveToCenter(this);
-        System.out.println("Reassigns the \"standard\" input stream.");
+        System.out.println("Reassigns the \"standard\" output stream.");
         System.setOut(new PrintStream(outPutBuffer, true));
         System.err.println("Reassigns the \"standard\" error output stream.");
         System.setErr(new PrintStream(outPutBuffer, true));

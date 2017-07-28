@@ -30,22 +30,27 @@ import java.util.List;
 /**
  * Created by HanYizhao on 2017/6/26.
  */
-public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutput {
+public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutput {
     public AlgorithmPanel(MainFrameEventHandler mainFrame, AbstractAlgorithm algorithm) {
         this.mainFrame = mainFrame;
         this.algorithm = algorithm;
         this.setLayout(new BorderLayout());
 
+
+        int ten = Tool.HighResolution(10);
+        int five = Tool.HighResolution(5);
+        int two = Tool.HighResolution(2);
+        int seven = Tool.HighResolution(7);
+
         URL helpImage = getClass().getResource("/image/help.png");
         URL helpActiveImage = getClass().getResource("/image/help_active.png");
-
         JSplitPane mainSplitPane = new JSplitPane();
-        mainSplitPane.setDividerSize(Tool.HighResolution(2));
+        mainSplitPane.setDividerSize(two);
         this.add(mainSplitPane, BorderLayout.CENTER);
         mainSplitPane.add(leftPanel, JSplitPane.LEFT);
         mainSplitPane.add(rightPanel, JSplitPane.RIGHT);
 
-        leftPanel.setDividerSize(Tool.HighResolution(2));
+        leftPanel.setDividerSize(two);
         leftPanel.setDividerLocation(Tool.HighResolution(350));
         leftPanel.setPreferredSize(new Dimension(Tool.HighResolution(300), 0));
 
@@ -60,10 +65,6 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
         });
 
         GridBagConstraints s = new GridBagConstraints();
-        int ten = Tool.HighResolution(10);
-        int five = Tool.HighResolution(5);
-        int two = Tool.HighResolution(2);
-        int seven = Tool.HighResolution(7);
 
         JPanel leftBottomPanel = new JPanel(new GridBagLayout());
         leftPanel.add(leftBottomPanel, JSplitPane.BOTTOM);
@@ -470,6 +471,21 @@ public class AlgorithmPanel extends MyPanel implements ItemListener, CanShowOutp
     @Override
     public void showLogString(String value) {
         System.out.println(value);
+    }
+
+    /**
+     * The only thread to do calculation using specific algorithm.
+     */
+    private Thread runningThread;
+
+    public boolean canCloseSafely() {
+        return runningThread == null;
+    }
+
+    public void doForceClose() {
+        if (runningThread != null) {
+            runningThread.stop();
+        }
     }
 
     /**

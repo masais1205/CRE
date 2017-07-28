@@ -40,8 +40,6 @@ public class Main {
                             }
                         }
                     }
-
-
                 }
                 if (((String) i.getKey()).endsWith(".font")) {
                     Object value = UIManager.get(i.getKey());
@@ -55,6 +53,11 @@ public class Main {
                 }
             }
         }
+        UIDefaults defaults = UIManager.getDefaults();
+        defaults.remove("SplitPane.border");
+        //defaults.remove("ScrollPane.border");
+        //defaults.remove("SplitPaneDivider.border");
+
 
         try {
             MainFrame mainFrame = new MainFrame();

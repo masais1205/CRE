@@ -10,14 +10,21 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * This function is used to classify the lines.
- * For example, the data file has 100 lines except the first line.
- * In order to do cross-validation, we need to slice these lines into
- * several subsets (the number of fold).
- * If fold is 5, these 100 lines are divided to 5 stratified parts.
- * The principle of stratification depends on values of attribute in position 'position'.
+ * Created by HanYizhao.
  * <p>
- * like 1,2,3,4,0,2,3,4,0,1...
+ * This class is used to do stratified validation.
+ * Now it can only handle csv file.
+ * <p>
+ * 1. Sort the lines according to the specific attribute (stratified attribute).
+ * <p>
+ * 2. Divided these lines into 10 groups using K-means. Thus, tuple in each group will have approximate value.
+ * The groups are sorted from smaller to bigger.
+ * <p>
+ * 3. When call {@link #nextLines()}, shuffle in each group.
+ * <p>
+ * 4. If 10 folds cross-validation, distribute group-ID using 0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,...
+ * If simple validation, distribute group-ID using stable 0,1,0,0,1,1,...
+ * The number of 0 and 1 depends on the percent of testing data. This sequence has been shuffled.
  */
 public class StratifiedSampleHelper {
 
@@ -47,6 +54,16 @@ public class StratifiedSampleHelper {
     private List<Integer> samplePositions = new ArrayList<>();
     private Random random = new Random(1);
 
+    /**
+     * If cross-validation, the lines of ths csv file will be divided to several groups(folds).
+     * Each line has a group Id, from 0 to (folds - 1). The result will be different if call this function repeatedly.
+     * <p>
+     * If simple validation, the lines of the csv file will be divided to two group, group 0 and group 1.
+     * Group 0 means it will be used to do testing. Group 1 means it will be used to do training.
+     * Each line has a group Id. The result will be different if call this function repeatedly.
+     *
+     * @return The group Id of every line.
+     */
     public int[] nextLines() {
         int[] result = new int[orderedPositions.size()];
         for (Point i : needShuffle) {
@@ -59,6 +76,16 @@ public class StratifiedSampleHelper {
     }
 
 
+    /**
+     * @param csvFileName     The csv file.
+     * @param delimiter       Delimiter of the csv file.
+     * @param position        The position of attribute which is used to stratify.
+     * @param crossValidation True, cross-validation; false, simple validation.
+     * @param value           If cross-validation, the value is fold. If simple validation, the value is percents of testing data, from 0 to 1.
+     * @param attributeLength The number of attributes.
+     * @param canShowOutput   Used to show output.
+     * @throws CalculatingException May cause some error.
+     */
     public StratifiedSampleHelper(String csvFileName, String delimiter, int position,
                                   boolean crossValidation, double value, int attributeLength,
                                   CanShowOutput canShowOutput) throws CalculatingException {

@@ -78,7 +78,7 @@ public class CRCS {
     int hashcoding = 0;
     long zrange = 0x7fffffffL;
     long zzrange = 0x7fffffffffffffffL;
-    Random r = new Random(1);
+    Random r = new Random();
     long[] z;
     long zz;
     ////
@@ -1889,7 +1889,7 @@ public class CRCS {
                 if (arrayitemtemp.size() > arrayfriendtemp.size()) {
                     int remainder = arrayitemtemp.size() - arrayfriendtemp.size();
                     for (int t = 0; t < remainder; t++) {
-                        Random rand = new Random(1);
+                        Random rand = new Random();
                         int pick = rand.nextInt(arrayitemtemp.size());
                         arrayitemtemp.remove(arrayitemtemp.get(pick));
                     }
@@ -1897,7 +1897,7 @@ public class CRCS {
                     if (arrayitemtemp.size() < arrayfriendtemp.size()) {
                         int remainder = arrayfriendtemp.size() - arrayitemtemp.size();
                         for (int t = 0; t < remainder; t++) {
-                            Random rand = new Random(1);
+                            Random rand = new Random();
                             int pick = rand.nextInt(arrayfriendtemp.size());
                             arrayfriendtemp.remove(arrayfriendtemp.get(pick));
                         }
@@ -1908,7 +1908,7 @@ public class CRCS {
                 for (int i = 0; i < arrayitemtemp.size(); i++) {
                     // System.out.println(arrayfriendtemp.size());
                     // for(int t=0; t<arrayfriendtemp.size(); t++){
-                    Random rand = new Random(1);
+                    Random rand = new Random();
                     int pick = rand.nextInt(arrayfriendtemp.size());
                     //add into fair dataset
                     fairDataset.add(arrayitemtemp.get(i));
@@ -1973,7 +1973,7 @@ public class CRCS {
                 if (arrayitemtemp.size() > arrayfriendtemp.size()) {
                     int remainder = arrayitemtemp.size() - arrayfriendtemp.size();
                     for (int t = 0; t < remainder; t++) {
-                        Random rand = new Random(1);
+                        Random rand = new Random();
                         int pick = rand.nextInt(arrayitemtemp.size());
                         arrayitemtemp.remove(arrayitemtemp.get(pick));
                     }
@@ -1981,7 +1981,7 @@ public class CRCS {
                     if (arrayitemtemp.size() < arrayfriendtemp.size()) {
                         int remainder = arrayfriendtemp.size() - arrayitemtemp.size();
                         for (int t = 0; t < remainder; t++) {
-                            Random rand = new Random(1);
+                            Random rand = new Random();
                             int pick = rand.nextInt(arrayfriendtemp.size());
                             arrayfriendtemp.remove(arrayfriendtemp.get(pick));
                         }
@@ -1997,7 +1997,7 @@ public class CRCS {
                 for (int i = 0; i < arrayitemtemp.size(); i++) {
                     // System.out.println(arrayfriendtemp.size());
                     // for(int t=0; t<arrayfriendtemp.size(); t++){
-                    Random rand = new Random(1);
+                    Random rand = new Random();
                     int pick = rand.nextInt(arrayfriendtemp.size());
                     //add into fair dataset
                     fairDataset.add(arrayitemtemp.get(i));
@@ -2444,7 +2444,7 @@ public class CRCS {
                 if (arrayitemtemp.size() > arrayfriendtemp.size()) {
                     int remainder = arrayitemtemp.size() - arrayfriendtemp.size();
                     for (int t = 0; t < remainder; t++) {
-                        Random rand = new Random(1);
+                        Random rand = new Random();
                         int pick = rand.nextInt(arrayitemtemp.size());
                         arrayitemtemp.remove(arrayitemtemp.get(pick));
                     }
@@ -2452,7 +2452,7 @@ public class CRCS {
                     if (arrayitemtemp.size() < arrayfriendtemp.size()) {
                         int remainder = arrayfriendtemp.size() - arrayitemtemp.size();
                         for (int t = 0; t < remainder; t++) {
-                            Random rand = new Random(1);
+                            Random rand = new Random();
                             int pick = rand.nextInt(arrayfriendtemp.size());
                             arrayfriendtemp.remove(arrayfriendtemp.get(pick));
                         }
@@ -2463,7 +2463,7 @@ public class CRCS {
                 for (int i = 0; i < arrayitemtemp.size(); i++) {
                     // System.out.println(arrayfriendtemp.size());
                     // for(int t=0; t<arrayfriendtemp.size(); t++){
-                    Random rand = new Random(1);
+                    Random rand = new Random();
                     int pick = rand.nextInt(arrayfriendtemp.size());
                     //add into fair dataset
                     fairDataset.add(arrayitemtemp.get(i));
@@ -2534,7 +2534,7 @@ public class CRCS {
                 if (arrayitemtemp.size() > arrayfriendtemp.size()) {
                     int remainder = arrayitemtemp.size() - arrayfriendtemp.size();
                     for (int t = 0; t < remainder; t++) {
-                        Random rand = new Random(1);
+                        Random rand = new Random();
                         int pick = rand.nextInt(arrayitemtemp.size());
                         //System.out.println("pick"+pick);
                         arrayitemtemp.remove(arrayitemtemp.get(pick));
@@ -2543,7 +2543,7 @@ public class CRCS {
                     if (arrayitemtemp.size() < arrayfriendtemp.size()) {
                         int remainder = arrayfriendtemp.size() - arrayitemtemp.size();
                         for (int t = 0; t < remainder; t++) {
-                            Random rand = new Random(1);
+                            Random rand = new Random();
                             int pick = rand.nextInt(arrayfriendtemp.size());
                             arrayfriendtemp.remove(arrayfriendtemp.get(pick));
                         }
@@ -2567,7 +2567,7 @@ public class CRCS {
                 for (int i = 0; i < arrayitemtemp.size(); i++) {
                     // System.out.println(arrayfriendtemp.size());
                     // for(int t=0; t<arrayfriendtemp.size(); t++){
-                    Random rand = new Random(1);
+                    Random rand = new Random();
                     int pick = rand.nextInt(arrayfriendtemp.size());
                     //add into fair dataset
                     fairDataset.add(arrayitemtemp.get(i));
