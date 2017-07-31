@@ -1,6 +1,7 @@
 package cre.ui;
 
 import cre.MyStringOutputStream;
+import cre.ui.custom.MyIconFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +11,7 @@ import java.awt.event.ActionListener;
 /**
  * Created by HanYizhao on 2017/7/23.
  */
-public class LogFrame extends JFrame {
+public class LogFrame extends MyIconFrame {
 
     public LogFrame(String title, MyStringOutputStream outputStream) throws HeadlessException {
         this.outputStream = outputStream;

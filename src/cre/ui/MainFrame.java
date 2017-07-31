@@ -2,16 +2,19 @@ package cre.ui;
 
 import cre.MyStringOutputStream;
 import cre.algorithm.AbstractAlgorithm;
-import cre.algorithm.crcs.CRCSAlgorithm;
 import cre.algorithm.CanShowStatus;
 import cre.algorithm.cdt.CDTAlgorithm;
+import cre.algorithm.crcs.CRCSAlgorithm;
 import cre.algorithm.crpa.CRPAAlgorithm;
 import cre.algorithm.test.TestAlgorithm;
+import cre.ui.custom.MyIconFrame;
 
 import javax.swing.*;
-import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -21,8 +24,10 @@ import java.util.Map;
 
 /**
  * Created by HanYizhao on 4/13/2017.
+ * <p>
+ * MainFrame
  */
-public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowStatus {
+public class MainFrame extends MyIconFrame implements MainFrameEventHandler, CanShowStatus {
 
     public MainFrame() throws HeadlessException {
         this.setSize(Tool.HighResolution(800), Tool.HighResolution(600));
@@ -66,6 +71,7 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
 
         //tabbedPane.setFont(new Font("", Font.PLAIN, 15));
         root.add(tabbedPane, BorderLayout.CENTER);
+        FilePanel filePanel = new FilePanel(this);
         tabbedPane.addTab("File", filePanel);
         for (int i = 0; i < algorithmNames.length; i++) {
             tabbedPane.addTab(algorithmNames[i], new JPanel());
@@ -100,10 +106,9 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
         });
     }
 
-    private FilePanel filePanel = new FilePanel(this);
     private JLabel statusLabel = new JLabel();
     private MyStringOutputStream outPutBuffer = new MyStringOutputStream();
-    JTabbedPane tabbedPane = new JTabbedPane();
+    private JTabbedPane tabbedPane = new JTabbedPane();
 
     private final String[] algorithmNames = {"CDT", "Test", "CR-CS", "CR-PA"};
 
@@ -113,7 +118,7 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
         for (int i = 0; i < algorithmNames.length; i++) {
             AlgorithmPanel panel = abstractAlgorithmList.get(i);
             if (panel == null) {
-                AbstractAlgorithm abstractAlgorithm = null;
+                AbstractAlgorithm abstractAlgorithm;
                 switch (i) {
                     case 0:
                         abstractAlgorithm = new CDTAlgorithm(file);
@@ -124,7 +129,7 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
                     case 2:
                         abstractAlgorithm = new CRCSAlgorithm(file);
                         break;
-                    case 3:
+                    default:
                         abstractAlgorithm = new CRPAAlgorithm(file);
                         break;
                 }
@@ -166,7 +171,6 @@ public class MainFrame extends JFrame implements MainFrameEventHandler, CanShowS
     public CanShowStatus getCanShowStatus() {
         return this;
     }
-
 
     @Override
     public void showStatus(final String value) {

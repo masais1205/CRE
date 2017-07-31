@@ -36,6 +36,12 @@ public class CDTAlgorithm extends AbstractAlgorithm {
         this(filePath, null);
     }
 
+    @Override
+    public void init() throws Exception {
+        if (!filePath.getAbsolutePath().toLowerCase().endsWith(".csv")) {
+            throw new Exception("Please choose a CSV file");
+        }
+    }
 
     @Override
     public String getName() {
@@ -111,6 +117,7 @@ public class CDTAlgorithm extends AbstractAlgorithm {
         try {
             if (nCDT.rootYizhao != null) {
                 result.add(new TreePanel(nCDT.rootYizhao));
+                result.get(0).setTag("Diagram");
             }
         } catch (Exception e) {
             e.printStackTrace();

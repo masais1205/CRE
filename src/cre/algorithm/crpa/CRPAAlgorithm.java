@@ -24,6 +24,9 @@ public class CRPAAlgorithm extends AbstractAlgorithm {
 
     @Override
     public void init() throws Exception {
+        if (!filePath.getAbsolutePath().endsWith(".names")) {
+            throw new Exception("Please choose a names file");
+        }
         config = new CRPAConfig(filePath);
         config.init();
     }

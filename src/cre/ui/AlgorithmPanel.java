@@ -7,6 +7,7 @@ import cre.algorithm.CanShowOutput;
 import cre.algorithm.CanShowStatus;
 import cre.algorithm.crcs.CRCSAlgorithm;
 import cre.algorithm.crpa.CRPAAlgorithm;
+import cre.ui.custom.MyFixWidthPanel;
 import cre.ui.custom.MyFormattedTextField;
 import cre.ui.custom.MyTitledBorder;
 import cre.view.ResizablePanel;
@@ -19,7 +20,10 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -39,30 +43,25 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
 
         int ten = Tool.HighResolution(10);
         int five = Tool.HighResolution(5);
+        int four = Tool.HighResolution(4);
         int two = Tool.HighResolution(2);
         int seven = Tool.HighResolution(7);
 
         URL helpImage = getClass().getResource("/image/help.png");
         URL helpActiveImage = getClass().getResource("/image/help_active.png");
         JSplitPane mainSplitPane = new JSplitPane();
-        mainSplitPane.setDividerSize(two);
+        mainSplitPane.setDividerSize(four);
         this.add(mainSplitPane, BorderLayout.CENTER);
         mainSplitPane.add(leftPanel, JSplitPane.LEFT);
         mainSplitPane.add(rightPanel, JSplitPane.RIGHT);
 
-        leftPanel.setDividerSize(two);
+        leftPanel.setDividerSize(four);
         leftPanel.setDividerLocation(Tool.HighResolution(350));
         leftPanel.setPreferredSize(new Dimension(Tool.HighResolution(300), 0));
 
         optionPanelHelper.add(optionPanel, BorderLayout.NORTH);
         optionPanelHelper.setMaximumSize(new Dimension());
 
-        mScroll.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                resetOptionPanelHelperSize();
-            }
-        });
 
         GridBagConstraints s = new GridBagConstraints();
 
@@ -100,7 +99,7 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
 
         JPanel testOptionPanel = new JPanel(new GridBagLayout());
         optionPanel.add(testOptionPanel, s);
-        testOptionPanel.setBorder(new MyTitledBorder("Test Options").setOtherInfo(helpImage,
+        testOptionPanel.setBorder(new MyTitledBorder("Options").setOtherInfo(helpImage,
                 helpActiveImage,
                 "fff", null, null));
         ButtonGroup buttonGroup = new ButtonGroup();
@@ -159,25 +158,11 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         crossValidationComboBox.setEnabled(false);
         predictionOptionPanel.setVisible(false);
 
+        algorithmOnlyRadio.addItemListener(this);
         predictionRadio.addItemListener(this);
         validationRadio.addItemListener(this);
         crossValidationRadio.addItemListener(this);
-        predictionOptionPanel.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentShown(ComponentEvent e) {
-                resetOptionPanelHelperSize();
-            }
 
-            @Override
-            public void componentHidden(ComponentEvent e) {
-                resetOptionPanelHelperSize();
-            }
-
-            @Override
-            public void componentResized(ComponentEvent e) {
-                resetOptionPanelHelperSize();
-            }
-        });
 
         try {
             algorithmOptionPanel = ConfigSetter.createAJPanel(mainFrame.getFrame(), algorithm.getConfiguration());
@@ -186,7 +171,7 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
             s.gridwidth = GridBagConstraints.REMAINDER;
             s.insets.set(ten, five, five, five);
             Document helpDoc = Tool.getAlgorithmHelpDoc(algorithm.getName(), algorithm.getIntroduction(), ConfigSetter.getConfigsFromObject(algorithm.getConfiguration()));
-            algorithmOptionPanel.setBorder(new MyTitledBorder("Algorithm Options").setOtherInfo(helpImage, helpActiveImage, helpDoc.getText(0, helpDoc.getLength()), algorithm.getName(), helpDoc));
+            algorithmOptionPanel.setBorder(new MyTitledBorder("Parameters").setOtherInfo(helpImage, helpActiveImage, helpDoc.getText(0, helpDoc.getLength()), algorithm.getName(), helpDoc));
             optionPanel.add(algorithmOptionPanel, s);
         } catch (ConfigSetter.ConfigException | BadLocationException e) {
             e.printStackTrace();
@@ -205,7 +190,7 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
             }
         });
         rightPanel.setBorder(new TitledBorder("Output"));
-        rightPanel.addTab("Text", new JScrollPane(textArea));
+        rightPanel.addTab("Results", new JScrollPane(textArea));
         textArea.setEditable(false);
 
         resultList.addListSelectionListener(new ListSelectionListener() {
@@ -271,7 +256,7 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
                 ResizablePanel rp = ri.figures.get(i);
                 String title;
                 if (rp.getTag() == null) {
-                    title = "Figure " + (i + 1);
+                    title = "Diagram " + (i + 1);
                 } else {
                     title = rp.getTag().toString();
                 }
@@ -280,23 +265,6 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         }
     }
 
-    private void resetOptionPanelHelperSize() {
-        Rectangle viewport = mScroll.getViewport().getViewRect();
-        Dimension oldSize = optionPanelHelper.getSize();
-        int maxHeight = -1;
-        for (Component component : optionPanelHelper.getComponents()) {
-            if (component.getY() + component.getHeight() > maxHeight) {
-                maxHeight = component.getY() + component.getHeight();
-            }
-        }
-        if (mScroll.getHorizontalScrollBar().isShowing() || (maxHeight != -1 && maxHeight != oldSize.height)) {
-            optionPanelHelper.setPreferredSize(new Dimension(viewport.width, maxHeight));
-            optionPanelHelper.validate();
-            mScroll.revalidate();
-            mScroll.repaint();
-            mScroll.updateUI();
-        }
-    }
 
     @Override
     public void itemStateChanged(ItemEvent e) {
@@ -423,13 +391,13 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
     private JTabbedPane rightPanel = new JTabbedPane();
 
     private JPanel predictionOptionPanel = new JPanel(new GridBagLayout());
-    private JPanel optionPanelHelper = new JPanel(new BorderLayout());
+    private JPanel optionPanelHelper = new MyFixWidthPanel(new BorderLayout());
     private JScrollPane mScroll = new JScrollPane(optionPanelHelper);
     private JPanel optionPanel = new JPanel(new GridBagLayout());
     private JPanel algorithmOptionPanel;
 
-    private JRadioButton algorithmOnlyRadio = new JRadioButton("Algorithm only");
-    private JRadioButton predictionRadio = new JRadioButton("Prediction");
+    private JRadioButton algorithmOnlyRadio = new JRadioButton("Causal discovery");
+    private JRadioButton predictionRadio = new JRadioButton("Classification");
     private JRadioButton validationRadio = new JRadioButton("Validation");
     private JRadioButton crossValidationRadio = new JRadioButton("Cross Validation");
 

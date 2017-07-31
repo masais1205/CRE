@@ -1,17 +1,16 @@
 package cre.ui;
 
-import sun.plugin.javascript.JSClassLoader;
+import cre.ui.custom.MyIconFrame;
 
 import javax.swing.*;
-import javax.swing.text.*;
-import java.awt.*;
-import java.io.IOException;
-import java.net.URL;
+import javax.swing.text.Document;
 
 /**
  * Created by 16502 on 2017/6/21.
+ * <p>
+ * Show text
  */
-public class TextInformationFrame extends JFrame {
+public class TextInformationFrame extends MyIconFrame {
     public TextInformationFrame(String title, Document document) {
         this.setTitle(title);
         this.setSize(Tool.HighResolution(600), Tool.HighResolution(400));

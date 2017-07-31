@@ -1,5 +1,6 @@
 package cre;
 
+import cre.ui.LogoFrame;
 import cre.ui.MainFrame;
 import cre.ui.Tool;
 
@@ -55,13 +56,33 @@ public class Main {
         }
         UIDefaults defaults = UIManager.getDefaults();
         defaults.remove("SplitPane.border");
-        //defaults.remove("ScrollPane.border");
+        defaults.remove("ScrollPane.border");
         //defaults.remove("SplitPaneDivider.border");
 
 
         try {
-            MainFrame mainFrame = new MainFrame();
-            mainFrame.setVisible(true);
+            final LogoFrame logoFrame = new LogoFrame();
+            logoFrame.setVisible(true);
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            logoFrame.dispose();
+                            MainFrame mainFrame = new MainFrame();
+                            mainFrame.setVisible(true);
+                        }
+                    });
+                }
+            });
+            t.start();
+
         } catch (HeadlessException e) {
             System.out.println("This environment does not support a keyboard, display or mouse");
         }

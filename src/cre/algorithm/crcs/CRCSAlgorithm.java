@@ -23,6 +23,9 @@ public class CRCSAlgorithm extends AbstractAlgorithm {
 
     @Override
     public void init() throws Exception {
+        if (!filePath.getAbsolutePath().endsWith(".names")) {
+            throw new Exception("Please choose a names file");
+        }
         config = new CRCSConfig(filePath);
         config.init();
     }

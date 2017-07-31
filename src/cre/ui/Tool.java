@@ -2,7 +2,6 @@ package cre.ui;
 
 import cre.Config.ConfigBase;
 
-import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.util.Collection;

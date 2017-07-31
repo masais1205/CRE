@@ -25,7 +25,7 @@ import java.util.List;
  * <p>
  * When user change the file, {@linkplain #getCloneBecauseChangeOfFile(File)} will be called.
  * <p>
- * In order to create the view of configuration, {@linkplain #getConfiguration()} will be called.
+ * Once want to create the view of configuration, {@linkplain #getConfiguration()} will be called.
  * And when user modify the view, the object returned from {@linkplain #getConfiguration()} will be modified.
  */
 public abstract class AbstractAlgorithm implements Cloneable {
@@ -37,8 +37,10 @@ public abstract class AbstractAlgorithm implements Cloneable {
     }
 
     /**
-     * If when init the algorithm, there may be some exceptions,
+     * If when initialize the algorithm, there may be some exceptions,
      * please implement this function and throw exception when this algorithm cannot handle this file.
+     * <p>
+     * If this algorithm can not handle this file, please throw exception.
      *
      * @throws Exception
      */

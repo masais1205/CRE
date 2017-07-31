@@ -150,7 +150,8 @@ public class ClassifyDialog extends JDialog {
         }
 
         @Override
-        public Object getValueAt(int rowIndex, int columnIndex) {
+        public Object getValueAt(int rowIndex, int
+                columnIndex) {
             if (columnIndex == 0) {
                 return rowIndex + 1;
             } else if (columnIndex == 1) {

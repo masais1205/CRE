@@ -1,12 +1,15 @@
 package cre.ui;
 
+import cre.ui.custom.MyFixWidthPanel;
+
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Created by HanYizhao on 4/13/2017.
@@ -22,7 +25,7 @@ public class FilePanel extends JPanel {
         this.setLayout(new BorderLayout());
         JScrollPane scrollPane = new JScrollPane();
         this.add(scrollPane, BorderLayout.CENTER);
-        JPanel mainPanelContainer = new JPanel(new BorderLayout());
+        JPanel mainPanelContainer = new MyFixWidthPanel(new BorderLayout());
         JPanel mainPanel = new JPanel();
         mainPanelContainer.add(mainPanel, BorderLayout.NORTH);
         scrollPane.setViewportView(mainPanelContainer);
@@ -36,7 +39,7 @@ public class FilePanel extends JPanel {
         s.gridwidth = 1;
         mainPanel.add(openFileButton, s);
         s.weightx = 1;
-        s.gridwidth = 0;
+        s.gridwidth = GridBagConstraints.REMAINDER;
         s.fill = GridBagConstraints.HORIZONTAL;
         mainPanel.add(fileTextField, s);
 
@@ -48,6 +51,32 @@ public class FilePanel extends JPanel {
                 openFileButtonActionPerformed();
             }
         });
+
+        Map<String, String> tips = new LinkedHashMap<>();
+        tips.put("CDT", "Only CSV file is accepted.");
+        tips.put("Test", "Only CSV file is accepted.");
+        tips.put("CR-CS", "Only names file is accepted");
+        tips.put("CR-PA", "Only names file is acceptedFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+
+        for (Map.Entry<String, String> i : tips.entrySet()) {
+            GridBagConstraints ss = new GridBagConstraints();
+            ss.weightx = 0;
+            ss.gridwidth = 1;
+            ss.anchor = GridBagConstraints.NORTHWEST;
+            ss.insets.set(ten, ten, 0, ten);
+            mainPanel.add(new JLabel(i.getKey()), ss);
+            ss.weightx = 1;
+            ss.gridwidth = GridBagConstraints.REMAINDER;
+            ss.fill = GridBagConstraints.HORIZONTAL;
+            JTextArea ja = new JTextArea(i.getValue());
+            ja.setEditable(false);
+            ja.setLineWrap(true);
+            ja.setWrapStyleWord(true);
+            ja.setOpaque(false);
+            mainPanel.add(ja, ss);
+        }
+
+
     }
 
     private MainFrameEventHandler mainFrame;
