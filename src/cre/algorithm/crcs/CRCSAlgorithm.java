@@ -71,6 +71,7 @@ public class CRCSAlgorithm extends AbstractAlgorithm {
         try {
             ppl.loadData(nameFileContent, new File(ret.fileName + ".data"));
         } catch (Exception e) {
+            canShowOutput.showOutputString("ERROR:" + e.getMessage());
             e.printStackTrace();
         }
         ret = ppl.getData();
@@ -86,7 +87,12 @@ public class CRCSAlgorithm extends AbstractAlgorithm {
             wholeInput = "-f" + " " + ret.fileName + " " + "-x" + " " + "-h" + " " + "-z" + " " + "-b";
         }
         char[] input2 = wholeInput.toCharArray();
-        CRCS crcs = new CRCS(6, input2, ret, p, v, canShowOutput);
+        try {
+            CRCS crcs = new CRCS(6, input2, ret, p, v, canShowOutput);
+        } catch (Exception e) {
+            e.printStackTrace();
+            canShowOutput.showOutputString("ERROR:" + e.getMessage());
+        }
 
         return null;
     }

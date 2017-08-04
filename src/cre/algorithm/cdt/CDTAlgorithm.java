@@ -89,6 +89,7 @@ public class CDTAlgorithm extends AbstractAlgorithm {
                 }
             }
         } catch (IOException e) {
+            canShowOutput.showOutputString("ERROR:" + e.getMessage());
             e.printStackTrace();
         } finally {
             if (br != null) {
@@ -112,6 +113,7 @@ public class CDTAlgorithm extends AbstractAlgorithm {
         try {
             nCDT.createDecisionTree();
         } catch (Exception e) {
+            canShowOutput.showOutputString("ERROR:" + e.getMessage());
             e.printStackTrace();
             return null;
         }
@@ -122,6 +124,7 @@ public class CDTAlgorithm extends AbstractAlgorithm {
                 result.get(0).setTag("Diagram");
             }
         } catch (Exception e) {
+            canShowOutput.showOutputString("ERROR:" + e.getMessage());
             e.printStackTrace();
         }
 
@@ -155,6 +158,7 @@ public class CDTAlgorithm extends AbstractAlgorithm {
                                 tempCDT.createDecisionTree();
                             } catch (Exception e) {
                                 e.printStackTrace();
+                                canShowOutput.showOutputString("ERROR:" + e.getMessage());
                                 return null;
                             }
                         }
@@ -193,6 +197,7 @@ public class CDTAlgorithm extends AbstractAlgorithm {
                         try {
                             tempCDT.createDecisionTree();
                         } catch (Exception e) {
+                            canShowOutput.showOutputString("ERROR:" + e.getMessage());
                             e.printStackTrace();
                             return null;
                         }

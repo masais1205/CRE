@@ -81,7 +81,6 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         s.insets.set(seven, five, five, five);
         leftBottomPanel.add(startStopPanel, s);
 
-
         s.weightx = 1;
         s.insets.set(0, five, 0, five);
         s.weighty = 1;
