@@ -55,7 +55,7 @@ public class CRCS {
     int ass;
     int Non;
     int maxLayer;
-    int maxControl;
+    int maxControl = 10;
     int fast;
     int discard;
     int complete;
@@ -552,6 +552,7 @@ public class CRCS {
         Non = 0;
         sub = 0;
         //maxLayer = 4;
+        maxControl = CRCHPUI_Parameters.maxNumberOfControlVariables;
         maxLayer = CRCHPUI_Parameters.num_combinedvariables;
         staThreshold = CRCHPUI_Parameters.oddsratio;
         ChisquareValue = CRCHPUI_Parameters.ChisquareValue; //hs.
@@ -1675,7 +1676,7 @@ public class CRCS {
         //printRecord(listnoncfd);
         //Fast version, use 10 items in the control
         if (fast == 1) {
-            maxControl = 10;
+            //maxControl = 10;
             //Thuc add to set number of control variables
             if (listnoncfd.length > maxControl) {
                 int[] temp = listnoncfd;
@@ -2225,7 +2226,7 @@ public class CRCS {
 
         if (fast == 1) {
             //Thuc add to set number of control variables
-            maxControl = 10;
+            //maxControl = 10;
             if (listnoncfd.length > maxControl) {
                 int[] temp = listnoncfd;
                 listnoncfd = new int[maxControl];
@@ -9640,7 +9641,7 @@ public class CRCS {
     }
 
 	/*
-	 * if choice = 0, RuleSet if choice = 1, SingleList
+     * if choice = 0, RuleSet if choice = 1, SingleList
 	 */
 
     public int displayAbsractRule(int choice) {
@@ -9773,7 +9774,7 @@ public class CRCS {
                 //        System.out.println("\n\t\t Cohort size = "+cur.attSupport+" Percentage = "+(double) cur.attSupport / maxData * 100);
                 //	fprintf(fp, "\n\t\t Cohort size = %d, Percentage = %.2f \n", cur.attSupport, (double) cur.attSupport / maxData * 100);
                 fprintf(fp, "\t\t Contingency table \n");
-				/*
+                /*
 				 * for(i=0; i<MaxClass; i++){ if (Dist[i]<0.0001) rate = 0; else
 				 * rate = (float)cur->LSup[i]/Dist[i]; tmp =
 				 * (float)cur->AttSupport/MaxData; // lift = rate/tmp;

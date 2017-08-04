@@ -35,8 +35,8 @@ public class CRPAConfig extends CRPAConfigBase {
     }
 
     private String maxRules;
-    private String oddsRatioOrChiSquare;
     private String minSupport;
+    private String oddsRatioOrChiSquare;
     private String paValue;
     private TreeMap<String, List<Integer>> type;
     private String recommend;
@@ -78,15 +78,28 @@ public class CRPAConfig extends CRPAConfigBase {
     }
 
     public String getPaValueShownName() {
-        return "PA confidence level";
+        return "PA test";
     }
 
     public String getPaValueComment() {
-        return "The confidence level for the partial association tests.";
+        return "The confidence level for the partial association tests. (default: 95%)";
+    }
+
+    public String getRecommendComment() {
+        return "\nForced: user choose\n" +
+                "Recommended: user choose + algrithm choose.";
+    }
+
+    public boolean getRecommendVisible() {
+        return false;
     }
 
     public String[] getRecommendList() {
         return recommendOptions;
+    }
+
+    public boolean getTypeVisible() {
+        return false;
     }
 
     public String[] getTypeNames() {
@@ -102,13 +115,11 @@ public class CRPAConfig extends CRPAConfigBase {
     }
 
     public String getMaxRulesShownName() {
-        return "Max level of combined rules";
+        return "Max rule level";
     }
 
     public String getMaxRulesComment() {
-        return "l(max) in the CR-PA algorithm, the maximum " +
-                "level of combined causes, e.g. select 2 for mining single and " +
-                "combined (level 2) causal rules.";
+        return "The maximum number of items in the LHS of a causal rule. For example, If 2 is selected, a causal rule discovered may contain 1 or 2 items in its LHS. (default: 1)";
     }
 
     public String[] getOddsRatioOrChiSquareList() {
@@ -116,15 +127,14 @@ public class CRPAConfig extends CRPAConfigBase {
     }
 
     public String getOddsRatioOrChiSquareShownName() {
-        return "Statistical measures";
+        return "Association test";
     }
 
     public String getOddsRatioOrChiSquareComment() {
-        return "Odds Ratio: the odds ratio threshold for mining association rules and " +
-                "causal rules. The default value is \"lower bound\", which uses the lower " +
-                "bound of the confidence interval of the odds ratio as the criterion (see " +
-                "Appendix A for more details).\n" + "Chi Square:" + "Chi-square confidence level, the confidence level of the Chi-square " +
-                "tests";
+        return "\nOdds ratio -- lower bound: odds ratio is used to measure the strength of the relationship and lower bound approach is to test the significance of the relationship.\n" +
+                "Odds ratio -- threshold: odds ratio is used to measure the strength of the relationship and a user selected odds ratio threshold is used.\n"
+                + "Chi Square -- threshold: Chi square test is used with the selected confidence level.\n"
+                + "(default: \"Odds ratio -- lower bound\"; see Appendix A in Reference [2] for more details)";
     }
 
 
@@ -137,7 +147,7 @@ public class CRPAConfig extends CRPAConfigBase {
     }
 
     public String getMinSupportComment() {
-        return "The minimum support, i.e. m(supp) in the CR-PA algorithm.";
+        return "The percentages of data samples that support a rule. (default: 0.05)";
     }
 
     @Override
@@ -321,8 +331,8 @@ public class CRPAConfig extends CRPAConfigBase {
     @Override
     public String toString() {
         return "max Rules=" + maxRules +
-                ", oddsRatioOrChiSquare=" + oddsRatioOrChiSquare +
                 ", minSupport=" + minSupport +
+                ", oddsRatioOrChiSquare=" + oddsRatioOrChiSquare +
                 ", paValue=" + paValue +
                 ", recommend=" + recommend;
     }

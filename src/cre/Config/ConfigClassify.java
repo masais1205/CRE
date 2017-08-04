@@ -16,6 +16,10 @@ public class ConfigClassify extends ConfigBase {
         super(name, comments, shownName);
     }
 
+    public ConfigClassify(String name, String comments, String shownName, boolean visible) {
+        super(name, comments, shownName, visible);
+    }
+
     public static String toString(TreeMap<String, List<Integer>> map, ConfigClassify classify) {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, List<Integer>> i : map.entrySet()) {

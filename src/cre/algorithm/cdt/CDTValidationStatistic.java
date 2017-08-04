@@ -2,6 +2,7 @@ package cre.algorithm.cdt;
 
 import cre.algorithm.tool.OtherTool;
 
+import javax.print.attribute.standard.MediaSize;
 import java.util.Collection;
 import java.util.List;
 
@@ -18,6 +19,11 @@ public class CDTValidationStatistic {
     public double rootMeanSquareError;
     public double relativeAbsoluteError;
     public double rootRelativeSquaredError;
+
+    public int[][] confusionMatrix = new int[2][2];
+
+    public double truePrecious, falsePrecious, trueRecall, falseRecall, trueFMeasure, falseFMeasure,
+            weightedPrecious, weightedRecall, weightedFMeasure;
 
     private CDTValidationStatistic() {
     }
@@ -45,8 +51,9 @@ public class CDTValidationStatistic {
             }
             int i1 = Integer.parseInt(s1);
             int i2 = Integer.parseInt(s2);
-            i1 = i1 == 1 ? 0 : 1;
-            i2 = i2 == 1 ? 0 : 1;
+            i1 = i1 == 1 ? 1 : 0;
+            i2 = i2 == 1 ? 1 : 0;
+            confusionMatrix[i1][i2]++;
             int abs = Math.abs(i1 - i2);
             double pow = Math.pow(i1 - i2, 2);
             meanAbsoluteError += abs;
@@ -62,12 +69,32 @@ public class CDTValidationStatistic {
         rootMeanSquareError = Math.sqrt(rootMeanSquareError / real.size());
         relativeAbsoluteError = RAE_TopSum / RAE_BottomSum;
         rootRelativeSquaredError = Math.sqrt(RRSE_TopSum / RRSE_BottomSum);
+
+        truePrecious = getPrecision(true);
+        falsePrecious = getPrecision(false);
+        trueRecall = getRecall(true);
+        falseRecall = getRecall(false);
+        trueFMeasure = getFMeasure(true);
+        falseFMeasure = getFMeasure(false);
+        weightedPrecious = getWeightedPrecision();
+        weightedRecall = getWeightedRecall();
+        weightedFMeasure = getWeightedFMeasure();
     }
 
     public static CDTValidationStatistic average(Collection<CDTValidationStatistic> all) {
         CDTValidationStatistic n = new CDTValidationStatistic();
         int[] count = new int[6];
         for (CDTValidationStatistic i : all) {
+            n.truePrecious += i.truePrecious;
+            n.trueRecall += i.trueRecall;
+            n.trueFMeasure += i.trueFMeasure;
+            n.falsePrecious += i.falsePrecious;
+            n.falseRecall += i.falseRecall;
+            n.falseFMeasure += i.falseFMeasure;
+            n.weightedFMeasure += i.weightedFMeasure;
+            n.weightedPrecious += i.weightedPrecious;
+            n.weightedRecall += i.weightedRecall;
+
             n.correctCount += i.correctCount;
             n.inCorrectCount += i.inCorrectCount;
             if (!Double.isNaN(i.correct) && !Double.isInfinite(i.correct)) {
@@ -95,6 +122,17 @@ public class CDTValidationStatistic {
                 count[5]++;
             }
         }
+
+        n.truePrecious /= all.size();
+        n.trueRecall /= all.size();
+        n.trueFMeasure /= all.size();
+        n.falsePrecious /= all.size();
+        n.falseRecall /= all.size();
+        n.falseFMeasure /= all.size();
+        n.weightedFMeasure /= all.size();
+        n.weightedPrecious /= all.size();
+        n.weightedRecall /= all.size();
+
         n.correctCount = Math.round((float) n.correctCount / all.size());
         n.inCorrectCount = Math.round((float) n.inCorrectCount / all.size());
         n.correct = n.correct / count[0];
@@ -106,6 +144,112 @@ public class CDTValidationStatistic {
         return n;
     }
 
+    public double getWeightedFMeasure() {
+        int sum1 = confusionMatrix[0][1] + confusionMatrix[0][0];
+        int sum2 = confusionMatrix[1][0] + confusionMatrix[1][1];
+        double precisionTotal = getFMeasure(false) * sum1;
+        precisionTotal += getFMeasure(true) * sum2;
+        return precisionTotal / (sum1 + sum2);
+    }
+
+    public double getWeightedRecall() {
+        int sum = confusionMatrix[0][0] + confusionMatrix[1][1];
+        if (sum == 0) {
+            return 0;
+        } else {
+            return (double) sum
+                    / (sum + confusionMatrix[1][0] + confusionMatrix[0][1]);
+        }
+    }
+
+    public double getWeightedPrecision() {
+        int sum1 = confusionMatrix[0][1] + confusionMatrix[0][0];
+        int sum2 = confusionMatrix[1][0] + confusionMatrix[1][1];
+        double precisionTotal = getPrecision(false) * sum1;
+        precisionTotal += getPrecision(true) * sum2;
+        return precisionTotal / (sum1 + sum2);
+    }
+
+    public double getFMeasure(boolean consider1) {
+
+        double precision = getPrecision(consider1);
+        double recall = getRecall(consider1);
+        if ((precision + recall) == 0) {
+            return 0;
+        }
+        return 2 * precision * recall / (precision + recall);
+    }
+
+    public double getRecall(boolean consider1) {
+        int sum;
+        if (consider1) {
+            sum = confusionMatrix[1][0] + confusionMatrix[1][1];
+            if (sum == 0) {
+                return 0;
+            } else {
+                return (double) confusionMatrix[1][1] / sum;
+            }
+        } else {
+            sum = confusionMatrix[0][0] + confusionMatrix[0][1];
+            if (sum == 0) {
+                return 0;
+            } else {
+                return (double) confusionMatrix[0][0] / sum;
+            }
+        }
+    }
+
+    public double getPrecision(boolean consider1) {
+        int sum;
+        if (consider1) {
+            sum = confusionMatrix[0][1] + confusionMatrix[1][1];
+            if (sum == 0) {
+                return 0;
+            } else {
+                return (double) confusionMatrix[1][1] / sum;
+            }
+        } else {
+            sum = confusionMatrix[0][0] + confusionMatrix[1][0];
+            if (sum == 0) {
+                return 0;
+            } else {
+                return (double) confusionMatrix[0][0] / sum;
+            }
+        }
+    }
+
+    public String getDetailedAccuracy() {
+        String line = OtherTool.getLineSeparator();
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== Detailed Accuracy By Class ===").append(line).append(line);
+        sb.append("                 Precious  Recall  F-Measure  Class").append(line);
+        sb.append("                 ").append(OtherTool.fromDoubleToString(falsePrecious));
+        sb.append("    ").append(OtherTool.fromDoubleToString(falseRecall));
+        sb.append("  ").append(OtherTool.fromDoubleToString(falseFMeasure));
+        sb.append("     0").append(line);
+        sb.append("                 ").append(OtherTool.fromDoubleToString(truePrecious));
+        sb.append("    ").append(OtherTool.fromDoubleToString(trueRecall));
+        sb.append("  ").append(OtherTool.fromDoubleToString(trueFMeasure));
+        sb.append("     1").append(line);
+        sb.append("Weighted Avg.    ").append(OtherTool.fromDoubleToString(weightedPrecious));
+        sb.append("    ").append(OtherTool.fromDoubleToString(weightedRecall));
+        sb.append("  ").append(OtherTool.fromDoubleToString(weightedFMeasure));
+        sb.append(line);
+        return sb.toString();
+
+    }
+
+    public String getConfusionMatrix() {
+        String line = OtherTool.getLineSeparator();
+        StringBuilder sb = new StringBuilder();
+        sb.append("=== Confusion Matrix ===").append(line).append(line);
+        sb.append("\ta\tb\t<-- classified as").append(line);
+        sb.append('\t').append(confusionMatrix[0][0]).append('\t').append(confusionMatrix[0][1]);
+        sb.append('\t').append("a = 0").append(line);
+        sb.append('\t').append(confusionMatrix[1][0]).append('\t').append(confusionMatrix[1][1]);
+        sb.append('\t').append("b = 1").append(line);
+        return sb.toString();
+    }
 
     @Override
     public String toString() {

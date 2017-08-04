@@ -35,7 +35,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
     @Override
     public void init() throws Exception {
         if (!filePath.getAbsolutePath().toLowerCase().endsWith(".csv")) {
-            throw new Exception("Please choose a CSV file");
+            throw new Exception("Current data file: " + filePath.getAbsolutePath() + "\n" + "For Test, only CSV format file is permitted.");
         }
         config = new TestConfig(filePath.getAbsolutePath());
         config.init();

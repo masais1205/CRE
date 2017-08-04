@@ -23,8 +23,9 @@ public class CRCSAlgorithm extends AbstractAlgorithm {
 
     @Override
     public void init() throws Exception {
+
         if (!filePath.getAbsolutePath().endsWith(".names")) {
-            throw new Exception("Please choose a names file");
+            throw new Exception("Current data file: " + filePath.getAbsolutePath() + "\n" + "For CR-CS, only C4.5 format file is permitted.");
         }
         config = new CRCSConfig(filePath);
         config.init();
@@ -32,14 +33,16 @@ public class CRCSAlgorithm extends AbstractAlgorithm {
 
     @Override
     public String getName() {
-        return "crcs";
+        return "CR-CS (Causal Rule mining with Corhort Study)";
     }
 
     @Override
     public String getIntroduction() {
-        return "This is a causal association rule discovery tool.\n" +
-                "This program was authored by Prof. Jiuyong Li (www.unisanet.unisa.edu.au/staff/homepage.asp?name=jiuyong.li).\n" +
-                "Contact jiuyong@unisa.edu.au to obtain a manual";
+        return "A tool for finding causal rules based on corhort study and association rule mining.\n\nReferences\n" +
+                "[1] Jiuyong Li, Thuc Duy Le, Lin Liu, Jixue Liu, Zhou Jin, Bingyu Sun, " +
+                "Saisai Ma. From Observational Studies to Causal Rule Mining, " +
+                "ACM Transactions on Intelligent Systems and Technology, 7 (2): Article 14.\n"
+                + "[2] Jiuyong Li, Lin Liu, Thuc Le. Practical approaches to causal relationship exploration. Springer, 2015.\n\n";
     }
 
     @Override

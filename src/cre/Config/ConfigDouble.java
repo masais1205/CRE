@@ -12,4 +12,11 @@ public class ConfigDouble extends ConfigBase {
         max = Double.MAX_VALUE;
         min = -Double.MAX_VALUE;
     }
+
+    public ConfigDouble(String name, String comments, String shownName, boolean visible) {
+        super(name, comments, shownName, visible);
+        max = Double.MAX_VALUE;
+        min = -Double.MAX_VALUE;
+    }
+
 }

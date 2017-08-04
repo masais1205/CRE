@@ -11,10 +11,7 @@ import cre.ui.custom.MyIconFrame;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -77,6 +74,22 @@ public class MainFrame extends MyIconFrame implements MainFrameEventHandler, Can
             tabbedPane.addTab(algorithmNames[i], new JPanel());
             tabbedPane.setEnabledAt(i + 1, false);
         }
+        tabbedPane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                for (int i = 1; i < tabbedPane.getTabCount(); i++) {
+                    Rectangle rect = tabbedPane.getBoundsAt(i);
+                    if (rect.contains(e.getX(), e.getY())) { //判断是否点在边界内
+                        if (!tabbedPane.isEnabledAt(i)) {
+                            String me = algorithmNoShownInitErrorMessage[i - 1];
+                            if (me != null) {
+                                JOptionPane.showMessageDialog(getFrame(), me, "ERROR", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    }
+                }
+            }
+        });
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new GridBagLayout());
         GridBagConstraints s = new GridBagConstraints();
@@ -92,7 +105,7 @@ public class MainFrame extends MyIconFrame implements MainFrameEventHandler, Can
         JButton logButton = new JButton("Log");
         logButton.setMargin(new Insets(0, two, 0, two));
         southPanel.add(logButton, s);
-        Tool.moveToCenter(this);
+        Tool.moveToCenter(this, true);
         System.out.println("Reassigns the \"standard\" output stream.");
         System.setOut(new PrintStream(outPutBuffer, true));
         System.err.println("Reassigns the \"standard\" error output stream.");
@@ -110,7 +123,8 @@ public class MainFrame extends MyIconFrame implements MainFrameEventHandler, Can
     private MyStringOutputStream outPutBuffer = new MyStringOutputStream();
     private JTabbedPane tabbedPane = new JTabbedPane();
 
-    private final String[] algorithmNames = {"CDT", "Test", "CR-CS", "CR-PA"};
+    private final String[] algorithmNames = {"CDT", "CR-CS", "CR-PA"};
+    private final String[] algorithmNoShownInitErrorMessage = new String[algorithmNames.length];
 
     @Override
     public void selectANewFile(File file) {
@@ -124,9 +138,6 @@ public class MainFrame extends MyIconFrame implements MainFrameEventHandler, Can
                         abstractAlgorithm = new CDTAlgorithm(file);
                         break;
                     case 1:
-                        abstractAlgorithm = new TestAlgorithm(file);
-                        break;
-                    case 2:
                         abstractAlgorithm = new CRCSAlgorithm(file);
                         break;
                     default:
@@ -143,7 +154,9 @@ public class MainFrame extends MyIconFrame implements MainFrameEventHandler, Can
                     tabbedPane.setEnabledAt(i + 1, true);
                 } catch (Throwable e) {
                     e.printStackTrace();
-                    notFitALgorithm.add(algorithmNames[i]);
+                    abstractAlgorithm.setInitErrorMessage(e.getMessage());
+                    algorithmNoShownInitErrorMessage[i] = e.getMessage();
+                    notFitALgorithm.add(algorithmNames[i] + ": " + e.getMessage());
                 }
             } else {
                 try {
@@ -152,7 +165,8 @@ public class MainFrame extends MyIconFrame implements MainFrameEventHandler, Can
                 } catch (Throwable e) {
                     e.printStackTrace();
                     panel.setCanStart(false);
-                    notFitALgorithm.add(algorithmNames[i]);
+                    panel.getAlgorithm().setInitErrorMessage(e.getMessage());
+                    notFitALgorithm.add(algorithmNames[i] + ": " + e.getMessage());
                 }
             }
         }

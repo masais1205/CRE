@@ -38,25 +38,25 @@ public class CDTAlgorithm extends AbstractAlgorithm {
 
     @Override
     public void init() throws Exception {
-        if (!filePath.getAbsolutePath().toLowerCase().endsWith(".csv")) {
-            throw new Exception("Please choose a CSV file");
+        if (!filePath.getAbsolutePath().endsWith(".csv")) {
+            throw new Exception("Current data file: " + filePath.getAbsolutePath() + ".\n" + "For CR-CS, only CSV format file is permitted.");
         }
     }
 
     @Override
     public String getName() {
-        return "CDT";
+        return "CDT (Causal Decision Tree)";
     }
 
     @Override
     public String getIntroduction() {
-        return "NAME\n" +
-                "cre.algorithm.CDT\n" +
-                "\n" +
-                "SYNOPSIS\n" +
-                "Class for generating a causal decision tree. For more information, see\n" +
-                "\n" +
-                "J. Li, S. Ma, T. Le, L. Liu, J. Liu (2015). CDT: Programs for Causal Decision Tree (Coded by S. Ma). .\n";
+        return "A tree model for discovering and representing causal relationships.\n" +
+                "\nReferences\n" +
+                "[1] Jiuyong Li, Saisai Ma, Thuc Duy Le, Lin Liu and Jixue Liu, Causal Decision Trees, " +
+                "IEEE Transactions on Knowledge and Data Engineering (TKDE), 29 (2): 257-271, 2016. \n\n"
+                + "Options\n"
+                + "Causal discovery  --  Discover and represent causal relationships using CDT.\n"
+                + "Classification  --  Build a CDT and use the causal features included in the CDT for classification\n";
     }
 
     @Override
@@ -65,8 +65,10 @@ public class CDTAlgorithm extends AbstractAlgorithm {
     }
 
     @Override
-    public AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile) {
-        return new CDTAlgorithm(newFile, this.config);
+    public AbstractAlgorithm getCloneBecauseChangeOfFile(File newFile) throws Exception {
+        CDTAlgorithm a = new CDTAlgorithm(newFile, this.config);
+        a.init();
+        return a;
     }
 
     @Override
@@ -208,8 +210,8 @@ public class CDTAlgorithm extends AbstractAlgorithm {
             CDTValidationStatistic cdt = CDTValidationStatistic.average(statistics);
             canShowOutput.showOutputString(cdt.toString());
             canShowOutput.showOutputString("");
+            canShowOutput.showOutputString(cdt.getDetailedAccuracy());
         }
-        //new CDT(config, fileName, outPutArea);
         return result;
     }
 

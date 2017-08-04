@@ -12,4 +12,10 @@ public class ConfigInt extends ConfigBase {
         min = Integer.MIN_VALUE;
         max = Integer.MAX_VALUE;
     }
+
+    public ConfigInt(String name, String comments, String shownName, boolean visible) {
+        super(name, comments, shownName, visible);
+        min = Integer.MIN_VALUE;
+        max = Integer.MAX_VALUE;
+    }
 }

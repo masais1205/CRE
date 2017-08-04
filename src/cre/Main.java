@@ -15,14 +15,14 @@ import java.util.Map;
  */
 public class Main {
     public static void main(String[] args) {
-//        try {
-//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//        } catch (ClassNotFoundException
-//                | InstantiationException
-//                | IllegalAccessException
-//                | UnsupportedLookAndFeelException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException
+                | InstantiationException
+                | IllegalAccessException
+                | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
 
         for (Map.Entry<Object, Object> i : UIManager.getDefaults().entrySet()) {
             if (i.getKey() instanceof String) {

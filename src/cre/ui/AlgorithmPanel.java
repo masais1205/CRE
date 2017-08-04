@@ -20,10 +20,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -35,7 +32,7 @@ import java.util.List;
  * Created by HanYizhao on 2017/6/26.
  */
 public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutput {
-    public AlgorithmPanel(MainFrameEventHandler mainFrame, AbstractAlgorithm algorithm) {
+    public AlgorithmPanel(final MainFrameEventHandler mainFrame, final AbstractAlgorithm algorithm) {
         this.mainFrame = mainFrame;
         this.algorithm = algorithm;
         this.setLayout(new BorderLayout());
@@ -97,11 +94,12 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         s.fill = GridBagConstraints.HORIZONTAL;
         s.insets = new Insets(five, five, five, five);
 
-        JPanel testOptionPanel = new JPanel(new GridBagLayout());
+        Document optionsDoc = Tool.getAlgorithmHelpDoc(algorithm.getName(), algorithm.getIntroduction(), null);
+
         optionPanel.add(testOptionPanel, s);
         testOptionPanel.setBorder(new MyTitledBorder("Options").setOtherInfo(helpImage,
                 helpActiveImage,
-                "fff", null, null));
+                "Click to see doc", algorithm.getName(), optionsDoc));
         ButtonGroup buttonGroup = new ButtonGroup();
         buttonGroup.add(algorithmOnlyRadio);
         buttonGroup.add(predictionRadio);
@@ -163,6 +161,9 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         validationRadio.addItemListener(this);
         crossValidationRadio.addItemListener(this);
 
+        if (algorithm instanceof CRPAAlgorithm || algorithm instanceof CRCSAlgorithm) {
+            testOptionPanel.setVisible(false);
+        }
 
         try {
             algorithmOptionPanel = ConfigSetter.createAJPanel(mainFrame.getFrame(), algorithm.getConfiguration());
@@ -170,10 +171,10 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
             s.fill = GridBagConstraints.HORIZONTAL;
             s.gridwidth = GridBagConstraints.REMAINDER;
             s.insets.set(ten, five, five, five);
-            Document helpDoc = Tool.getAlgorithmHelpDoc(algorithm.getName(), algorithm.getIntroduction(), ConfigSetter.getConfigsFromObject(algorithm.getConfiguration()));
-            algorithmOptionPanel.setBorder(new MyTitledBorder("Parameters").setOtherInfo(helpImage, helpActiveImage, helpDoc.getText(0, helpDoc.getLength()), algorithm.getName(), helpDoc));
+            Document helpDoc = Tool.getAlgorithmHelpDoc(algorithm.getName(), testOptionPanel.isVisible() ? null : algorithm.getIntroduction(), ConfigSetter.getConfigsFromObject(algorithm.getConfiguration()));
+            algorithmOptionPanel.setBorder(new MyTitledBorder("Parameters").setOtherInfo(helpImage, helpActiveImage, "Click to see doc", algorithm.getName(), helpDoc));
             optionPanel.add(algorithmOptionPanel, s);
-        } catch (ConfigSetter.ConfigException | BadLocationException e) {
+        } catch (ConfigSetter.ConfigException e) {
             e.printStackTrace();
         }
         stopButton.setEnabled(false);
@@ -181,6 +182,17 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
             @Override
             public void actionPerformed(ActionEvent e) {
                 startButtonClicked();
+            }
+        });
+        startButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!startButton.isEnabled() && runningThread == null) {
+                    String errorMessage = algorithm.getInitErrorMessage();
+                    if (errorMessage != null) {
+                        JOptionPane.showMessageDialog(mainFrame.getFrame(), errorMessage, "ERROR", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
             }
         });
         stopButton.addActionListener(new ActionListener() {
@@ -193,6 +205,11 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         rightPanel.addTab("Results", new JScrollPane(textArea));
         textArea.setEditable(false);
 
+        Font oldFont = textArea.getFont();
+        if (oldFont != null) {
+            textArea.setFont(new Font(Font.MONOSPACED, oldFont.getStyle(), oldFont.getSize()));
+        }
+
         resultList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -202,9 +219,6 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
             }
         });
 
-        if (algorithm instanceof CRPAAlgorithm || algorithm instanceof CRCSAlgorithm) {
-            testOptionPanel.setVisible(false);
-        }
 
     }
 
@@ -230,10 +244,10 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
             s.fill = GridBagConstraints.HORIZONTAL;
             s.gridwidth = GridBagConstraints.REMAINDER;
             s.insets.set(ten, five, five, five);
-            Document helpDoc = Tool.getAlgorithmHelpDoc(algorithm.getName(), algorithm.getIntroduction(), ConfigSetter.getConfigsFromObject(algorithm.getConfiguration()));
-            algorithmOptionPanel.setBorder(new MyTitledBorder("Algorithm Options").setOtherInfo(helpImage, helpActiveImage, helpDoc.getText(0, helpDoc.getLength()), algorithm.getName(), helpDoc));
+            Document helpDoc = Tool.getAlgorithmHelpDoc(algorithm.getName(), testOptionPanel.isVisible() ? null : algorithm.getIntroduction(), ConfigSetter.getConfigsFromObject(algorithm.getConfiguration()));
+            algorithmOptionPanel.setBorder(new MyTitledBorder("Parameters").setOtherInfo(helpImage, helpActiveImage, "Click to see doc", algorithm.getName(), helpDoc));
             optionPanel.add(algorithmOptionPanel, s);
-        } catch (ConfigSetter.ConfigException | BadLocationException e) {
+        } catch (ConfigSetter.ConfigException e) {
             e.printStackTrace();
         }
     }
@@ -342,7 +356,6 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
-
                             resultListItems.get(resultListItems.size() - 1).figures = panels;
                             resultListSelectedChange();
                             calculatingFinished();
@@ -395,6 +408,7 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
     private JScrollPane mScroll = new JScrollPane(optionPanelHelper);
     private JPanel optionPanel = new JPanel(new GridBagLayout());
     private JPanel algorithmOptionPanel;
+    private JPanel testOptionPanel = new JPanel(new GridBagLayout());
 
     private JRadioButton algorithmOnlyRadio = new JRadioButton("Causal discovery");
     private JRadioButton predictionRadio = new JRadioButton("Classification");

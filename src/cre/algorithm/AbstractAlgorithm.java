@@ -47,6 +47,16 @@ public abstract class AbstractAlgorithm implements Cloneable {
     public void init() throws Exception {
     }
 
+    private String initErrorMessage;
+
+    public String getInitErrorMessage() {
+        return initErrorMessage;
+    }
+
+    public void setInitErrorMessage(String initErrorMessage) {
+        this.initErrorMessage = initErrorMessage;
+    }
+
     /**
      * Get name of this algorithm.
      *
@@ -87,7 +97,7 @@ public abstract class AbstractAlgorithm implements Cloneable {
     @Override
     public String toString() {
         Cloneable config = getConfiguration();
-        return this.getName() + " " + (config == null ? " no Config" : config);
+        return this.filePath + " " + (config == null ? " no Config" : config);
     }
 
 

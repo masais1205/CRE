@@ -18,15 +18,16 @@ public class CRCSConfigBase implements Cloneable {
     protected static String[] maxRulesOptions = {"1", "2", "3", "4"};
     protected static String[] minSupportOptions = {"0.01", "0.05", "0.1"};
 
-    protected static String oddsRatioName = "Odds Ratio";
-    protected static String ChiSquareName = "Chi_square_confidence_level";
-    protected static String oddsOrChiSplit = " -- ";
+    protected static String oddsRatioName = "Odds ratio";
+    protected static String ChiSquareName = "Chi square";
+    protected static String oddsOrChiSplit = " - ";
 
     protected static String[] attributeClasses = {"Exposure", "Control", "Ignore", "Others"};
     protected String[] attributeNames;
     public PreprocessingLogic.retclass ret;
 
     protected static String[] recommendOptions = {"Recommended", "Forced"};
+    protected int maxNumberOfControlVariablesMax;
 
 
     static {

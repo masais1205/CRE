@@ -24,6 +24,7 @@ public class CRCSConfig extends CRCSConfigBase implements Cloneable {
         public double oddsratio;
         public double gsup;
         public double ChisquareValue;
+        public int maxNumberOfControlVariables;
     }
 
     /**
@@ -36,8 +37,9 @@ public class CRCSConfig extends CRCSConfigBase implements Cloneable {
     }
 
     private String maxRules;
-    private String oddsRatioOrChiSquare;
     private String minSupport;
+    private String oddsRatioOrChiSquare;
+    private int maxNumberOfControlVariables;
     private TreeMap<String, List<Integer>> type;
     private String recommend;
 
@@ -70,6 +72,44 @@ public class CRCSConfig extends CRCSConfigBase implements Cloneable {
         type.put(attributeClasses[1], new ArrayList<Integer>());
         type.put(attributeClasses[2], new ArrayList<Integer>());
         type.put(attributeClasses[3], l1);
+        super.maxNumberOfControlVariablesMax = atts.size() - 2;
+        if (maxNumberOfControlVariablesMax > 10) {
+            maxNumberOfControlVariables = 10;
+        } else {
+            if (maxNumberOfControlVariablesMax <= 0) {
+                maxNumberOfControlVariablesMax = 0;
+            }
+            maxNumberOfControlVariables = maxNumberOfControlVariablesMax;
+        }
+    }
+
+    public String getMaxNumberOfControlVariablesComment() {
+        return "The maximum number of control variables when performing causal tests. The acceptable maximum value of this parameter is (#predictor variables - 1). (default: min((#predictor variables - 1), 10))";
+    }
+
+    public int getMaxNumberOfControlVariablesMax() {
+        return maxNumberOfControlVariablesMax;
+    }
+
+    public int getMaxNumberOfControlVariablesMin() {
+        return 0;
+    }
+
+    public String getMaxNumberOfControlVariablesShownName() {
+        return "Max number of control variables";
+    }
+
+    public boolean getTypeVisible() {
+        return false;
+    }
+
+    public boolean getRecommendVisible() {
+        return false;
+    }
+
+    public String getRecommendComment() {
+        return "\nForced: user choose\n" +
+                "Recommended: user choose + algrithm choose.";
     }
 
     public String[] getRecommendList() {
@@ -89,11 +129,11 @@ public class CRCSConfig extends CRCSConfigBase implements Cloneable {
     }
 
     public String getMaxRulesShownName() {
-        return "Max level of combined rules";
+        return "Max rule level";
     }
 
     public String getMaxRulesComment() {
-        return "l(max) in the CR-CS algorithm, which is the maximum level of combined causes that users desire, e.g. select 2 for mining single and combined (level 2) causal rules.";
+        return "The maximum number of items in the LHS of a causal rule. For example, If 2 is selected, a causal rule discovered may contain 1 or 2 items in its LHS. (default: 1)";
     }
 
     public String[] getOddsRatioOrChiSquareList() {
@@ -101,15 +141,14 @@ public class CRCSConfig extends CRCSConfigBase implements Cloneable {
     }
 
     public String getOddsRatioOrChiSquareShownName() {
-        return "Statistical measures";
+        return "Test measures";
     }
 
-    public String getOddsRatioOrChiSquareComment(){
-        return "Odds Ratio: the odds ratio threshold for mining association rules and " +
-                "causal rules. The default value is \"lower bound\", which uses the lower " +
-                "bound of the confidence interval of the odds ratio as the criterion (see " +
-                "Appendix A for more details).\n" + "Chi Square:" + "Chi-square confidence level, the confidence level of the Chi-square " +
-                "tests";
+    public String getOddsRatioOrChiSquareComment() {
+        return "\nOdds ratio -- lower bound: odds ratio is used to measure the strength of the relationship and lower bound approach is to test the significance of the relationship.\n" +
+                "Odds ratio -- threshold: odds ratio is used to measure the strength of the relationship and a user selected odds ratio threshold is used.\n"
+                + "Chi Square -- threshold: Chi square test is used with the selected confidence level.\n"
+                + "(default: \"Odds ratio -- lower bound\"; see Appendix A in Reference [2] for more details)";
     }
 
 
@@ -118,7 +157,7 @@ public class CRCSConfig extends CRCSConfigBase implements Cloneable {
     }
 
     public String getMinSupportComment() {
-        return "the minimum support, i.e. m(supp) in the CR-CS algorithm";
+        return "The percentages of data samples that support a rule. (default: 0.05)";
     }
 
     public String getMinSupportShownName() {
@@ -208,6 +247,7 @@ public class CRCSConfig extends CRCSConfigBase implements Cloneable {
         P p = new P();
         p.num_combinedvariables = Integer.parseInt(this.maxRules);
         p.gsup = Double.parseDouble(this.minSupport);
+        p.maxNumberOfControlVariables = this.maxNumberOfControlVariables;
         if (this.oddsRatioOrChiSquare.startsWith(oddsRatioName)) {
             String value = this.oddsRatioOrChiSquare.substring(oddsRatioName.length() + oddsOrChiSplit.length());
             try {
@@ -281,11 +321,20 @@ public class CRCSConfig extends CRCSConfigBase implements Cloneable {
         return recommend;
     }
 
+    public int getMaxNumberOfControlVariables() {
+        return maxNumberOfControlVariables;
+    }
+
+    public void setMaxNumberOfControlVariables(int maxNumberOfControlVariables) {
+        this.maxNumberOfControlVariables = maxNumberOfControlVariables;
+    }
+
     @Override
     public String toString() {
         return "max Rules=" + maxRules +
-                ", oddsRatioOrChiSquare=" + oddsRatioOrChiSquare +
                 ", minSupport=" + minSupport +
+                ", oddsRatioOrChiSquare=" + oddsRatioOrChiSquare +
+                ", maxNumberOfControlVariables=" + maxNumberOfControlVariables +
                 ", recommend=" + recommend;
     }
 }

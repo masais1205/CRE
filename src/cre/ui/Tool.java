@@ -43,21 +43,23 @@ public class Tool {
         StyleConstants.setFontSize(set, Tool.HighResolution(12));
         StyleConstants.setBold(set, false);
         try {
-            helpDoc.insertString(helpDoc.getLength(), "\n" + algorithmIntroduction + "\n", set);
+            if (algorithmIntroduction != null) {
+                helpDoc.insertString(helpDoc.getLength(), "\n" + algorithmIntroduction + "\n", set);
+            }
+            if (configBases != null) {
+                for (ConfigBase i : configBases) {
+                    if (i.isVisible()) {
+                        StyleConstants.setFontSize(set, Tool.HighResolution(14));
+                        StyleConstants.setBold(set, true);
+                        helpDoc.insertString(helpDoc.getLength(), "\n" + i.getShownName(), set);
+                        StyleConstants.setFontSize(set, Tool.HighResolution(12));
+                        StyleConstants.setBold(set, false);
+                        helpDoc.insertString(helpDoc.getLength(), "    -    " + i.getComments() + "\n", set);
+                    }
+                }
+            }
         } catch (BadLocationException e) {
             e.printStackTrace();
-        }
-        for (ConfigBase i : configBases) {
-            try {
-                StyleConstants.setFontSize(set, Tool.HighResolution(12));
-                StyleConstants.setBold(set, true);
-                helpDoc.insertString(helpDoc.getLength(), "\n" + i.getShownName(), set);
-                StyleConstants.setFontSize(set, Tool.HighResolution(10));
-                StyleConstants.setBold(set, false);
-                helpDoc.insertString(helpDoc.getLength(), "    -    " + i.getComments() + "\n", set);
-            } catch (BadLocationException e) {
-                e.printStackTrace();
-            }
         }
         return helpDoc;
     }

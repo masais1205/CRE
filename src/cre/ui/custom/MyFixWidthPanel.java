@@ -1,11 +1,13 @@
 package cre.ui.custom;
-/**
- * Created by HanYizhao on 2017/7/31.
- */
 
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Created by HanYizhao on 2017/7/31.
+ * <p>
+ * My blog: http://blog.csdn.net/sun_wu/article/details/76436742
+ */
 public class MyFixWidthPanel extends JPanel implements Scrollable {
     public MyFixWidthPanel() {
         super();

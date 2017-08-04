@@ -9,4 +9,8 @@ public class ConfigString extends ConfigBase {
     public ConfigString(String name, String comments, String shownName) {
         super(name, comments, shownName);
     }
+
+    public ConfigString(String name, String comments, String shownName, boolean visible) {
+        super(name, comments, shownName, visible);
+    }
 }

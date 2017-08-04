@@ -25,7 +25,7 @@ public class CRPAAlgorithm extends AbstractAlgorithm {
     @Override
     public void init() throws Exception {
         if (!filePath.getAbsolutePath().endsWith(".names")) {
-            throw new Exception("Please choose a names file");
+            throw new Exception("Current data file: " + filePath.getAbsolutePath() + "\n" + "For CR-PA, only C4.5 format file is permitted.");
         }
         config = new CRPAConfig(filePath);
         config.init();
@@ -33,12 +33,16 @@ public class CRPAAlgorithm extends AbstractAlgorithm {
 
     @Override
     public String getName() {
-        return "CR-PA";
+        return "CR-PA (Causal Rule-Partial Association)";
     }
 
     @Override
     public String getIntroduction() {
-        return "CR-PA is a causal association rule discovery tool.\nPaper: Discovery of Causal Rules Using Partial Association, (ICDM 2012).";
+        return "A tool for discovering causal rules base on partial associations.\n\nReferences\n" +
+                "[1] Zhou Jin, Jiuyong Li, Lin Liu, Thuc Le, Bingyu Sun, Rujing Wang. " +
+                "Discovery of Causal Rules Using Partial Association, " +
+                "in IEEE 12th International Conference on Data Mining, IEEE Press, pp. 309-318.\n"
+                + "[2] Jiuyong Li, Lin Liu, Thuc Le. Practical approaches to causal relationship exploration. Springer, 2015.\n\n";
     }
 
     @Override
