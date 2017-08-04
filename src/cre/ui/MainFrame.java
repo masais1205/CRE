@@ -172,7 +172,7 @@ public class MainFrame extends MyIconFrame implements MainFrameEventHandler, Can
         }
         if (notFitALgorithm.size() > 0) {
             showStatus(notFitALgorithm.size() + " algorithm" + (notFitALgorithm.size() == 1 ? "" : "s")
-                    + " can not handle this file. " + Arrays.toString(notFitALgorithm.toArray()));
+                    + " can not handle this file. See log for more details.");
         }
     }
 

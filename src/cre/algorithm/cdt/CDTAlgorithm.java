@@ -56,7 +56,7 @@ public class CDTAlgorithm extends AbstractAlgorithm {
                 "IEEE Transactions on Knowledge and Data Engineering (TKDE), 29 (2): 257-271, 2016. \n\n"
                 + "Options\n"
                 + "Causal discovery  --  Discover and represent causal relationships using CDT.\n"
-                + "Classification  --  Build a CDT and use the causal features included in the CDT for classification\n";
+                + "Classification  --  Build a CDT and use the causal features included in the CDT for classification.\n";
     }
 
     @Override

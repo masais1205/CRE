@@ -72,20 +72,22 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         s.insets = new Insets(0, 0, 0, 0);
         leftPanel.add(mScroll, JSplitPane.TOP);
 
-
+        JPanel startStopPanel = new JPanel(new GridLayout(1, 2, ten, 0));
+        startStopPanel.add(startButton);
+        startStopPanel.add(stopButton);
+        s.weightx = 1;
         s.weighty = 0;
-        s.insets.set(ten, five, five, five);
-        s.gridwidth = 1;
-        leftBottomPanel.add(startButton, s);
-        s.insets.set(ten, five, five, seven);
         s.gridwidth = GridBagConstraints.REMAINDER;
-        leftBottomPanel.add(stopButton, s);
+        s.insets.set(seven, five, five, five);
+        leftBottomPanel.add(startStopPanel, s);
 
+
+        s.weightx = 1;
         s.insets.set(0, five, 0, five);
-        JScrollPane scrollPane = new JScrollPane(resultList);
-        scrollPane.setBorder(new MyTitledBorder("Result list"));
         s.weighty = 1;
         s.fill = GridBagConstraints.BOTH;
+        JScrollPane scrollPane = new JScrollPane(resultList);
+        scrollPane.setBorder(new MyTitledBorder("Result list"));
         leftBottomPanel.add(scrollPane, s);
 
         s.weightx = 1;
@@ -187,10 +189,12 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         startButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (!startButton.isEnabled() && runningThread == null) {
-                    String errorMessage = algorithm.getInitErrorMessage();
-                    if (errorMessage != null) {
-                        JOptionPane.showMessageDialog(mainFrame.getFrame(), errorMessage, "ERROR", JOptionPane.ERROR_MESSAGE);
+                if (!startButton.isEnabled()) {
+                    if (runningThread == null) {
+                        String errorMessage = algorithm.getInitErrorMessage();
+                        if (errorMessage != null) {
+                            JOptionPane.showMessageDialog(mainFrame.getFrame(), errorMessage, "ERROR", JOptionPane.ERROR_MESSAGE);
+                        }
                     }
                 }
             }
@@ -295,6 +299,7 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
      * Called when the calculation is finished.
      */
     private void calculatingFinished() {
+        startButton.setText("Start");
         startButton.setEnabled(canStart);
         stopButton.setEnabled(false);
         runningThread = null;
@@ -326,6 +331,7 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
                 return;
             }
             startButton.setEnabled(false);
+            startButton.setText("Running");
             stopButton.setEnabled(true);
             ResultListItem item = new ResultListItem();
             item.algorithm = calculatingAlgorithm;

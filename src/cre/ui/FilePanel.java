@@ -82,7 +82,7 @@ public class FilePanel extends JPanel {
                                     "1. row headers are not permitted,\n" +
                                     "2. column headers (first row) must be attribute names,\n" +
                                     "3. instances are store from row 2 onwards,\n" +
-                                    "4. attributes have binary values (i.e. 0 or 1).\n\n", set2);
+                                    "4. Values of attributes must be binary (i.e. 0 or 1).\n\n", set2);
                     document.insertString(document.getLength(), "CR-CS", set);
                     document.insertString(document.getLength(), " requires an input data file in C4.5 format.\n\n", set2);
                     document.insertString(document.getLength(), "CR-PA", set);

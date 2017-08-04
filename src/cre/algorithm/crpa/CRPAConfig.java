@@ -133,7 +133,7 @@ public class CRPAConfig extends CRPAConfigBase {
     public String getOddsRatioOrChiSquareComment() {
         return "\nOdds ratio -- lower bound: odds ratio is used to measure the strength of the relationship and lower bound approach is to test the significance of the relationship.\n" +
                 "Odds ratio -- threshold: odds ratio is used to measure the strength of the relationship and a user selected odds ratio threshold is used.\n"
-                + "Chi Square -- threshold: Chi square test is used with the selected confidence level.\n"
+                + "Chi Square -- confidence level: Chi square test is used with the selected confidence level.\n"
                 + "(default: \"Odds ratio -- lower bound\"; see Appendix A in Reference [2] for more details)";
     }
 
