@@ -1,0 +1,35 @@
+Index: CRE.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- CRE.iml	(date 1570340125000)
++++ CRE.iml	(date 1569936470115)
+@@ -9,5 +9,8 @@
+     <orderEntry type="sourceFolder" forTests="false" />
+     <orderEntry type="library" name="batik-1.9-simplify" level="project" />
+     <orderEntry type="library" name="common-math" level="project" />
++    <orderEntry type="library" name="REngine" level="project" />
++    <orderEntry type="library" name="RserveEngine" level="project" />
++    <orderEntry type="library" name="guava-23.0" level="project" />
+   </component>
+ </module>
+\ No newline at end of file
+Index: .idea/libraries/guava_23_0.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/libraries/guava_23_0.xml	(date 1569936470178)
++++ .idea/libraries/guava_23_0.xml	(date 1569936470178)
+@@ -0,0 +1,9 @@
++<component name="libraryTable">
++  <library name="guava-23.0">
++    <CLASSES>
++      <root url="jar://$PROJECT_DIR$/lib/guava-23.0.jar!/" />
++    </CLASSES>
++    <JAVADOC />
++    <SOURCES />
++  </library>
++</component>
+\ No newline at end of file

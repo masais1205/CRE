@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="RserveEngine">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/RserveEngine.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
