@@ -328,12 +328,12 @@ public class TestOldAlgorithm {
 
             /////////////
             List<AbstractCE> mergeResult = new ArrayList<>();
-            CEAlgorithm.doMerge(trainingData.values(), mergeResult, XPSorted,
-                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+//            CEAlgorithm.doMerge(trainingData.values(), mergeResult, XPSorted,
+//                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             // add by mss, reliability first
-//            CEAlgorithm.doMergeReliability(trainingData.values(), mergeResult, XPSorted,
-//                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+            CEAlgorithm.doMergeReliability(trainingData.values(), mergeResult, XPSorted,
+                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             //show pattern numbers after generation
             countPlus = 0;
