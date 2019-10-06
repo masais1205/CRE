@@ -16,6 +16,7 @@ public class NumberCE extends AbstractCE {
         super(buffer);
     }
 
+
     public void addItem(boolean W, double Y) {
         if (W) {
             trueList.add(Y);
@@ -89,6 +90,23 @@ public class NumberCE extends AbstractCE {
     public int getInstanceNumber() {
         return trueList.size() + falseList.size();
     }
+
+
+    @Override
+    public void updateStatistics() {
+        statistics[0] = trueList.size();
+        statistics[1] = falseList.size();
+        for(int i=2; i<5; i++)
+            statistics[i] = -1;
+    }
+
+
+    @Override
+    public void updateReliable() {
+        int num = getInstanceNumber();
+        reliable = num >= 20 ? true : false;
+    }
+
 
     @Override
     public String toString() {

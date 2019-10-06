@@ -1,6 +1,9 @@
 package cre.algorithm.test.ce;
 
+import java.util.Arrays;
 import java.util.Locale;
+import cre.ui.AlgorithmPanel;
+import cre.ui.MainFrameEventHandler;
 
 /**
  * Created by HanYizhao on 2017/3/9.
@@ -34,6 +37,11 @@ public class TrueFalseCE extends AbstractCE {
     }
 
 
+    /**
+     * The interface in which there are functions MainFrame provide.
+     */
+    private MainFrameEventHandler mainFrame;
+
     @Override
     public void updateCEValue(double zc) {
         double[] tempStatisticValue = new double[4];
@@ -52,6 +60,18 @@ public class TrueFalseCE extends AbstractCE {
         double z = (Math.abs(p1 - p2) - temp / 2)
                 / Math.sqrt(p_av * (1.0 - p_av) * temp);
 
+        // modified by mss, commented z > zc
+//        double thre = 0;
+//        if (p1-p2 < 0-thre) {
+//            cEValue = CEValue.MINUS;
+//        }
+//        else if (p1-p2 > thre) {
+//            cEValue = CEValue.PLUS;
+//        }
+//        else {
+//            cEValue = CEValue.QUESTION;
+//        }
+        // mss
         if (p1 < p2) {
             //System.out.println(z + "\t" + this);
             if (z > zc) {
@@ -75,6 +95,13 @@ public class TrueFalseCE extends AbstractCE {
     }
 
 
+    @Override
+    public void updateReliable() {
+        int num = getInstanceNumber();
+        reliable = num >= 20 ? true : false;
+    }
+
+
     public void addItem(boolean W, boolean Y) {
         if (W) {
             if (Y) {
@@ -89,6 +116,20 @@ public class TrueFalseCE extends AbstractCE {
                 statisticValue[3]++;
             }
         }
+    }
+
+    @Override
+    public void updateStatistics() {
+        for (int i = 0; i < 4; i++) {
+            statistics[i] = statisticValue[i] == 0 ? 0.5 : statisticValue[i];
+        }
+        double WAll0 = statistics[2] + statistics[3];
+        double WAll1 = statistics[0] + statistics[1];
+
+        double p1 = statistics[0] / WAll1;
+        double p2 = statistics[2] / WAll0;
+        statistics[4] = p1 - p2;
+        System.out.println(Arrays.toString(statistics));
     }
 
 

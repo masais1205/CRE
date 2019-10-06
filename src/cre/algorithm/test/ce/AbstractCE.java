@@ -8,6 +8,10 @@ public abstract class AbstractCE {
 
     public CEValue cEValue;
 
+    public double[] statistics = new double[5];
+
+    public boolean reliable;
+
     public AbstractCE(char[] buffer) {
         value = new char[buffer.length];
         System.arraycopy(buffer, 0, value, 0, buffer.length);
@@ -18,5 +22,9 @@ public abstract class AbstractCE {
     public abstract void updateCEValue(double zc);
 
     public abstract int getInstanceNumber();
+
+    public abstract void updateStatistics();
+
+    public abstract void updateReliable();
 
 }

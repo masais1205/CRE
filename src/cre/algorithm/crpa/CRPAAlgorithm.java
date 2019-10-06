@@ -71,7 +71,7 @@ public class CRPAAlgorithm extends AbstractAlgorithm {
         try {
             ppl.loadData(nameFileContent, new File(ret.fileName + ".data"));
         } catch (Exception e) {
-            canShowOutput.showOutputString("ERROR:" + e.getMessage());
+            canShowOutput.showOutputString("ERROR. See log for more details");
             e.printStackTrace();
         }
         ret = ppl.getData();
@@ -93,7 +93,7 @@ public class CRPAAlgorithm extends AbstractAlgorithm {
             CRPA crpa = new CRPA(3, input2, ret, p, v, canShowOutput);
         } catch (Exception e) {
             e.printStackTrace();
-            canShowOutput.showOutputString("ERROR:" + e.getMessage());
+            canShowOutput.showOutputString("ERROR. See log for more details");
         }
         return null;
     }

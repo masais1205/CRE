@@ -1,11 +1,16 @@
 package cre.algorithm.test.ce;
 
+import com.google.common.collect.Table;
 import cre.algorithm.CanShowOutput;
 import cre.algorithm.test.MathListCombination;
+import cre.algorithm.test.Statistic;
+import org.apache.commons.math3.ml.distance.DistanceMeasure;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+
+import static cre.algorithm.test.ce.DistMeasure.minDistLocation.sortDist;
 
 /**
  * Created by HanYizhao on 4/13/2017.
@@ -189,6 +194,99 @@ public class CEAlgorithm {
         mergeSimpleList(minusResult, result, mc, CEValue.MINUS, canShowOutput);
         result.addAll(questionResult);
         canShowOutput.showLogString("All Finish:" + result.size());
+    }
+
+    public static int[] getMergePoistion(String xor) {
+        List<Integer> positionsList = new ArrayList<>();
+        for(int i = 0; i < xor.length(); i++){
+            if(xor.charAt(i) == '1'){
+                positionsList.add(i);
+            }
+        }
+        int[] positions = new int[positionsList.size()];
+        for (int i=0; i<positionsList.size(); i++)
+            positions[i] = positionsList.get(i);
+        return positions;
+    }
+
+    public static void doMergeReliability(Collection<AbstractCE> old, List<AbstractCE> result,
+                               int[] order, int[] reverseOrder, double zc,
+                               HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {
+        List<AbstractCE> CEList = new ArrayList<>();
+        for (AbstractCE i : old) {
+            i.updateReliable();
+            i.updateStatistics();
+            CEList.add(i);
+        }
+
+        DistMeasure distMeasure = new DistMeasure();
+        distMeasure.buildDistanceMatrix(CEList);
+        Table<Integer, Integer, String> xorMatrix = distMeasure.xorMatrix;
+        Table<Integer, Integer, Integer> distanceMatrix = distMeasure.distanceMatrix;
+
+        int n = CEList.size();
+        System.out.println(CEList.size());
+        System.out.println(distanceMatrix.size());
+        for (int j=0; j<n; j++) {
+            for (int k = 0; k<n; k++) {
+                System.out.print(distanceMatrix.get(j,k));
+                System.out.print("\t");
+            }
+            System.out.println();
+        }
+        System.out.println("=========================");
+
+        List<DistMeasure.minDistLocation> location = new ArrayList<>();
+        Map<Integer, Integer> row = new HashMap<>();
+        int distance, cntUnreliable;
+        double diffCE;
+        for(int j=1; j<n; j++) {
+            row = distanceMatrix.row(j);
+
+//            Map.Entry<Integer, Integer> min = null;
+//            for (Map.Entry<Integer, Integer> entry : row.entrySet()) {
+//                if (min == null || min.getValue() > entry.getValue()) {
+//                    min = entry;
+//                }
+//            }
+//            // min.getKey() & min.getValue() // key & value
+
+            for(int k=0; k<j; k++) {
+                cntUnreliable = 0;
+                distance = row.get(k);
+                if (! CEList.get(j).reliable)
+                    cntUnreliable++;
+                if (! CEList.get(k).reliable)
+                    cntUnreliable++;
+                diffCE = Math.abs(CEList.get(j).statistics[4] - CEList.get(k).statistics[4]);
+                location.add(new DistMeasure.minDistLocation(j, k, distance, cntUnreliable, diffCE));
+            }
+
+        }
+
+        sortDist(location);
+
+        List<Integer> mergerdIndex = new ArrayList<>();
+        int jdx, kdx;
+        for(DistMeasure.minDistLocation loc : location) {
+            jdx = loc.rowIndex;
+            kdx = loc.colIndex;
+            if (mergerdIndex.indexOf(jdx)>=0 || mergerdIndex.indexOf(kdx)>=0)
+                continue;
+            mergerdIndex.add(jdx);
+            mergerdIndex.add(kdx);
+
+            String xor = xorMatrix.get(jdx, kdx);
+            int[] positions = getMergePoistion(xor);
+            AbstractCE newCE = CEList.get(jdx).mergeInstance(CEList.get(kdx),
+                    positions, char_QUESTION, null, zc);
+
+            result.add(newCE);
+        }
+
+        for (int i=0; i<CEList.size(); i++)
+            if (mergerdIndex.indexOf(i) < 0)
+                result.add(CEList.get(i));
     }
 
 

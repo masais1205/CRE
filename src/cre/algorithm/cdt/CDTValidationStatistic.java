@@ -22,8 +22,8 @@ public class CDTValidationStatistic {
 
     public int[][] confusionMatrix = new int[2][2];
 
-    public double truePrecious, falsePrecious, trueRecall, falseRecall, trueFMeasure, falseFMeasure,
-            weightedPrecious, weightedRecall, weightedFMeasure;
+    public double truePrecision, falsePrecision, trueRecall, falseRecall, trueFMeasure, falseFMeasure,
+            weightedPrecision, weightedRecall, weightedFMeasure;
 
     private CDTValidationStatistic() {
     }
@@ -70,13 +70,13 @@ public class CDTValidationStatistic {
         relativeAbsoluteError = RAE_TopSum / RAE_BottomSum;
         rootRelativeSquaredError = Math.sqrt(RRSE_TopSum / RRSE_BottomSum);
 
-        truePrecious = getPrecision(true);
-        falsePrecious = getPrecision(false);
+        truePrecision = getPrecision(true);
+        falsePrecision = getPrecision(false);
         trueRecall = getRecall(true);
         falseRecall = getRecall(false);
         trueFMeasure = getFMeasure(true);
         falseFMeasure = getFMeasure(false);
-        weightedPrecious = getWeightedPrecision();
+        weightedPrecision = getWeightedPrecision();
         weightedRecall = getWeightedRecall();
         weightedFMeasure = getWeightedFMeasure();
     }
@@ -85,14 +85,14 @@ public class CDTValidationStatistic {
         CDTValidationStatistic n = new CDTValidationStatistic();
         int[] count = new int[6];
         for (CDTValidationStatistic i : all) {
-            n.truePrecious += i.truePrecious;
+            n.truePrecision += i.truePrecision;
             n.trueRecall += i.trueRecall;
             n.trueFMeasure += i.trueFMeasure;
-            n.falsePrecious += i.falsePrecious;
+            n.falsePrecision += i.falsePrecision;
             n.falseRecall += i.falseRecall;
             n.falseFMeasure += i.falseFMeasure;
             n.weightedFMeasure += i.weightedFMeasure;
-            n.weightedPrecious += i.weightedPrecious;
+            n.weightedPrecision += i.weightedPrecision;
             n.weightedRecall += i.weightedRecall;
 
             n.correctCount += i.correctCount;
@@ -123,14 +123,14 @@ public class CDTValidationStatistic {
             }
         }
 
-        n.truePrecious /= all.size();
+        n.truePrecision /= all.size();
         n.trueRecall /= all.size();
         n.trueFMeasure /= all.size();
-        n.falsePrecious /= all.size();
+        n.falsePrecision /= all.size();
         n.falseRecall /= all.size();
         n.falseFMeasure /= all.size();
         n.weightedFMeasure /= all.size();
-        n.weightedPrecious /= all.size();
+        n.weightedPrecision /= all.size();
         n.weightedRecall /= all.size();
 
         n.correctCount = Math.round((float) n.correctCount / all.size());
@@ -222,16 +222,16 @@ public class CDTValidationStatistic {
         String line = OtherTool.getLineSeparator();
         StringBuilder sb = new StringBuilder();
         sb.append("=== Detailed Accuracy By Class ===").append(line).append(line);
-        sb.append("                 Precious  Recall  F-Measure  Class").append(line);
-        sb.append("                 ").append(OtherTool.fromDoubleToString(falsePrecious));
+        sb.append("                 Precision  Recall  F-Measure  Class").append(line);
+        sb.append("                 ").append(OtherTool.fromDoubleToString(falsePrecision));
         sb.append("    ").append(OtherTool.fromDoubleToString(falseRecall));
         sb.append("  ").append(OtherTool.fromDoubleToString(falseFMeasure));
         sb.append("     0").append(line);
-        sb.append("                 ").append(OtherTool.fromDoubleToString(truePrecious));
+        sb.append("                 ").append(OtherTool.fromDoubleToString(truePrecision));
         sb.append("    ").append(OtherTool.fromDoubleToString(trueRecall));
         sb.append("  ").append(OtherTool.fromDoubleToString(trueFMeasure));
         sb.append("     1").append(line);
-        sb.append("Weighted Avg.    ").append(OtherTool.fromDoubleToString(weightedPrecious));
+        sb.append("Weighted Avg.    ").append(OtherTool.fromDoubleToString(weightedPrecision));
         sb.append("    ").append(OtherTool.fromDoubleToString(weightedRecall));
         sb.append("  ").append(OtherTool.fromDoubleToString(weightedFMeasure));
         sb.append(line);

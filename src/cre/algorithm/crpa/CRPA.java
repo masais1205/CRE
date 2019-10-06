@@ -10045,7 +10045,7 @@ public class CRPA {
             fp.close();
             fWrite.close();
         } catch (Exception e) {
-            canShowOutput.showOutputString("ERROR:" + e.getMessage());
+            canShowOutput.showOutputString("ERROR. See log for more details");
             e.printStackTrace();
         }
     }
@@ -11467,7 +11467,7 @@ public class CRPA {
         try {
             out.write(String.format(s, a));
         } catch (IOException e) {
-            canShowOutput.showOutputString("ERROR:" + e.getMessage());
+            canShowOutput.showOutputString("ERROR. See log for more details");
             e.printStackTrace();
         }
     }

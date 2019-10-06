@@ -123,7 +123,7 @@ public class MainFrame extends MyIconFrame implements MainFrameEventHandler, Can
     private MyStringOutputStream outPutBuffer = new MyStringOutputStream();
     private JTabbedPane tabbedPane = new JTabbedPane();
 
-    private final String[] algorithmNames = {"CDT", "CR-CS", "CR-PA"};
+    private final String[] algorithmNames = {"CDT", "CR-CS", "CR-PA", "DEEP"};
     private final String[] algorithmNoShownInitErrorMessage = new String[algorithmNames.length];
 
     @Override
@@ -134,14 +134,18 @@ public class MainFrame extends MyIconFrame implements MainFrameEventHandler, Can
             if (panel == null) {
                 AbstractAlgorithm abstractAlgorithm;
                 switch (i) {
+                    // commented by mss
                     case 0:
                         abstractAlgorithm = new CDTAlgorithm(file);
                         break;
                     case 1:
                         abstractAlgorithm = new CRCSAlgorithm(file);
                         break;
-                    default:
+                    case 2:
                         abstractAlgorithm = new CRPAAlgorithm(file);
+                        break;
+                    default:
+                        abstractAlgorithm = new TestAlgorithm(file);
                         break;
                 }
                 try {

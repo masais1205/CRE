@@ -348,7 +348,7 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
                         panelss = calculatingAlgorithm.doMyAlgorithm(AlgorithmPanel.this, canShowStatus, nowOtherConfig);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        AlgorithmPanel.this.showOutputString("ERROR:" + e.getMessage());
+                        AlgorithmPanel.this.showOutputString("ERROR. See log for more details");
                     }
                     final List<ResizablePanel> panels = panelss;
                     long endTime = System.nanoTime();

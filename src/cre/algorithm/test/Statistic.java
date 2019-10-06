@@ -1,9 +1,15 @@
 package cre.algorithm.test;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+import cre.algorithm.test.ce.AbstractCE;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+
+import static java.lang.Math.abs;
 
 /**
  * Created by HanYizhao on 2017/5/24.
@@ -14,6 +20,7 @@ public class Statistic {
     public double patternMatch;
     public double sd;
     public double recall;
+
 
     public static Statistic average(Collection<Statistic> data) {
         Statistic result = new Statistic();

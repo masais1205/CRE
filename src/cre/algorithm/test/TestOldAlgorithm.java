@@ -8,11 +8,18 @@ import cre.algorithm.test.ce.*;
 
 import cre.algorithm.tool.FileTool;
 import cre.algorithm.tool.OtherTool;
+import cre.algorithm.tool.TemporaryFileManager;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
+
+import org.rosuda.REngine.REXP;
+import org.rosuda.REngine.REXPMismatchException;
+import org.rosuda.REngine.Rserve.RConnection;
+import org.rosuda.REngine.Rserve.RserveException;
 
 /**
  * Created by HanYizhao on 2017/3/9.
@@ -26,6 +33,89 @@ public class TestOldAlgorithm {
                                   CanShowOutput canShowOutput, boolean isTesting) throws CalculatingException {
 
         BufferedReader br = null;
+
+        // modified by mss
+        int[] XPArray_question_blacklist = new int[XPArray.length];
+
+//        String rFileName = "";
+//        try {
+//            File f = TemporaryFileManager.getInstance().releasePackedFile("/r_code/adjustment.R");
+//            rFileName = f.getAbsolutePath();
+//            canShowOutput.showOutputString(f.getAbsolutePath());
+//        } catch (Exception e) {
+//            canShowOutput.showOutputString(e.toString());
+//            e.printStackTrace();
+//        }
+
+        try {
+            int[] XPArray_R = new int[XPArray.length];
+            RConnection c = new RConnection();
+            String filePath = fileName.replace("\\","/");
+//            String rFileName = "C:/Users/maysy020/Documents/adjustment.R";
+            File f = TemporaryFileManager.getInstance().releasePackedFile("/r_code/adjustment.R");
+            String rFileName = f.getAbsolutePath();
+            rFileName = rFileName.replace("\\","/");
+//            canShowOutput.showOutputString(rFileName);
+            c.eval("source(\"" + rFileName + "\")");
+
+            c.assign("fileName", fileName);
+            int[] w = new int[1];
+            w[0] = WP;
+            c.assign("w", w);
+            int[] y = new int[1];
+            y[0] = YP;
+            c.assign("y", y);
+            int[] xArray = XPArray;
+            c.assign("xArray", xArray);
+            double[] alpha = new double[1];
+            alpha[0] = 0.005;
+            c.assign("alpha", alpha);
+
+            c.assign(".tmp.", "adjustment(fileName,w,y,xArray,alpha)");
+            REXP r = c.parseAndEval("try(eval(parse(text=.tmp.)),silent=TRUE)");
+            if (r.inherits("try-error")) {
+                canShowOutput.showOutputString("Error: " + r.asString());
+                c.close();
+//                return 0;
+            }
+
+            REXP XPArray_REXP = c.eval("adjustment(fileName,w,y,xArray,alpha)");
+            XPArray_R = XPArray_REXP.asIntegers();
+//            for(int xp : XPArray_R)
+//                canShowOutput.showOutputString(String.valueOf(xp));
+//            canShowOutput.showOutputString("String.valueOf(xp)");
+
+            boolean flag = true;
+            int cnt_xp = 0;
+            int cnt_xp_black = 0;
+            for(int xp: XPArray_R) {
+                if(xp < 0)
+                    flag = false;
+                else {
+                    XPArray[cnt_xp] = xp;
+                    cnt_xp++;
+                }
+                if(flag) {
+                    XPArray_question_blacklist[cnt_xp_black] = xp;
+                    cnt_xp_black++;
+                }
+            }
+            XPArray = trimlength(XPArray, cnt_xp);
+            XPArray_question_blacklist = trimlength(XPArray_question_blacklist, cnt_xp_black);
+//            canShowOutput.showOutputString("Z+C");
+//            for(int xp : XPArray)
+//                canShowOutput.showOutputString(String.valueOf(xp));
+//            canShowOutput.showOutputString("Z");
+//            for(int xp : XPArray)
+//                canShowOutput.showOutputString(String.valueOf(xp));
+//            canShowOutput.showOutputString("stop");
+
+            c.close();
+        } catch (Exception e) {
+            canShowOutput.showOutputString(e.toString());
+        } // mss
+
+
         int[] XPSorted;
         int[] XPReverseSorted;
         try {
@@ -106,6 +196,7 @@ public class TestOldAlgorithm {
                 }
                 count++;
             }
+
             /////////show OR
             {
                 StringBuilder sb = new StringBuilder();
@@ -155,11 +246,25 @@ public class TestOldAlgorithm {
                     orWXPNoFitOddsRatio.add(tempValue);
                 }
             }
+            // modified by mss, add question black list (i.e. Z) to orYXPNoFitOddsRatio
+            List<Integer> tempIndex = new ArrayList<>();
+            if(XPArray_question_blacklist.length > 0) {
+                for(int xp: XPArray_question_blacklist)
+                    tempIndex.add(Arrays.binarySearch(XPArray, xp));
+            }
+            // mss
             for (int i = 0; i < orYX.length; i++) {
                 Integer tempValue = ((Integer) orYX[i].getAttach());
                 XPSorted[i] = tempValue;
-                if (orYX[i].getOR(false) > odd_ratio) {
+                if (orYX[i].getOR(false) > odd_ratio && !orYXPNoFitOddsRatio.contains(tempValue)) {
+//                    canShowOutput.showOutputString("OR threshold " + String.valueOf(XPArray[tempValue]));
                     orYXPNoFitOddsRatio.add(tempValue);
+                }
+                else {
+                    if(tempIndex.size() > 0 && tempIndex.contains(tempValue) && !orYXPNoFitOddsRatio.contains(tempValue)) {
+                        orYXPNoFitOddsRatio.add(tempValue);
+//                        canShowOutput.showOutputString("C " + String.valueOf(XPArray[tempValue]));
+                    }
                 }
             }
 
@@ -170,6 +275,7 @@ public class TestOldAlgorithm {
 
             for (AbstractCE i : trainingData.values()) {
                 i.updateCEValue(ZC);
+                System.out.println(i);
             }
             //show pattern numbers before generation
             int countPlus = 0, countMinus = 0, countQuestion = 0;
@@ -194,10 +300,41 @@ public class TestOldAlgorithm {
             canShowOutput.showLogString(countPlus + "(" + countPlusInstanceCount + ")\t"
                     + countMinus + "(" + countMinusInstanceCount + ")\t"
                     + countQuestion + "(" + countQuestionInstanceCount + ")");
+
+            // modified by mss, show pattern before merge
+//            canShowOutput.showOutputString("before merge");
+//            if (!isTesting) {
+//                StringBuilder sb = new StringBuilder();
+//                sb.append("\n");
+//                for (int i = 0; i < XPArray.length; i++) {
+//                    sb.append(names[XPArray[i]]);
+//                    sb.append("\t");
+//                }
+//                if (simpleTrueFalse) {
+//                    sb.append("ce.TrueFalseCE\tn11\tn12\tn21\tn22\t");
+//                    sb.append("p1-p2");
+//                } else {
+//                    sb.append("ce.TrueFalseCE\tW=1\tW=0");
+//                }
+//                sb.append("\n");
+//                for (AbstractCE i : trainingData.values()) {
+//                    sb.append(i.toString());
+//                    sb.append("\n");
+//                }
+//                canShowOutput.showOutputString(sb.toString());
+//            }
+//            canShowOutput.showOutputString("finish");
+            // mss
+
             /////////////
             List<AbstractCE> mergeResult = new ArrayList<>();
             CEAlgorithm.doMerge(trainingData.values(), mergeResult, XPSorted,
                     XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+
+            // add by mss, reliability first
+//            CEAlgorithm.doMergeReliability(trainingData.values(), mergeResult, XPSorted,
+//                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+
             //show pattern numbers after generation
             countPlus = 0;
             countMinus = 0;
@@ -350,5 +487,15 @@ public class TestOldAlgorithm {
             }
         }
         return null;
+    }
+
+
+
+    public static int[] trimlength(int[] array, int len){
+        int [] newArray = new int[len];
+        for (int i=0; i<len; i++){
+            newArray[i] = array[i];
+        }
+        return newArray;
     }
 }

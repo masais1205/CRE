@@ -182,7 +182,7 @@ public class CDT {
                 canShowOutput.showOutputString("\nTree size: "
                         + treeSize.width + "\tleaf size: " + treeSize.height + "\n");
                 rootYizhao = new Node(attributeNames[node.decompositionAttribute],
-                        "ROOT", null);
+                        null, null);
                 getTreeYizhao(node, rootYizhao);
             } else if (node.m_ClassValue != -1) {
                 String result = attributeNames[classPosition] + " = " + node.m_ClassValue;
@@ -242,7 +242,8 @@ public class CDT {
                     canShowOutput.showOutputString(stringNow +
                             attributeNames[node.decompositionAttribute] + " = " +
                             node.children.get(i).decompositionValue +
-                            " " + attributeNames[classPosition] + "=" + node.children.get(i).m_ClassValue);
+                            " " + attributeNames[classPosition] + " = " + node.children.get(i).m_ClassValue +
+                            " " + node.ACE);
                 } else {
                     canShowOutput.showOutputString(stringNow +
                             attributeNames[node.decompositionAttribute] + " = " +
@@ -335,14 +336,18 @@ public class CDT {
 
             // Compute attribute with maximum PA value.
             double[] PAValue = new double[attributeNames.length];
+            double[] ACEValue = new double[attributeNames.length];
             int[] assList;
+            double[] PaAceTmp = new double[2];
 
             for (int i = 0; i < attributeNames.length; i++) {
                 if (numValues[i] < 2 || i == classPosition) {
                     continue;
                 }
                 assList = assTest(data, i);
-                PAValue[i] = PAMH(data, i, assList);
+                PaAceTmp = PAMH(data, i, assList);
+                PAValue[i] = PaAceTmp[0];
+                ACEValue[i] = PaAceTmp[1];
             }
 
             int m_Attribute = maxIndex(PAValue);
@@ -362,6 +367,7 @@ public class CDT {
                     nowNode.children = new ArrayList<>();
                     nowNode.decompositionAttribute = m_Attribute;
                     nowNode.PA = PAValue[m_Attribute];
+                    nowNode.ACE = ACEValue[m_Attribute];
                     for (int i = 0; i < numValues[m_Attribute]; i++) {
                         TreeNode treeNode = new TreeNode();
                         treeNode.parent = nowNode;
@@ -517,10 +523,10 @@ public class CDT {
      * @return the PA value for the given attribute and data
      * @throws Exception if computation fails
      */
-    private double PAMH(List<int[]> data, int att, int[] assList)
+    private double[] PAMH(List<int[]> data, int att, int[] assList)
             throws Exception {
 
-        double PAVal = 0;
+        double[] PaAceVal = new double[2]; // PA value & ACE value
         int[] controlList = new int[attributeNames.length];
         int controlInd = 0;
 
@@ -566,7 +572,8 @@ public class CDT {
                 contValue[contValueInd++] = contingencyTable(eqiClass, att);
                 //		  		System.out.println(dataList.size());
             }
-            PAVal = PAMHCalc(contValue, contValueInd);
+            PaAceVal[0] = PAMHCalc(contValue, contValueInd);
+            PaAceVal[1] = ACECalc(contValue, contValueInd);
         } else {
             /*
             int[] equiclassDist = new int[3 * 6];
@@ -673,7 +680,7 @@ public class CDT {
                 startInd = endInd;
             }
 
-            PAVal = PAMHCalc(contValue, equiclassNum);
+            PaAceVal = PAMHCalc(contValue, equiclassNum);
             */
         }
 
@@ -681,7 +688,7 @@ public class CDT {
 //		  m_Instances.removeElementAt(index);
 //		  Instances tmpData = new Instances(data_keep, 0);
 
-        return PAVal;
+        return PaAceVal;
     }
 
     private double PAMHCalc(double[][] contTable, int equiclassNum) {
@@ -725,6 +732,42 @@ public class CDT {
             PAValue = 0;
 
         return PAValue;
+    }
+
+    private double ACECalc(double[][] contTable, int equiclassNum) {
+        double ACEValue = 0;
+        double[] ACEtmp = new double[equiclassNum];
+        double Ma, Mb, Mc, Md;
+        double sum01 = 0;
+        double sum02 = 0;
+
+        for (int i = 0; i < equiclassNum; i++) {
+
+	    		/*        contingency table
+                 *       Class=0     Class=1
+	    		 * A=0   V[0](Ma)    V[1](Mb)
+	    		 * A=1   V[2](Mc)    V[3](Md)
+	    		 */
+            Ma = contTable[i][0];
+            Mb = contTable[i][1];
+            Mc = contTable[i][2];
+            Md = contTable[i][3];
+            sum01 = Ma + Mb;
+            sum02 = Mc + Md;
+
+            if (sum01 != 0 && sum02 != 0)
+                ACEtmp[i] = Ma/sum01 - Mc/sum02;
+            else if(sum01 == 0 && sum02 != 0)
+                ACEtmp[i] = 0 - Mc/sum02;
+            else if(sum01 != 0 && sum02 == 0)
+                ACEtmp[i] = Ma/sum01;
+            else
+                ACEtmp[i] = 0;
+
+            ACEValue += ACEtmp[i];
+        }
+
+        return ACEValue/equiclassNum;
     }
 
     /**
@@ -830,6 +873,7 @@ public class CDT {
          */
         int decompositionValue;
         double PA;
+        double ACE;
         /**
          * Class value if node is leaf, 0 otherwise.
          */
