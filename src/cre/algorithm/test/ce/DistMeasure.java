@@ -2,9 +2,12 @@ package cre.algorithm.test.ce;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
+import com.sun.deploy.util.StringUtils;
 
 import java.util.*;
+import java.lang.String;
 
+import static com.google.common.base.Strings.repeat;
 import static java.lang.Math.abs;
 
 /**
@@ -12,7 +15,7 @@ import static java.lang.Math.abs;
  */
 
 public class DistMeasure {
-    public Table<Integer, Integer, String> xorMatrix = HashBasedTable.create();
+    public static Table<Integer, Integer, String> xorMatrix = HashBasedTable.create();
     public Table<Integer, Integer, Integer> distanceMatrix = HashBasedTable.create();
     
     public DistMeasure() {
@@ -87,8 +90,21 @@ public class DistMeasure {
         }
         
         for(int j=0; j<n; j++) {
-            xorMatrix.put(j,j,new String(CEList.get(j).value));
+            xorMatrix.put(j,j, repeat("0", CEList.get(j).value.length));
             distanceMatrix.put(j,j,n);
+        }
+    }
+
+    public static void updateXorMatrix(int rowIndex, int colSize, int[] positions, char positionChar) {
+        String xor;
+        for (int c=0; c<colSize; c++) {
+            for (int p : positions) {
+                xor = xorMatrix.get(rowIndex, c);
+                char[] xorChars = xor.toCharArray();
+                xorChars[p] = positionChar;
+                xor = String.valueOf(xorChars);
+                xorMatrix.put(rowIndex, c, xor);
+            }
         }
     }
 }

@@ -129,7 +129,6 @@ public class TrueFalseCE extends AbstractCE {
         double p1 = statistics[0] / WAll1;
         double p2 = statistics[2] / WAll0;
         statistics[4] = p1 - p2;
-        System.out.println(Arrays.toString(statistics));
     }
 
 
