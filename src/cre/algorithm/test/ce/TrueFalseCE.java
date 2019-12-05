@@ -2,6 +2,8 @@ package cre.algorithm.test.ce;
 
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.stream.IntStream;
+
 import cre.ui.AlgorithmPanel;
 import cre.ui.MainFrameEventHandler;
 
@@ -18,21 +20,35 @@ public class TrueFalseCE extends AbstractCE {
     }
 
     @Override
-    public AbstractCE mergeInstance(AbstractCE c, int[] position, char positionChar, CEValue preferredValue, double zc) {
+    public AbstractCE mergeInstance(AbstractCE c, int[] position, int[] PCMembers, char positionChar, CEValue preferredValue, double zc) {
         TrueFalseCE c2 = (TrueFalseCE) c;
         TrueFalseCE result = new TrueFalseCE(this.value);
+        boolean hasPC = false;
         for (int i : position) {
+            if (!hasPC)
+                hasPC = IntStream.of(PCMembers).anyMatch(x -> x == i);
             result.value[i] = positionChar;
         }
         System.arraycopy(this.statisticValue, 0, result.statisticValue, 0, 4);
-        for (int i = 0; i < 4; i++) {
-            result.statisticValue[i] += c2.statisticValue[i];
+        if(!hasPC) {
+            for (int i = 0; i < 4; i++) {
+                result.statisticValue[i] += c2.statisticValue[i];
+            }
+            result.updateStatistics();
+        }
+        else {
+            statistics[4] = updateStatistics(result, c2);
+            for (int i = 0; i < 4; i++) {
+                result.statisticValue[i] += c2.statisticValue[i];
+                statistics[i] = result.statisticValue[i] == 0 ? 0.5 : result.statisticValue[i];
+            }
         }
         if (preferredValue != null) {
             result.cEValue = preferredValue;
         } else {
             result.updateCEValue(zc);
         }
+        result.updateReliable();
         return result;
     }
 
@@ -116,6 +132,26 @@ public class TrueFalseCE extends AbstractCE {
                 statisticValue[3]++;
             }
         }
+    }
+
+    public double updateStatistics(TrueFalseCE c1, TrueFalseCE c2) {
+        double[] s1 = new double[4];
+        double[] s2 = new double[4];
+        double ce;
+        for (int i = 0; i < 4; i++) {
+            s1[i] = c1.statisticValue[i] == 0 ? 0.5 : c1.statisticValue[i];
+            s2[i] = c2.statisticValue[i] == 0 ? 0.5 : c2.statisticValue[i];
+        }
+
+        double c10 = s1[2] + s1[3];
+        double c11 = s1[0] + s1[1];
+
+        double c20 = s2[2] + s2[3];
+        double c21 = s2[0] + s2[1];
+
+        ce = ((s1[0]/c11 - s1[2]/c10) * (c10+c11) + (s2[0]/c21 - s2[2]/c20) * (c20+c21) /
+                (c10+c11+c20+c21));
+        return ce;
     }
 
     @Override

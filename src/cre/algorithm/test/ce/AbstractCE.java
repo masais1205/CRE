@@ -17,7 +17,7 @@ public abstract class AbstractCE {
         System.arraycopy(buffer, 0, value, 0, buffer.length);
     }
 
-    public abstract AbstractCE mergeInstance(AbstractCE c2, int[] position, char positionChar, CEValue preferredValue, double zc);
+    public abstract AbstractCE mergeInstance(AbstractCE c2, int[] position, int[] PCMembers, char positionChar, CEValue preferredValue, double zc);
 
     public abstract void updateCEValue(double zc);
 

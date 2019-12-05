@@ -15,8 +15,13 @@ import static java.lang.Math.abs;
  */
 
 public class DistMeasure {
-    public static Table<Integer, Integer, String> xorMatrix = HashBasedTable.create();
-    public Table<Integer, Integer, Integer> distanceMatrix = HashBasedTable.create();
+
+    public static final char char_Star = '*';
+    public static final char char_QUESTION = '×';
+
+    public static Table<Integer, Integer, String> xorMatrix = HashBasedTable.create(); // xor matrix, rowIndex, colIndex, xor
+    public Table<Integer, Integer, Integer> distanceMatrix = HashBasedTable.create(); // distance matrix, rowIndex, colIndex, distance
+                                                                                      // distance between Record rowIndex and Record colIndex
     
     public DistMeasure() {
     }
@@ -33,7 +38,7 @@ public class DistMeasure {
             this.diffCE = diffCE;
         }
 
-        public static void sortDist(List<minDistLocation> location) {
+        public static void sortDistEffectHomo(List<minDistLocation> location) {
 
             Collections.sort(location, new Comparator() {
 
@@ -46,18 +51,37 @@ public class DistMeasure {
                         return sComp;
                     }
 
-                    Integer r1 = ((minDistLocation) o1).cntUnreliable;
-                    Integer r2 = ((minDistLocation) o2).cntUnreliable;
-                    sComp = r2.compareTo(r1);
-                    if (sComp != 0) {
-                        return sComp;
-                    }
-
                     Double e1 = ((minDistLocation) o1).diffCE;
                     Double e2 = ((minDistLocation) o2).diffCE;
                     return e1.compareTo(e2);
                 }});
         }
+    }
+
+    public static void sortDistReliable(List<minDistLocation> location) {
+
+        Collections.sort(location, new Comparator() {
+
+            public int compare(Object o1, Object o2) {
+
+                Integer d1 = ((minDistLocation) o1).minDistance;
+                Integer d2 = ((minDistLocation) o2).minDistance;
+                int sComp = d1.compareTo(d2);
+                if (sComp != 0) {
+                    return sComp;
+                }
+
+                Integer r1 = ((minDistLocation) o1).cntUnreliable;
+                Integer r2 = ((minDistLocation) o2).cntUnreliable;
+                sComp = r2.compareTo(r1);
+                if (sComp != 0) {
+                    return sComp;
+                }
+
+                Double e1 = ((minDistLocation) o1).diffCE;
+                Double e2 = ((minDistLocation) o2).diffCE;
+                return e1.compareTo(e2);
+            }});
     }
 
     public char[] calcXOR(char[] a, char[] b) {

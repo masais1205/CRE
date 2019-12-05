@@ -15,6 +15,7 @@ import java.io.FileReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.IntStream;
 
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
@@ -35,7 +36,7 @@ public class TestOldAlgorithm {
         BufferedReader br = null;
 
         // modified by mss
-        int[] XPArray_question_blacklist = new int[XPArray.length];
+        int[] PCMembers = new int[XPArray.length];
 
 //        String rFileName = "";
 //        try {
@@ -96,12 +97,12 @@ public class TestOldAlgorithm {
                     cnt_xp++;
                 }
                 if(flag) {
-                    XPArray_question_blacklist[cnt_xp_black] = xp;
+                    PCMembers[cnt_xp_black] = xp;
                     cnt_xp_black++;
                 }
             }
             XPArray = trimlength(XPArray, cnt_xp);
-            XPArray_question_blacklist = trimlength(XPArray_question_blacklist, cnt_xp_black);
+            PCMembers = trimlength(PCMembers, cnt_xp_black);
 //            canShowOutput.showOutputString("Z+C");
 //            for(int xp : XPArray)
 //                canShowOutput.showOutputString(String.valueOf(xp));
@@ -114,7 +115,6 @@ public class TestOldAlgorithm {
         } catch (Exception e) {
             canShowOutput.showOutputString(e.toString());
         } // mss
-
 
         int[] XPSorted;
         int[] XPReverseSorted;
@@ -248,8 +248,8 @@ public class TestOldAlgorithm {
             }
             // modified by mss, add question black list (i.e. Z) to orYXPNoFitOddsRatio
             List<Integer> tempIndex = new ArrayList<>();
-            if(XPArray_question_blacklist.length > 0) {
-                for(int xp: XPArray_question_blacklist)
+            if(PCMembers.length > 0) {
+                for(int xp: PCMembers)
                     tempIndex.add(Arrays.binarySearch(XPArray, xp));
             }
             // mss
@@ -328,11 +328,15 @@ public class TestOldAlgorithm {
 
             /////////////
             List<AbstractCE> mergeResult = new ArrayList<>();
-//            CEAlgorithm.doMerge(trainingData.values(), mergeResult, XPSorted,
+//            CEAlgorithm.doMerge(trainingData.values(), mergeResult, PCMembers, XPSorted,
+//                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+
+            // add by mss, treatment effect homogeneity first
+//            CEAlgorithm.doMergeEffectHomo(trainingData.values(), mergeResult, PCMembers, XPSorted,
 //                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             // add by mss, reliability first
-            CEAlgorithm.doMergeReliability(trainingData.values(), mergeResult, XPSorted,
+            CEAlgorithm.doMergeReliable(trainingData.values(), mergeResult, PCMembers, XPSorted,
                     XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             //show pattern numbers after generation
@@ -373,7 +377,12 @@ public class TestOldAlgorithm {
                 sb.append(mergeResult.size());
                 sb.append("\n");
                 for (int i = 0; i < XPArray.length; i++) {
+                    int p = XPArray[i];
+                    if(IntStream.of(PCMembers).anyMatch(x -> x == p))
+                        sb.append("[");
                     sb.append(names[XPArray[i]]);
+                    if(IntStream.of(PCMembers).anyMatch(x -> x == p))
+                        sb.append("]");
                     sb.append("\t");
                 }
                 if (simpleTrueFalse) {

@@ -11,7 +11,8 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-import static cre.algorithm.test.ce.DistMeasure.minDistLocation.sortDist;
+import static cre.algorithm.test.ce.DistMeasure.minDistLocation.sortDistEffectHomo;
+import static cre.algorithm.test.ce.DistMeasure.sortDistReliable;
 
 /**
  * Created by HanYizhao on 4/13/2017.
@@ -30,7 +31,7 @@ public class CEAlgorithm {
     }
 
     private static void mergeQuestionList(List<AbstractCE> old, List<AbstractCE> plusResult, List<AbstractCE> minusResult,
-                                          List<AbstractCE> questionResult, MergeConfig mc, CanShowOutput canShowOutput) {
+                                          List<AbstractCE> questionResult, int[] PCMembers, MergeConfig mc, CanShowOutput canShowOutput) {
         canShowOutput.showLogString("Merge Question: " + old.size() + "\t" + plusResult.size() + "\t" + questionResult.size());
         //As index
         HashMap<String, Integer> map = new HashMap<>();
@@ -79,7 +80,7 @@ public class CEAlgorithm {
                             if (position != null) {
                                 hasMergeOne = true;
                                 AbstractCE newCE = tempCE.mergeInstance(list.get(position),
-                                        i, char_QUESTION, null, mc.zc);
+                                        i, PCMembers, char_QUESTION, null, mc.zc);
                                 list.set(l, null);
                                 list.set(position, null);
                                 map.remove(new String(tempCE.value));
@@ -105,16 +106,16 @@ public class CEAlgorithm {
             questionResult.add(list.get(i.getValue()));
         }
         if (newPlusList.size() != 0) {
-            mergeSimpleList(newPlusList, plusResult, mc, CEValue.PLUS, canShowOutput);
+            mergeSimpleList(newPlusList, plusResult, PCMembers, mc, CEValue.PLUS, canShowOutput);
         }
         if (newMinusList.size() != 0) {
-            mergeSimpleList(newMinusList, minusResult, mc, CEValue.MINUS, canShowOutput);
+            mergeSimpleList(newMinusList, minusResult, PCMembers, mc, CEValue.MINUS, canShowOutput);
         }
         old.clear();
         canShowOutput.showLogString("Merge Question Finish: " + "\t" + plusResult.size() + "\t" + questionResult.size());
     }
 
-    private static void mergeSimpleList(List<AbstractCE> old, List<AbstractCE> result, MergeConfig mc, CEValue preferredValue, CanShowOutput canShowOutput) {
+    private static void mergeSimpleList(List<AbstractCE> old, List<AbstractCE> result, int[] PCMembers, MergeConfig mc, CEValue preferredValue, CanShowOutput canShowOutput) {
         canShowOutput.showLogString("Merge " + preferredValue + ": " + old.size() + "\t" + result.size());
         HashMap<String, Integer> map = new HashMap<>();
         ArrayList<AbstractCE> list = new ArrayList<>(old.size());
@@ -142,7 +143,7 @@ public class CEAlgorithm {
                                 hasMergeOne = true;
                                 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                                 AbstractCE newCE = tempCE.mergeInstance(list.get(position),
-                                        new int[]{i}, char_Star, null, mc.zc);
+                                        new int[]{i}, PCMembers, char_Star, null, mc.zc);
                                 if (newCE.cEValue.compareTo(preferredValue) != 0) {
                                     canShowOutput.showLogString("ERROR");
                                 }
@@ -164,7 +165,7 @@ public class CEAlgorithm {
         canShowOutput.showLogString("Merge " + preferredValue + " Finish: " + old.size() + "\t" + result.size());
     }
 
-    public static void doMerge(Collection<AbstractCE> old, List<AbstractCE> result,
+    public static void doMerge(Collection<AbstractCE> old, List<AbstractCE> result, int[] PCMembers,
                                int[] order, int[] reverseOrder, double zc,
                                HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {
         MergeConfig mc = new MergeConfig();
@@ -188,11 +189,11 @@ public class CEAlgorithm {
         List<AbstractCE> plusResult = new ArrayList<>();
         List<AbstractCE> questionResult = new ArrayList<>();
         List<AbstractCE> minusResult = new ArrayList<>();
-        mergeSimpleList(plusList, plusResult, mc, CEValue.PLUS, canShowOutput);
-        mergeSimpleList(minusList, minusResult, mc, CEValue.MINUS, canShowOutput);
-        mergeQuestionList(questionList, plusResult, minusResult, questionResult, mc, canShowOutput);
-        mergeSimpleList(plusResult, result, mc, CEValue.PLUS, canShowOutput);
-        mergeSimpleList(minusResult, result, mc, CEValue.MINUS, canShowOutput);
+        mergeSimpleList(plusList, plusResult, PCMembers, mc, CEValue.PLUS, canShowOutput);
+        mergeSimpleList(minusList, minusResult, PCMembers, mc, CEValue.MINUS, canShowOutput);
+        mergeQuestionList(questionList, plusResult, minusResult, questionResult, PCMembers, mc, canShowOutput);
+        mergeSimpleList(plusResult, result, PCMembers, mc, CEValue.PLUS, canShowOutput);
+        mergeSimpleList(minusResult, result, PCMembers, mc, CEValue.MINUS, canShowOutput);
         result.addAll(questionResult);
         canShowOutput.showLogString("All Finish:" + result.size());
     }
@@ -200,7 +201,7 @@ public class CEAlgorithm {
     public static int[] getMergePoistion(String xor) {
         List<Integer> positionsList = new ArrayList<>();
         for(int i = 0; i < xor.length(); i++){
-            if(xor.charAt(i) == '1' || xor.charAt(i) == char_QUESTION){
+            if(xor.charAt(i) == '1' || xor.charAt(i) == char_QUESTION || xor.charAt(i) == char_Star){
                 positionsList.add(i);
             }
         }
@@ -224,7 +225,46 @@ public class CEAlgorithm {
         return list;
     }
 
-    public static void doMergeReliability(Collection<AbstractCE> old, List<AbstractCE> result,
+    public static List<DistMeasure.minDistLocation> getMinDistLocation(List<AbstractCE> CEList, Table<Integer, Integer, Integer> distanceMatrix) {
+        List<DistMeasure.minDistLocation> location = new ArrayList<>();
+        int n = CEList.size();
+
+        Map<Integer, Integer> row = new HashMap<>();
+        int distance, cntUnreliable;
+        double diffCE;
+        for(int j=1; j<n; j++) {
+            row = distanceMatrix.row(j);
+
+            for(int k=0; k<j; k++) {
+                cntUnreliable = 0;
+                distance = row.get(k);
+                if (! CEList.get(j).reliable)
+                    cntUnreliable++;
+                if (! CEList.get(k).reliable)
+                    cntUnreliable++;
+                diffCE = Math.abs(CEList.get(j).statistics[4] - CEList.get(k).statistics[4]);
+                location.add(new DistMeasure.minDistLocation(j, k, distance, cntUnreliable, diffCE));
+            }
+        }
+        return location;
+    }
+
+    public static void doMergeOne(List<AbstractCE> CEList, ArrayList<AbstractCE> list, int[] positions,
+                                                   int[] PCMembers, int jKey, int kKey, Integer jValue, Integer kValue, double zc) {
+        AbstractCE newCE = list.get(jValue).mergeInstance(list.get(kValue),
+                positions, PCMembers, char_QUESTION, null, zc);
+        DistMeasure.updateXorMatrix(jValue, CEList.size(), positions, char_QUESTION);
+
+        list.set(jValue, newCE);
+        if(jKey != jValue)
+            list.set(jKey, null);
+        if(kKey != jValue)
+            list.set(kKey, null);
+        if(kValue != jValue)
+            list.set(kValue, null);
+    }
+
+    public static void doMergeEffectHomo(Collection<AbstractCE> old, List<AbstractCE> result, int[] PCMembers,
                                int[] order, int[] reverseOrder, double zc,
                                HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {
         List<AbstractCE> CEList = new ArrayList<>();
@@ -239,37 +279,8 @@ public class CEAlgorithm {
         Table<Integer, Integer, String> xorMatrix = distMeasure.xorMatrix;
         Table<Integer, Integer, Integer> distanceMatrix = distMeasure.distanceMatrix;
 
-        int n = CEList.size();
-
-        List<DistMeasure.minDistLocation> location = new ArrayList<>();
-        Map<Integer, Integer> row = new HashMap<>();
-        int distance, cntUnreliable;
-        double diffCE;
-        for(int j=1; j<n; j++) {
-            row = distanceMatrix.row(j);
-
-//            Map.Entry<Integer, Integer> min = null;
-//            for (Map.Entry<Integer, Integer> entry : row.entrySet()) {
-//                if (min == null || min.getValue() > entry.getValue()) {
-//                    min = entry;
-//                }
-//            }
-//            // min.getKey() & min.getValue() // key & value
-
-            for(int k=0; k<j; k++) {
-                cntUnreliable = 0;
-                distance = row.get(k);
-                if (! CEList.get(j).reliable)
-                    cntUnreliable++;
-                if (! CEList.get(k).reliable)
-                    cntUnreliable++;
-                diffCE = Math.abs(CEList.get(j).statistics[4] - CEList.get(k).statistics[4]);
-                location.add(new DistMeasure.minDistLocation(j, k, distance, cntUnreliable, diffCE));
-            }
-
-        }
-
-        sortDist(location);
+        List<DistMeasure.minDistLocation> location = getMinDistLocation(CEList, distanceMatrix);
+        sortDistEffectHomo(location);
 
         HashMap<Integer, Integer> map = new HashMap<>();
         ArrayList<AbstractCE> list = new ArrayList<>(CEList.size());
@@ -294,19 +305,68 @@ public class CEAlgorithm {
             int[] positions = getMergePoistion(xor);
             if (positions.length == 0)
                 continue;
-            AbstractCE newCE = list.get(jValue).mergeInstance(list.get(kValue),
-                    positions, char_QUESTION, null, zc);
-            DistMeasure.updateXorMatrix(jValue, CEList.size(), positions, char_QUESTION);
-            newCE.updateStatistics();
-            newCE.updateReliable();
+            doMergeOne(CEList, list, positions, PCMembers, jKey, kKey, jValue, kValue, zc);
 
-            list.set(jValue, newCE);
-            if(jKey != jValue)
-                list.set(jKey, null);
-            if(kKey != jValue)
-                list.set(kKey, null);
-            if(kValue != jValue)
-                list.set(kValue, null);
+            List<Integer> keys = getKeysFromValue(map, kValue);
+            for(Integer k : keys)
+                map.put(k, jValue);
+        }
+
+        for (AbstractCE i : list)
+            if (i != null)
+                result.add(i);
+    }
+
+    public static void doMergeReliable(Collection<AbstractCE> old, List<AbstractCE> result, int[] PCMembers,
+                                         int[] order, int[] reverseOrder, double zc,
+                                         HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {
+        List<AbstractCE> CEList = new ArrayList<>();
+        for (AbstractCE i : old) {
+            i.updateReliable();
+            i.updateStatistics();
+            CEList.add(i);
+        }
+
+        DistMeasure distMeasure = new DistMeasure();
+        distMeasure.buildDistanceMatrix(CEList);
+        Table<Integer, Integer, String> xorMatrix = distMeasure.xorMatrix;
+        Table<Integer, Integer, Integer> distanceMatrix = distMeasure.distanceMatrix;
+
+        List<DistMeasure.minDistLocation> location = getMinDistLocation(CEList, distanceMatrix);
+        sortDistEffectHomo(location);
+
+        HashMap<Integer, Integer> map = new HashMap<>();
+        ArrayList<AbstractCE> list = new ArrayList<>(CEList.size());
+        for (int i=0; i<CEList.size(); i++) {
+            list.add(CEList.get(i));
+            map.put(i, i);
+        }
+
+        int jKey, kKey;
+        Integer jValue, kValue;
+        boolean notMerge;
+        for(int a=0; a<location.size(); a++) {
+            DistMeasure.minDistLocation loc = location.get(a);
+            jKey = loc.rowIndex;
+            kKey = loc.colIndex;
+            jValue = map.get(jKey);
+            kValue = map.get(kKey);
+            notMerge = list.get(jValue).reliable & list.get(kValue).reliable;
+            if (notMerge)
+                continue;
+
+            int distance = loc.minDistance;
+            if(distance == 1) {
+                String xor = xorMatrix.get(jValue, kValue);
+                int[] positions = getMergePoistion(xor);
+                if (positions.length == 0)
+                    continue;
+                doMergeOne(CEList, list, positions, PCMembers, jKey, kKey, jValue, kValue, zc);
+            }
+            else if (distance > 1) {
+                // TODO
+            }
+
             List<Integer> keys = getKeysFromValue(map, kValue);
             for(Integer k : keys)
                 map.put(k, jValue);
