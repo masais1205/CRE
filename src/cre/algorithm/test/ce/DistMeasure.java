@@ -38,7 +38,7 @@ public class DistMeasure {
             this.diffCE = diffCE;
         }
 
-        public static void sortDistEffectHomo(List<minDistLocation> location) {
+        public static void sortDist(List<minDistLocation> location) {
 
             Collections.sort(location, new Comparator() {
 
@@ -56,32 +56,6 @@ public class DistMeasure {
                     return e1.compareTo(e2);
                 }});
         }
-    }
-
-    public static void sortDistReliable(List<minDistLocation> location) {
-
-        Collections.sort(location, new Comparator() {
-
-            public int compare(Object o1, Object o2) {
-
-                Integer d1 = ((minDistLocation) o1).minDistance;
-                Integer d2 = ((minDistLocation) o2).minDistance;
-                int sComp = d1.compareTo(d2);
-                if (sComp != 0) {
-                    return sComp;
-                }
-
-                Integer r1 = ((minDistLocation) o1).cntUnreliable;
-                Integer r2 = ((minDistLocation) o2).cntUnreliable;
-                sComp = r2.compareTo(r1);
-                if (sComp != 0) {
-                    return sComp;
-                }
-
-                Double e1 = ((minDistLocation) o1).diffCE;
-                Double e2 = ((minDistLocation) o2).diffCE;
-                return e1.compareTo(e2);
-            }});
     }
 
     public char[] calcXOR(char[] a, char[] b) {
@@ -112,7 +86,6 @@ public class DistMeasure {
                 distanceMatrix.put(k,j,distance*n);
             }
         }
-        
         for(int j=0; j<n; j++) {
             xorMatrix.put(j,j, repeat("0", CEList.get(j).value.length));
             distanceMatrix.put(j,j,n);
