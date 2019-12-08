@@ -83,25 +83,12 @@ public class DistMeasure {
                     if(xor[i] == '1')
                         distance += 1;
                 distanceMatrix.put(j,k,distance);
-                distanceMatrix.put(k,j,distance*n);
+                distanceMatrix.put(k,j,distance);
             }
         }
         for(int j=0; j<n; j++) {
-            xorMatrix.put(j,j, repeat("0", CEList.get(j).value.length));
+            xorMatrix.put(j,j, repeat("1", CEList.get(j).value.length));
             distanceMatrix.put(j,j,n);
-        }
-    }
-
-    public static void updateXorMatrix(int rowIndex, int colSize, int[] positions, char positionChar) {
-        String xor;
-        for (int c=0; c<colSize; c++) {
-            for (int p : positions) {
-                xor = xorMatrix.get(rowIndex, c);
-                char[] xorChars = xor.toCharArray();
-                xorChars[p] = positionChar;
-                xor = String.valueOf(xorChars);
-                xorMatrix.put(rowIndex, c, xor);
-            }
         }
     }
 }

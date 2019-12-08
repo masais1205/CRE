@@ -248,8 +248,8 @@ public class TestOldAlgorithm {
             }
             // modified by mss, add question black list (i.e. Z) to orYXPNoFitOddsRatio
             List<Integer> tempIndex = new ArrayList<>();
-            if(PCMembers.length > 0) {
-                for(int xp: PCMembers)
+            if (PCMembers.length > 0) {
+                for (int xp : PCMembers)
                     tempIndex.add(Arrays.binarySearch(XPArray, xp));
             }
             // mss
@@ -259,9 +259,8 @@ public class TestOldAlgorithm {
                 if (orYX[i].getOR(false) > odd_ratio && !orYXPNoFitOddsRatio.contains(tempValue)) {
 //                    canShowOutput.showOutputString("OR threshold " + String.valueOf(XPArray[tempValue]));
                     orYXPNoFitOddsRatio.add(tempValue);
-                }
-                else {
-                    if(tempIndex.size() > 0 && tempIndex.contains(tempValue) && !orYXPNoFitOddsRatio.contains(tempValue)) {
+                } else {
+                    if (tempIndex.size() > 0 && tempIndex.contains(tempValue) && !orYXPNoFitOddsRatio.contains(tempValue)) {
                         orYXPNoFitOddsRatio.add(tempValue);
 //                        canShowOutput.showOutputString("C " + String.valueOf(XPArray[tempValue]));
                     }
@@ -302,28 +301,28 @@ public class TestOldAlgorithm {
                     + countQuestion + "(" + countQuestionInstanceCount + ")");
 
             // modified by mss, show pattern before merge
-//            canShowOutput.showOutputString("before merge");
-//            if (!isTesting) {
-//                StringBuilder sb = new StringBuilder();
-//                sb.append("\n");
-//                for (int i = 0; i < XPArray.length; i++) {
-//                    sb.append(names[XPArray[i]]);
-//                    sb.append("\t");
-//                }
-//                if (simpleTrueFalse) {
-//                    sb.append("ce.TrueFalseCE\tn11\tn12\tn21\tn22\t");
-//                    sb.append("p1-p2");
-//                } else {
-//                    sb.append("ce.TrueFalseCE\tW=1\tW=0");
-//                }
-//                sb.append("\n");
-//                for (AbstractCE i : trainingData.values()) {
-//                    sb.append(i.toString());
-//                    sb.append("\n");
-//                }
-//                canShowOutput.showOutputString(sb.toString());
-//            }
-//            canShowOutput.showOutputString("finish");
+            canShowOutput.showOutputString("before merge");
+            if (!isTesting) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("\n");
+                for (int i = 0; i < XPArray.length; i++) {
+                    sb.append(names[XPArray[i]]);
+                    sb.append("\t");
+                }
+                if (simpleTrueFalse) {
+                    sb.append("ce.TrueFalseCE\tn11\tn12\tn21\tn22\t");
+                    sb.append("p1-p2");
+                } else {
+                    sb.append("ce.TrueFalseCE\tW=1\tW=0");
+                }
+                sb.append("\n");
+                for (AbstractCE i : trainingData.values()) {
+                    sb.append(i.toString());
+                    sb.append("\n");
+                }
+                canShowOutput.showOutputString(sb.toString());
+            }
+            canShowOutput.showOutputString("finish");
             // mss
 
             /////////////
@@ -337,7 +336,7 @@ public class TestOldAlgorithm {
 
             // add by mss, reliability first
             CEAlgorithm.doMergeReliable(trainingData.values(), mergeResult, PCMembers, XPSorted,
-                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+                        XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             //show pattern numbers after generation
             countPlus = 0;
@@ -374,8 +373,8 @@ public class TestOldAlgorithm {
             //Log training result.
             if (!isTesting) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(mergeResult.size());
-                sb.append("\n");
+//                sb.append(mergeResult.size());
+//                sb.append("\n");
                 for (int i = 0; i < XPArray.length; i++) {
                     int p = XPArray[i];
                     if(IntStream.of(PCMembers).anyMatch(x -> x == p))

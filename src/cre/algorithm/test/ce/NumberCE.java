@@ -26,7 +26,7 @@ public class NumberCE extends AbstractCE {
     }
 
     @Override
-    public AbstractCE mergeInstance(AbstractCE cc, int[] position, int[] PCMembers, char positionChar, CEValue preferredValue, double zc) {
+    public AbstractCE mergeInstance(AbstractCE cc, List<Integer> position, int[] PCMembers, char positionChar, CEValue preferredValue, double zc) {
         NumberCE c2 = (NumberCE) cc;
         NumberCE result = new NumberCE(this.value);
         for (int i : position) {

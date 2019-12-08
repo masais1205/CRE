@@ -1,6 +1,7 @@
 package cre.algorithm.test.ce;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.stream.IntStream;
 
@@ -20,7 +21,7 @@ public class TrueFalseCE extends AbstractCE {
     }
 
     @Override
-    public AbstractCE mergeInstance(AbstractCE c, int[] position, int[] PCMembers, char positionChar, CEValue preferredValue, double zc) {
+    public AbstractCE mergeInstance(AbstractCE c, List<Integer> position, int[] PCMembers, char positionChar, CEValue preferredValue, double zc) {
         TrueFalseCE c2 = (TrueFalseCE) c;
         TrueFalseCE result = new TrueFalseCE(this.value);
         boolean hasPC = false;
