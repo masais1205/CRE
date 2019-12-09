@@ -27,6 +27,7 @@ import org.rosuda.REngine.Rserve.RserveException;
  */
 public class TestOldAlgorithm {
     private static String delimiter = ",";
+    private int trainPlusMinusCount;
 
     public static Statistic do_it(String fileName, double ZC, double odd_ratio, int mergeDepth, int WP, int YP, int[] XPArray,
                                   int[] group, int testGroupId,
@@ -301,28 +302,28 @@ public class TestOldAlgorithm {
                     + countQuestion + "(" + countQuestionInstanceCount + ")");
 
             // modified by mss, show pattern before merge
-            canShowOutput.showOutputString("before merge");
-            if (!isTesting) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("\n");
-                for (int i = 0; i < XPArray.length; i++) {
-                    sb.append(names[XPArray[i]]);
-                    sb.append("\t");
-                }
-                if (simpleTrueFalse) {
-                    sb.append("ce.TrueFalseCE\tn11\tn12\tn21\tn22\t");
-                    sb.append("p1-p2");
-                } else {
-                    sb.append("ce.TrueFalseCE\tW=1\tW=0");
-                }
-                sb.append("\n");
-                for (AbstractCE i : trainingData.values()) {
-                    sb.append(i.toString());
-                    sb.append("\n");
-                }
-                canShowOutput.showOutputString(sb.toString());
-            }
-            canShowOutput.showOutputString("finish");
+//            canShowOutput.showOutputString("before merge");
+//            if (!isTesting) {
+//                StringBuilder sb = new StringBuilder();
+//                sb.append("\n");
+//                for (int i = 0; i < XPArray.length; i++) {
+//                    sb.append(names[XPArray[i]]);
+//                    sb.append("\t");
+//                }
+//                if (simpleTrueFalse) {
+//                    sb.append("ce.TrueFalseCE\tn11\tn12\tn21\tn22\t");
+//                    sb.append("p1-p2");
+//                } else {
+//                    sb.append("ce.TrueFalseCE\tW=1\tW=0");
+//                }
+//                sb.append("\n");
+//                for (AbstractCE i : trainingData.values()) {
+//                    sb.append(i.toString());
+//                    sb.append("\n");
+//                }
+//                canShowOutput.showOutputString(sb.toString());
+//            }
+//            canShowOutput.showOutputString("finish");
             // mss
 
             /////////////
@@ -331,12 +332,12 @@ public class TestOldAlgorithm {
 //                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             // add by mss, treatment effect homogeneity first
-//            CEAlgorithm.doMergeEffectHomo(trainingData.values(), mergeResult, PCMembers, XPSorted,
-//                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+            CEAlgorithm.doMergeEffectHomo(trainingData.values(), mergeResult, PCMembers, XPSorted,
+                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             // add by mss, reliability first
-            CEAlgorithm.doMergeReliable(trainingData.values(), mergeResult, PCMembers, XPSorted,
-                        XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+//            CEAlgorithm.doMergeReliable(trainingData.values(), mergeResult, PCMembers, XPSorted,
+//                        XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             //show pattern numbers after generation
             countPlus = 0;
