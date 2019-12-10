@@ -11,7 +11,7 @@ adjustment <- function(fileName, w, y, xArray, alpha) {
   
   ### select based on PC
   results = pcSelect(data[,y], data[,(xArray)], alpha)
-  xArray.new = c(which(results$G == T), -1, which(results$G == F))
+  xArray.new = c(which(results$G), -1, which(!results$G))
   
   #### selct based chisq p_value 
   # p_value = lapply(xArray.new, function(x) chisq.test(table(data[,w],data[,x]))$p.value )
