@@ -21,6 +21,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -114,10 +115,39 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         s.insets.set(two, ten + ten, 0, 0);
         testOptionPanel.add(predictionOptionPanel, s);
         ButtonGroup predictionGroup = new ButtonGroup();
+        predictionGroup.add(suppliedTestData);
         predictionGroup.add(validationRadio);
         predictionGroup.add(crossValidationRadio);
 
 
+        s.gridwidth = 1;
+        s.insets = new Insets(two, 0, 0, 0);
+        s.gridwidth = GridBagConstraints.REMAINDER;
+        predictionOptionPanel.add(suppliedTestData, s);
+//        s.weightx = 0;
+        s.gridwidth = 1;
+        s.fill = GridBagConstraints.HORIZONTAL;
+        predictionOptionPanel.add(openFileButton, s);
+        s.gridwidth = GridBagConstraints.REMAINDER;
+        predictionOptionPanel.add(fileTextField, s);
+
+        s.gridwidth = GridBagConstraints.REMAINDER;
+//        s.fill = GridBagConstraints.NONE;
+
+        fileTextField.setEditable(false);
+        JFileChooser fileChooser = new JFileChooser();
+        openFileButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int ch = fileChooser.showDialog(predictionOptionPanel, null);
+                if (ch == JFileChooser.APPROVE_OPTION) {
+                    File f = fileChooser.getSelectedFile();
+                    fileTextField.setText(f.getAbsolutePath());
+                }
+            }
+        });
+
+//        s.weightx = 0;
         s.gridwidth = 1;
         s.insets = new Insets(two, 0, 0, 0);
         predictionOptionPanel.add(validationRadio, s);
@@ -126,7 +156,6 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         validationTestingRatioTextField.setValue(50);
         predictionOptionPanel.add(validationTestingRatioTextField, s);
         s.gridwidth = GridBagConstraints.REMAINDER;
-
         predictionOptionPanel.add(new JLabel("%", JLabel.CENTER), s);
 
         crossValidationComboBox.setSelectedItem(10);
@@ -153,12 +182,15 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         predictionOptionPanel.add(new JLabel(), s);
 
         algorithmOnlyRadio.setSelected(true);
+        openFileButton.setEnabled(false);
+        fileTextField.setEnabled(false);
         validationRadio.setSelected(true);
         crossValidationComboBox.setEnabled(false);
         predictionOptionPanel.setVisible(false);
 
         algorithmOnlyRadio.addItemListener(this);
         predictionRadio.addItemListener(this);
+        suppliedTestData.addItemListener(this);
         validationRadio.addItemListener(this);
         crossValidationRadio.addItemListener(this);
 
@@ -291,6 +323,9 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
             validationTestingRatioTextField.setEnabled(e.getStateChange() == ItemEvent.SELECTED);
         } else if (e.getSource() == crossValidationRadio) {
             crossValidationComboBox.setEnabled(e.getStateChange() == ItemEvent.SELECTED);
+        } else if (e.getSource() == suppliedTestData) {
+            openFileButton.setEnabled(e.getStateChange() == ItemEvent.SELECTED);
+            fileTextField.setEnabled(e.getStateChange() == ItemEvent.SELECTED);
         }
     }
 
@@ -319,8 +354,10 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
                 nowOtherConfig = new OtherConfig(
                         algorithmOnlyRadio.isSelected() ? OtherConfig.Validation.NONE :
                                 (validationRadio.isSelected() ? OtherConfig.Validation.VALIDATION :
-                                        OtherConfig.Validation.CROSS_VALIDATION),
+                                        (suppliedTestData.isSelected() ? OtherConfig.Validation.SUPPLIED_TEST_DATA :
+                                                OtherConfig.Validation.CROSS_VALIDATION)),
                         Integer.parseInt(validationRepeatTimeTextField.getText()),
+                        fileTextField.getText(),
                         Integer.parseInt(validationTestingRatioTextField.getText()),
                         (Integer) crossValidationComboBox.getSelectedItem());
             } catch (Exception e) {
@@ -329,6 +366,7 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
                         e.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            System.out.println("===================="+fileTextField.getText());
             startButton.setEnabled(false);
             startButton.setText("Running");
             stopButton.setEnabled(true);
@@ -417,6 +455,7 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
 
     private JRadioButton algorithmOnlyRadio = new JRadioButton("Causal discovery");
     private JRadioButton predictionRadio = new JRadioButton("Classification");
+    private JRadioButton suppliedTestData = new JRadioButton("Supplied Test Data");
     private JRadioButton validationRadio = new JRadioButton("Validation");
     private JRadioButton crossValidationRadio = new JRadioButton("Cross Validation");
 
@@ -424,6 +463,9 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
     private JComboBox<Integer> crossValidationComboBox = new JComboBox<>(new Integer[]{2, 3, 4, 5, 6, 7, 8, 9, 10});
     private MyFormattedTextField validationRepeatTimeTextField = new MyFormattedTextField(NumberFormat.getIntegerInstance()),
             validationTestingRatioTextField = new MyFormattedTextField(NumberFormat.getIntegerInstance());
+    private JButton openFileButton = new JButton("Open file...");
+    private JTextField fileTextField = new JTextField(17);
+    private static JFileChooser fileChooser;
 
     private DefaultListModel<String> listModel = new DefaultListModel<>();
     private JList<String> resultList = new JList<>(listModel);

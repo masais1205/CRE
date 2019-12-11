@@ -334,12 +334,12 @@ public class TestOldAlgorithm {
 //                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             // add by mss, treatment effect homogeneity first
-            CEAlgorithm.doMergeEffectHomo(trainingData.values(), mergeResult, PCMembers, XPSorted,
-                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+//            CEAlgorithm.doMergeEffectHomo(trainingData.values(), mergeResult, PCMembers, XPSorted,
+//                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             // add by mss, reliability first
-//            CEAlgorithm.doMergeReliable(trainingData.values(), mergeResult, PCMembers, XPSorted,
-//                        XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+            CEAlgorithm.doMergeReliable(trainingData.values(), mergeResult, PCMembers, XPSorted,
+                        XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             //show pattern numbers after generation
             countPlus = 0;
@@ -414,7 +414,7 @@ public class TestOldAlgorithm {
                 HashMap<String, LineValue> testDataStatistic = new HashMap<>();
                 for (LineValue lv : testingData.values()) {
                     double[] dData = OtherTool.fromIntArrayToNoZeroArray(lv.getWYValues());
-//                    canShowOutput.showOutputString(Arrays.toString(dData));
+                    canShowOutput.showOutputString(Arrays.toString(dData));
                     double ATE = dData[0] / (dData[0] + dData[1]) - dData[2] / (dData[2] + dData[3]);
                     char ateSign = searchTool.getSign(ATE);
                     int instanceCount = lv.getWYSum();

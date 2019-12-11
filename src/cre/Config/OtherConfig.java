@@ -7,15 +7,16 @@ package cre.Config;
 public class OtherConfig {
 
     public enum Validation {
-        VALIDATION, CROSS_VALIDATION, NONE
+        VALIDATION, CROSS_VALIDATION, SUPPLIED_TEST_DATA, NONE
     }
 
     private int crossValidationFolds;
     private Validation validation;
+    private String testFile;
     private int validationRepeatTimes;
     private int test;
 
-    public OtherConfig(Validation validation, int validationRepeatTimes, int test, int fold) throws Exception {
+    public OtherConfig(Validation validation, int validationRepeatTimes, String testFile, int test, int fold) throws Exception {
         if (validation == null) {
             throw new Exception("OtherConfig need a validation type.");
         }
@@ -29,10 +30,13 @@ public class OtherConfig {
             throw new Exception("'Fold' must be between 2 and 10");
         }
         this.validation = validation;
+        this.testFile = testFile;
         this.validationRepeatTimes = validationRepeatTimes;
         this.test = test;
         this.crossValidationFolds = fold;
     }
+
+    public String getTestFile() {return testFile;}
 
     public int getCrossValidationFolds() {
         return crossValidationFolds;
