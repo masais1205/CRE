@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 
+import org.apache.commons.math3.analysis.function.StepFunction;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.Rserve.RConnection;
@@ -445,8 +446,33 @@ public class TestOldAlgorithm {
                 int testPlusMinusCount = 0;
                 HashMap<String, LineValue> testDataStatistic = new HashMap<>();
                 for (LineValue lv : testingData.values()) {
+                    if (otherConfig.getValidation().toString().equals("SUPPLIED_TEST_DATA")) {
+                        String tS = new String(lv.getValue());
+                        LineValue testLv = new LineValue(lv.getValue());
+                        testDataStatistic.put(tS, testLv);
+                        testLv.addSomeItem(lv.getWYValues());
+                    } else {
+                        char[] charValue = searchTool.getCharValue(lv.getValue());
+                        if (charValue != null) {
+                            canShowOutput.showOutputString(String.valueOf(charValue));
+                            String tS = new String(charValue);
+                            LineValue testLv = testDataStatistic.get(tS);
+                            if (testLv == null) {
+                                testLv = new LineValue(charValue);
+                                testDataStatistic.put(tS, testLv);
+                            }
+                            testLv.addSomeItem(lv.getWYValues());
+                        } else {
+                            for (int i = 0; i < 4; i++) {
+                                notMatch += lv.getWYValues()[i];
+                            }
+                            canShowOutput.showLogString("CESearchTool#getCEValue return null");
+                        }
+                    }
+                }
+
+                for (LineValue lv : testDataStatistic.values()) {
                     double[] dData = OtherTool.fromIntArrayToNoZeroArray(lv.getWYValues());
-//                    canShowOutput.showOutputString(Arrays.toString(dData));
                     double ATE = dData[0] / (dData[0] + dData[1]) - dData[2] / (dData[2] + dData[3]);
                     char ateSign = searchTool.getSign(ATE);
                     int instanceCount = lv.getWYSum();
@@ -455,7 +481,6 @@ public class TestOldAlgorithm {
                     char ceSign = searchTool.getNearestFreqCESign(lv.getValue()); // get nearest and most frequent pattern
 //                    char ceSign = searchTool.getNearestAvgCESign(lv.getValue()); // get nearest pattern, average
 //                    char ceSign = searchTool.getNearestPCCESign(lv.getValue(), PCMembers); // get nearest pattern, more PC variables invovled
-//                    canShowOutput.showOutputString("test: "+Character.toString(ateSign)+"\tpattern: "+ Character.toString(ceSign));
 
                     if (ceSign != '?') {
                         allInstance += instanceCount;

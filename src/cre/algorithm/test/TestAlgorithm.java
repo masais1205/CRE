@@ -136,7 +136,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                     canShowOutput.showOutputString("\n========Supplied test data(test data: "
                             + otherConfig.getTestFile() + ")\n        repeat: "
                             + otherConfig.getValidationRepeatTimes() + "("
-                            + 1/otherConfig.getValidationRepeatTimes()*100 + "% of training data used " +
+                            + 100/otherConfig.getValidationRepeatTimes() + "% of training data used " +
                             "for training each time)=======\n");
 
                     StratifiedSampleHelper helper = new StratifiedSampleHelper(fileName, ",", YP,
