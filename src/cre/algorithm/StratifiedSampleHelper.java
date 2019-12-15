@@ -78,6 +78,126 @@ public class StratifiedSampleHelper {
 
     /**
      * @param csvFileName     The csv file.
+     * @param testCSVFileName The test csv file.
+     * @param delimiter       Delimiter of the csv file.
+     * @param position        The position of attribute which is used to stratify.
+     * @param value           1/repeatTimes, randomly select 1/repeatTimes data as training.
+     * @param attributeLength The number of attributes.
+     * @param canShowOutput   Used to show output.
+     * @throws CalculatingException May cause some error.
+     */
+    public StratifiedSampleHelper(String csvFileName, String testCSVFileName, String delimiter, int position,
+                                  double value, int attributeLength, CanShowOutput canShowOutput) throws CalculatingException {
+        BufferedReader br = null;
+        List<Simple> buffer = new ArrayList<>();
+        try {
+            br = new BufferedReader(new FileReader(csvFileName));
+            br.readLine();
+            String temp;
+            int count = 2;
+            while ((temp = br.readLine()) != null) {
+                String[] strings = temp.split(delimiter);
+                if (strings.length == attributeLength) {
+                    buffer.add(new Simple(Double.parseDouble(strings[position]),
+                            count - 2));
+                } else {
+                    String message = "Line value ERROR: (line:" + count + ") " + temp;
+                    if (canShowOutput != null) {
+                        canShowOutput.showOutputString(message);
+                    }
+                    throw new CalculatingException(message);
+                }
+                count++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        Collections.sort(buffer);
+
+        BufferedReader testBr = null;
+        List<Simple> testBuffer = new ArrayList<>();
+        try {
+            testBr = new BufferedReader(new FileReader(testCSVFileName));
+            br.readLine();
+            String temp;
+            int count = 2;
+            while ((temp = testBr.readLine()) != null) {
+                String[] strings = temp.split(delimiter);
+                if (strings.length == attributeLength) {
+                    testBuffer.add(new Simple(Double.parseDouble(strings[position]),
+                            count - 2));
+                } else {
+                    String message = "Line value ERROR: (line:" + count + ") " + temp;
+                    if (canShowOutput != null) {
+                        canShowOutput.showOutputString(message);
+                    }
+                    throw new CalculatingException(message);
+                }
+                count++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (testBr != null) {
+                try {
+                    testBr.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        Collections.sort(testBuffer);
+
+        ArrayList<double[]> kMeansData = new ArrayList<>();
+        for (Simple i : buffer) {
+            kMeansData.add(new double[]{i.value});
+        }
+        KMeans kmeans = new KMeans(10, kMeansData);
+        ArrayList<ArrayList<double[]>> cluster = kmeans.execute();
+        List<Simple> clusterStatistic = new ArrayList<>();
+        for (ArrayList<double[]> i : cluster) {
+            double min = Double.MAX_VALUE;
+            for (double[] k : i) {
+                if (k[0] < min) {
+                    min = k[0];
+                }
+            }
+            clusterStatistic.add(new Simple(min, i.size()));
+        }
+        Collections.sort(clusterStatistic);
+        int start = 0;
+        for (Simple i : clusterStatistic) {
+            System.out.println(i.value + " " + i.position);
+            needShuffle.add(new Point(start, start + i.position));
+            start += i.position;
+        }
+        for (Simple i : buffer) {
+            orderedPositions.add(i.position);
+        }
+
+        int fold = (int) Math.round(value);
+        if (fold < 2) {
+            fold = 2;
+        }
+        if (fold > 100) {
+            fold = 100;
+        }
+        for (int i = 0; i < buffer.size(); i++) {
+            samplePositions.add(i % fold);
+        }
+    }
+
+
+    /**
+     * @param csvFileName     The csv file.
      * @param delimiter       Delimiter of the csv file.
      * @param position        The position of attribute which is used to stratify.
      * @param crossValidation True, cross-validation; false, simple validation.

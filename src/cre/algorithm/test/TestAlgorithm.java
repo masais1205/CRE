@@ -123,14 +123,39 @@ public class TestAlgorithm extends AbstractAlgorithm {
             }
             canShowOutput.showOutputString("==== full training set ===");
             canShowStatus.showStatus("Building...");
-            TestOldAlgorithm.do_it(fileName,
+            TestOldAlgorithm.do_it(fileName, otherConfig.getTestFile(),
                     config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
                     WP, YP,
-                    XPArray, null, -1, canShowStatus, canShowOutput, false);
+                    XPArray, null, -1, otherConfig,
+                    canShowStatus, canShowOutput, false);
 
 
             List<Statistic> result = new ArrayList<>();
             switch (otherConfig.getValidation()) {
+                case SUPPLIED_TEST_DATA: {
+                    canShowOutput.showOutputString("\n========Supplied test data(test data: "
+                            + otherConfig.getTestFile() + ")\n        repeat: "
+                            + otherConfig.getValidationRepeatTimes() + "("
+                            + 1/otherConfig.getValidationRepeatTimes()*100 + "% of training data used " +
+                            "for training each time)=======\n");
+
+                    StratifiedSampleHelper helper = new StratifiedSampleHelper(fileName, ",", YP,
+                            true, otherConfig.getValidationRepeatTimes(), configAttributeNames.length, canShowOutput);
+                    for (int i = 0; i < otherConfig.getValidationRepeatTimes(); i++) {
+                        if (isShouldStop()) {
+                            result = null;
+                            break;
+                        }
+                        canShowStatus.showStatus("times: " + (i + 1));
+                        int[] group = helper.nextLines();
+                        result.add(TestOldAlgorithm.do_it(fileName, otherConfig.getTestFile(),
+                                config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
+                                WP, YP,
+                                XPArray, group, 0, otherConfig,
+                                canShowStatus, canShowOutput, true));
+                    }
+                }
+                break;
                 case VALIDATION: {
                     canShowOutput.showOutputString("\n========Validation(testing: "
                             + otherConfig.getTest() + "%, repeat: "
@@ -146,10 +171,11 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         }
                         canShowStatus.showStatus("times: " + (i + 1));
                         int[] group = helper.nextLines();
-                        result.add(TestOldAlgorithm.do_it(fileName,
+                        result.add(TestOldAlgorithm.do_it(fileName, otherConfig.getTestFile(),
                                 config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
                                 WP, YP,
-                                XPArray, group, 0, canShowStatus, canShowOutput, true));
+                                XPArray, group, 0, otherConfig,
+                                canShowStatus, canShowOutput, true));
                     }
                 }
                 break;
@@ -173,10 +199,11 @@ public class TestAlgorithm extends AbstractAlgorithm {
                                 break outer;
                             }
                             canShowStatus.showStatus("times: " + (i + 1) + "; fold: " + (l + 1));
-                            result.add(TestOldAlgorithm.do_it(fileName,
+                            result.add(TestOldAlgorithm.do_it(fileName, otherConfig.getTestFile(),
                                     config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
                                     WP, YP,
-                                    XPArray, group, l, canShowStatus, canShowOutput, true));
+                                    XPArray, group, l, otherConfig,
+                                    canShowStatus, canShowOutput, true));
                         }
                     }
                 }

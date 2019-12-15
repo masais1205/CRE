@@ -1,6 +1,7 @@
 package cre.algorithm.test;
 
 
+import cre.Config.OtherConfig;
 import cre.algorithm.CalculatingException;
 import cre.algorithm.CanShowOutput;
 import cre.algorithm.CanShowStatus;
@@ -31,8 +32,8 @@ import javax.xml.crypto.dom.DOMCryptoContext;
 public class TestOldAlgorithm {
     private static String delimiter = ",";
 
-    public static Statistic do_it(String fileName, double ZC, double odd_ratio, int mergeDepth, int WP, int YP, int[] XPArray,
-                                  int[] group, int testGroupId,
+    public static Statistic do_it(String fileName, String testFileName, double ZC, double odd_ratio, int mergeDepth, int WP, int YP, int[] XPArray,
+                                  int[] group, int testGroupId, OtherConfig otherConfig,
                                   CanShowStatus canShowStatus,
                                   CanShowOutput canShowOutput, boolean isTesting) throws CalculatingException {
 
@@ -153,8 +154,39 @@ public class TestOldAlgorithm {
             HashMap<String, AbstractCE> trainingData = new HashMap<>();
             HashMap<String, LineValue> testingData = new HashMap<>();
             int testingDataCount = 0;
-            while ((tempS = br.readLine()) != null) {
-                isTrainingSet = group == null || (group[count - 2] != testGroupId);
+
+            BufferedReader testBr = new BufferedReader(new FileReader(fileName));
+            if (otherConfig.getValidation().toString().equals("SUPPLIED_TEST_DATA")) {
+                testBr = new BufferedReader(new FileReader(testFileName));
+                String testHeader = testBr.readLine();
+                String[] testNames = testHeader.split(delimiter);
+                for (int t = 0; t < names.length; t++) {
+                    if (!names[t].equals(testNames[t])) {
+                        canShowOutput.showOutputString("Error. Attributes names of training and testing data" +
+                                " have to be consistent!");
+                        return null;
+                    }
+                }
+            }
+
+            while (true) {
+                if (otherConfig.getValidation().toString().equals("SUPPLIED_TEST_DATA")) {
+                    tempS = br.readLine();
+                    if (tempS != null)
+                        isTrainingSet = group == null || (group[count - 2] == testGroupId);
+                    else {
+                        tempS = testBr.readLine();
+                        if (tempS == null)
+                            break;
+                        isTrainingSet = false;
+                    }
+                }
+                else {
+                    tempS = br.readLine();
+                    if (tempS == null)
+                        break;
+                    isTrainingSet = group == null || (group[count - 2] != testGroupId);
+                }
                 String[] tempSS = tempS.split(delimiter);
                 if (tempSS.length == names.length) {
                     double yValue = Double.parseDouble(tempSS[YP]);
@@ -414,16 +446,16 @@ public class TestOldAlgorithm {
                 HashMap<String, LineValue> testDataStatistic = new HashMap<>();
                 for (LineValue lv : testingData.values()) {
                     double[] dData = OtherTool.fromIntArrayToNoZeroArray(lv.getWYValues());
-                    canShowOutput.showOutputString(Arrays.toString(dData));
+//                    canShowOutput.showOutputString(Arrays.toString(dData));
                     double ATE = dData[0] / (dData[0] + dData[1]) - dData[2] / (dData[2] + dData[3]);
                     char ateSign = searchTool.getSign(ATE);
                     int instanceCount = lv.getWYSum();
                     allInstanceIncludeQuestion += instanceCount;
 //                    char[] charValue = searchTool.getCharValue(lv.getValue()); // get matched pattern, maybe not nearest
-//                    char ceSign = searchTool.getNearestFreqCESign(lv.getValue()); // get nearest and most frequent pattern
+                    char ceSign = searchTool.getNearestFreqCESign(lv.getValue()); // get nearest and most frequent pattern
 //                    char ceSign = searchTool.getNearestAvgCESign(lv.getValue()); // get nearest pattern, average
-                    char ceSign = searchTool.getNearestPCCESign(lv.getValue(), PCMembers); // get nearest pattern, more PC variables invovled
-                    canShowOutput.showOutputString("test: "+Character.toString(ateSign)+"\tpattern: "+ Character.toString(ceSign));
+//                    char ceSign = searchTool.getNearestPCCESign(lv.getValue(), PCMembers); // get nearest pattern, more PC variables invovled
+//                    canShowOutput.showOutputString("test: "+Character.toString(ateSign)+"\tpattern: "+ Character.toString(ceSign));
 
                     if (ceSign != '?') {
                         allInstance += instanceCount;
