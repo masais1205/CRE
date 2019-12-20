@@ -99,6 +99,14 @@ public class TestAlgorithm extends AbstractAlgorithm {
                     configTreeMap.get(configAttributeClasses[1]));
             Arrays.sort(XPArray);
 
+            configTempList = configTreeMap.get(configAttributeClasses[3]);
+            int GT = -1;
+            if (configTempList.size() > 1) {
+                canShowOutput.showOutputString("Config ERROR : there exist more than one column set as ground truth");
+                return null;
+            } else if (configTempList.size() == 1)
+                GT = configTempList.get(0);
+
             String fileName = filePath.getAbsolutePath();
             {
                 HashMap<String, String> map = new HashMap<>();
@@ -126,7 +134,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
             TestOldAlgorithm.do_it(fileName,
                     config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
                     WP, YP,
-                    XPArray, null, -1, otherConfig,
+                    XPArray, GT, null, -1, otherConfig,
                     canShowStatus, canShowOutput, false);
 
 
@@ -136,7 +144,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                     canShowOutput.showOutputString("\n========Supplied test data(test data: "
                             + otherConfig.getTestFile() + ")\n        repeat: "
                             + otherConfig.getValidationRepeatTimes() + "("
-                            + 100/otherConfig.getValidationRepeatTimes() + "% of training data used " +
+                            + 1/otherConfig.getValidationRepeatTimes()*100 + "% of training data used " +
                             "for training each time)=======\n");
 
                     StratifiedSampleHelper helper = new StratifiedSampleHelper(fileName, ",", YP,
@@ -151,7 +159,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         result.add(TestOldAlgorithm.do_it(fileName,
                                 config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
                                 WP, YP,
-                                XPArray, group, 0, otherConfig,
+                                XPArray, GT, group, 0, otherConfig,
                                 canShowStatus, canShowOutput, true));
                     }
                 }
@@ -174,7 +182,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         result.add(TestOldAlgorithm.do_it(fileName,
                                 config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
                                 WP, YP,
-                                XPArray, group, 0, otherConfig,
+                                XPArray, GT, group, 0, otherConfig,
                                 canShowStatus, canShowOutput, true));
                     }
                 }
@@ -202,7 +210,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                             result.add(TestOldAlgorithm.do_it(fileName,
                                     config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
                                     WP, YP,
-                                    XPArray, group, l, otherConfig,
+                                    XPArray, GT, group, l, otherConfig,
                                     canShowStatus, canShowOutput, true));
                         }
                     }

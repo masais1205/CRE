@@ -35,7 +35,7 @@ public class TestOldAlgorithm {
     private static String delimiter = ",";
 
     public static Statistic do_it(String fileName, double ZC, double odd_ratio, int mergeDepth, int WP, int YP, int[] XPArray,
-                                  int[] group, int testGroupId, OtherConfig otherConfig,
+                                  int GT, int[] group, int testGroupId, OtherConfig otherConfig,
                                   CanShowStatus canShowStatus,
                                   CanShowOutput canShowOutput, boolean isTesting) throws CalculatingException {
         String testFileName = otherConfig.getTestFile();

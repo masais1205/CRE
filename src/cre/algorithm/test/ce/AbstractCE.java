@@ -10,6 +10,8 @@ public abstract class AbstractCE {
 
     public CEValue cEValue;
 
+    public double groundTruth; // (ground truth) individual/conditional causal effect
+
     public double[] statistics = new double[5];
 
     public boolean reliable;

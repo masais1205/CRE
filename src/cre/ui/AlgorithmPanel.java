@@ -106,10 +106,10 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         ButtonGroup buttonGroup = new ButtonGroup();
         buttonGroup.add(algorithmOnlyRadio);
         buttonGroup.add(predictionRadio);
-        optionPanel.add(groundTruthPanel, s);
-        groundTruthPanel.setBorder(new MyTitledBorder("Ground Truth Data").setOtherInfo(helpImage,
-                helpActiveImage,
-                "Click to see doc", algorithm.getName(), groundTruthDoc));
+//        optionPanel.add(groundTruthPanel, s); // a panel to add ground truth file
+//        groundTruthPanel.setBorder(new MyTitledBorder("Ground Truth Data").setOtherInfo(helpImage,
+//                helpActiveImage,
+//                "Click to see doc", algorithm.getName(), groundTruthDoc));
 
         s.insets.set(two, 0, 0, 0);
         s.fill = GridBagConstraints.NONE;
