@@ -123,7 +123,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
             }
             canShowOutput.showOutputString("==== full training set ===");
             canShowStatus.showStatus("Building...");
-            TestOldAlgorithm.do_it(fileName, otherConfig.getTestFile(),
+            TestOldAlgorithm.do_it(fileName,
                     config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
                     WP, YP,
                     XPArray, null, -1, otherConfig,
@@ -148,7 +148,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         }
                         canShowStatus.showStatus("times: " + (i + 1));
                         int[] group = helper.nextLines();
-                        result.add(TestOldAlgorithm.do_it(fileName, otherConfig.getTestFile(),
+                        result.add(TestOldAlgorithm.do_it(fileName,
                                 config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
                                 WP, YP,
                                 XPArray, group, 0, otherConfig,
@@ -171,7 +171,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         }
                         canShowStatus.showStatus("times: " + (i + 1));
                         int[] group = helper.nextLines();
-                        result.add(TestOldAlgorithm.do_it(fileName, otherConfig.getTestFile(),
+                        result.add(TestOldAlgorithm.do_it(fileName,
                                 config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
                                 WP, YP,
                                 XPArray, group, 0, otherConfig,
@@ -199,7 +199,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                                 break outer;
                             }
                             canShowStatus.showStatus("times: " + (i + 1) + "; fold: " + (l + 1));
-                            result.add(TestOldAlgorithm.do_it(fileName, otherConfig.getTestFile(),
+                            result.add(TestOldAlgorithm.do_it(fileName,
                                     config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
                                     WP, YP,
                                     XPArray, group, l, otherConfig,

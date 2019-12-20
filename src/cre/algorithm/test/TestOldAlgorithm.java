@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
@@ -33,10 +34,12 @@ import javax.xml.crypto.dom.DOMCryptoContext;
 public class TestOldAlgorithm {
     private static String delimiter = ",";
 
-    public static Statistic do_it(String fileName, String testFileName, double ZC, double odd_ratio, int mergeDepth, int WP, int YP, int[] XPArray,
+    public static Statistic do_it(String fileName, double ZC, double odd_ratio, int mergeDepth, int WP, int YP, int[] XPArray,
                                   int[] group, int testGroupId, OtherConfig otherConfig,
                                   CanShowStatus canShowStatus,
                                   CanShowOutput canShowOutput, boolean isTesting) throws CalculatingException {
+        String testFileName = otherConfig.getTestFile();
+        String groundTruthFileName = otherConfig.getGroundTruthFile();
 
         BufferedReader br = null;
 
@@ -367,12 +370,12 @@ public class TestOldAlgorithm {
 //                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             // add by mss, treatment effect homogeneity first
-//            CEAlgorithm.doMergeEffectHomo(trainingData.values(), mergeResult, PCMembers, XPSorted,
-//                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+            CEAlgorithm.doMergeEffectHomo(trainingData.values(), mergeResult, PCMembers, XPSorted,
+                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             // add by mss, reliability first
-            CEAlgorithm.doMergeReliable(trainingData.values(), mergeResult, PCMembers, XPSorted,
-                        XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+//            CEAlgorithm.doMergeReliable(trainingData.values(), mergeResult, PCMembers, XPSorted,
+//                        XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             //show pattern numbers after generation
             countPlus = 0;
@@ -452,9 +455,8 @@ public class TestOldAlgorithm {
                         testDataStatistic.put(tS, testLv);
                         testLv.addSomeItem(lv.getWYValues());
                     } else {
-                        char[] charValue = searchTool.getCharValue(lv.getValue());
+                        char[] charValue = searchTool.getNearestFreqCharValue(lv.getValue());
                         if (charValue != null) {
-                            canShowOutput.showOutputString(String.valueOf(charValue));
                             String tS = new String(charValue);
                             LineValue testLv = testDataStatistic.get(tS);
                             if (testLv == null) {
@@ -473,16 +475,19 @@ public class TestOldAlgorithm {
 
                 for (LineValue lv : testDataStatistic.values()) {
                     double[] dData = OtherTool.fromIntArrayToNoZeroArray(lv.getWYValues());
+//                    canShowOutput.showOutputString(Arrays.toString(dData));
                     double ATE = dData[0] / (dData[0] + dData[1]) - dData[2] / (dData[2] + dData[3]);
                     char ateSign = searchTool.getSign(ATE);
                     int instanceCount = lv.getWYSum();
                     allInstanceIncludeQuestion += instanceCount;
-//                    char[] charValue = searchTool.getCharValue(lv.getValue()); // get matched pattern, maybe not nearest
-                    char ceSign = searchTool.getNearestFreqCESign(lv.getValue()); // get nearest and most frequent pattern
-//                    char ceSign = searchTool.getNearestAvgCESign(lv.getValue()); // get nearest pattern, average
-//                    char ceSign = searchTool.getNearestPCCESign(lv.getValue(), PCMembers); // get nearest pattern, more PC variables invovled
+
+                    char ceSign = '?';
+                    ceSign = searchTool.getNearestFreqCESign(lv.getValue()); // get nearest and most frequent pattern
+//                    ceSign = searchTool.getNearestAvgCESign(lv.getValue()); // get nearest pattern, average
+//                    ceSign = searchTool.getNearestPCCESign(lv.getValue(), PCMembers); // get nearest pattern, more PC variables invovled
 
                     if (ceSign != '?') {
+//                        canShowOutput.showOutputString(Character.toString(ateSign)+"\t"+Character.toString(ceSign));
                         allInstance += instanceCount;
                         if (ceSign == ateSign) {
                             success++;

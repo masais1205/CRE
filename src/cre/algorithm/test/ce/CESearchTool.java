@@ -47,6 +47,43 @@ public class CESearchTool {
         return null;
     }
 
+    public char[] getNearestFreqCharValue(char[] buffer) {
+        int minDist = Integer.MAX_VALUE;
+        List<char[]> valueList = new ArrayList<>();
+        List<Integer> ceListSize = new ArrayList<>();
+        for (AbstractCE i : mergeResult) {
+            char[] now = i.value;
+            if (now.length == buffer.length) {
+                int dist = compareDistFromPatternToArray(now, buffer);
+                if (dist < minDist) {
+                    minDist = dist;
+                    valueList = new ArrayList<>();
+                    valueList.add(now);
+                    ceListSize = new ArrayList<>();
+                    ceListSize.add(i.getInstanceNumber());
+                }
+                else if (dist == minDist) {
+                    valueList.add(now);
+                    ceListSize.add(i.getInstanceNumber());
+                }
+            }
+        }
+        int maxSize = Integer.MIN_VALUE;
+        char[] value = new char[buffer.length];
+        boolean flag = false;
+        for (int j=0; j<valueList.size(); j++) {
+            if (ceListSize.get(j) > maxSize) {
+                maxSize = ceListSize.get(j);
+                value = valueList.get(j);
+                flag = true;
+            }
+        }
+        if (flag)
+            return value;
+        else
+            return null;
+    }
+
     public CEValue getCEValue(char[] buffer) {
         for (AbstractCE i : mergeResult) {
             char[] now = i.value;
@@ -115,21 +152,21 @@ public class CESearchTool {
 
     public char getSign(double num) {
         if (num > 0) {
-            if (num < .05)
-                return '0';
+//            if (num < .05)
+//                return '0';
             return '+';
         }
         else if (num == 0)
             return '0';
         else {
-            if (num > -.05)
-                return '0';
+//            if (num > -.05)
+//                return '0';
             return '-';
         }
     }
 
     public char getCESign(char[] buffer) {
-        int minDist = buffer.length*10;
+        int minDist = Integer.MAX_VALUE;
         char ceSign = '?';
         for (AbstractCE i : mergeResult) {
             char[] now = i.value;
@@ -145,7 +182,7 @@ public class CESearchTool {
     }
 
     public char getNearestFreqCESign(char[] buffer) {
-        int minDist = buffer.length*10;
+        int minDist = Integer.MAX_VALUE;
         List<Double> ceList = new ArrayList<>();
         List<Integer> ceListSize = new ArrayList<>();
         for (AbstractCE i : mergeResult) {
@@ -165,20 +202,18 @@ public class CESearchTool {
                 }
             }
         }
-        double maxSize = 0, ce = 0, cnt = 0;
+        int maxSize = Integer.MIN_VALUE;
+        double ce = 0;
+        boolean flag = false;
         for (int j=0; j<ceList.size(); j++) {
             if (ceListSize.get(j) > maxSize) {
                 maxSize = ceListSize.get(j);
                 ce = ceList.get(j);
-                cnt = 1;
-            }
-            else if (ceListSize.get(j) == maxSize) {
-                ce += ceList.get(j);
-                cnt++;
+                flag = true;
             }
         }
-        if (cnt > 0)
-            return getSign(ce/cnt);
+        if (flag)
+            return getSign(ce);
         else
             return '?';
     }
@@ -194,7 +229,6 @@ public class CESearchTool {
                 int[] distNpccnt = compareDistFromPatternToArray(now, buffer, PCMembers);
                 int dist = distNpccnt[0];
                 int PCCnt = distNpccnt[1];
-                System.out.println("============================="+ PCCnt);
                 if (dist < minDist) {
                     minDist = dist;
                     ceList = new ArrayList<>();

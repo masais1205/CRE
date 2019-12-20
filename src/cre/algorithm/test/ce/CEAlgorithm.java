@@ -355,16 +355,16 @@ public class CEAlgorithm {
                 result.add(i);
                 listString.add(String.valueOf(i.value));
             }
-        for (AbstractCE r : reliableList) {
-            String rString = String.valueOf(r.value);
-            boolean existing = false;
-            for (String iString : listString) {
-                if (rString.equals(iString))
-                    existing = true;
-            }
-            if (!existing)
-                result.add(r);
-        }
+//        for (AbstractCE r : reliableList) {
+//            String rString = String.valueOf(r.value);
+//            boolean existing = false;
+//            for (String iString : listString) {
+//                if (rString.equals(iString))
+//                    existing = true;
+//            }
+//            if (!existing)
+//                result.add(r);
+//        }
     }
 
     public static void doMergeReliable(Collection<AbstractCE> old, List<AbstractCE> result, int[] PCMembers,

@@ -13,10 +13,11 @@ public class OtherConfig {
     private int crossValidationFolds;
     private Validation validation;
     private String testFile;
+    private String groundTruthFile;
     private int validationRepeatTimes;
     private int test;
 
-    public OtherConfig(Validation validation, int validationRepeatTimes, String testFile, int test, int fold) throws Exception {
+    public OtherConfig(Validation validation, int validationRepeatTimes, String testFile, int test, int fold, String groundTruthFile) throws Exception {
         if (validation == null) {
             throw new Exception("OtherConfig need a validation type.");
         }
@@ -31,12 +32,15 @@ public class OtherConfig {
         }
         this.validation = validation;
         this.testFile = testFile;
+        this.groundTruthFile = groundTruthFile;
         this.validationRepeatTimes = validationRepeatTimes;
         this.test = test;
         this.crossValidationFolds = fold;
     }
 
     public String getTestFile() {return testFile;}
+
+    public String getGroundTruthFile() {return groundTruthFile;}
 
     public int getCrossValidationFolds() {
         return crossValidationFolds;

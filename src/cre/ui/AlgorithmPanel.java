@@ -97,6 +97,7 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         s.insets = new Insets(five, five, five, five);
 
         Document optionsDoc = Tool.getAlgorithmHelpDoc(algorithm.getName(), algorithm.getIntroduction(), null);
+        Document groundTruthDoc = Tool.getGroundTruthHelpDoc();
 
         optionPanel.add(testOptionPanel, s);
         testOptionPanel.setBorder(new MyTitledBorder("Options").setOtherInfo(helpImage,
@@ -105,6 +106,10 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         ButtonGroup buttonGroup = new ButtonGroup();
         buttonGroup.add(algorithmOnlyRadio);
         buttonGroup.add(predictionRadio);
+        optionPanel.add(groundTruthPanel, s);
+        groundTruthPanel.setBorder(new MyTitledBorder("Ground Truth Data").setOtherInfo(helpImage,
+                helpActiveImage,
+                "Click to see doc", algorithm.getName(), groundTruthDoc));
 
         s.insets.set(two, 0, 0, 0);
         s.fill = GridBagConstraints.NONE;
@@ -118,30 +123,53 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         predictionGroup.add(suppliedTestData);
         predictionGroup.add(validationRadio);
         predictionGroup.add(crossValidationRadio);
+//        optionPanel.add(groundTruthPanel, s);
+
+
+        s.gridwidth = 1;
+        s.insets = new Insets(two, 0, 0, 0);
+//        s.gridwidth = GridBagConstraints.REMAINDER;
+//        predictionOptionPanel.add(groundTruthData, s);
+//        s.gridwidth = 1;
+        s.fill = GridBagConstraints.HORIZONTAL;
+        groundTruthPanel.add(openGTFileButton, s);
+        s.gridwidth = GridBagConstraints.REMAINDER;
+        groundTruthPanel.add(groundTruthFileTextField, s);
+        s.gridwidth = GridBagConstraints.REMAINDER;
+
+        groundTruthFileTextField.setEditable(true);
+        JFileChooser fileChooser = new JFileChooser();
+        openGTFileButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int ch = fileChooser.showDialog(groundTruthPanel, null);
+                if (ch == JFileChooser.APPROVE_OPTION) {
+                    File f = fileChooser.getSelectedFile();
+                    groundTruthFileTextField.setText(f.getAbsolutePath());
+                }
+            }
+        });
 
 
         s.gridwidth = 1;
         s.insets = new Insets(two, 0, 0, 0);
         s.gridwidth = GridBagConstraints.REMAINDER;
         predictionOptionPanel.add(suppliedTestData, s);
-//        s.weightx = 0;
         s.gridwidth = 1;
         s.fill = GridBagConstraints.HORIZONTAL;
         predictionOptionPanel.add(openFileButton, s);
         s.gridwidth = GridBagConstraints.REMAINDER;
         predictionOptionPanel.add(fileTextField, s);
-
         s.gridwidth = GridBagConstraints.REMAINDER;
-//        s.fill = GridBagConstraints.NONE;
 
         fileTextField.setEditable(false);
-        JFileChooser fileChooser = new JFileChooser();
+        JFileChooser fileChooserS = new JFileChooser();
         openFileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int ch = fileChooser.showDialog(predictionOptionPanel, null);
+                int ch = fileChooserS.showDialog(predictionOptionPanel, null);
                 if (ch == JFileChooser.APPROVE_OPTION) {
-                    File f = fileChooser.getSelectedFile();
+                    File f = fileChooserS.getSelectedFile();
                     fileTextField.setText(f.getAbsolutePath());
                 }
             }
@@ -187,6 +215,8 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
         validationRadio.setSelected(true);
         crossValidationComboBox.setEnabled(false);
         predictionOptionPanel.setVisible(false);
+        openGTFileButton.setEnabled(true);
+        groundTruthFileTextField.setEnabled(true);
 
         algorithmOnlyRadio.addItemListener(this);
         predictionRadio.addItemListener(this);
@@ -359,7 +389,8 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
                         Integer.parseInt(validationRepeatTimeTextField.getText()),
                         fileTextField.getText(),
                         Integer.parseInt(validationTestingRatioTextField.getText()),
-                        (Integer) crossValidationComboBox.getSelectedItem());
+                        (Integer) crossValidationComboBox.getSelectedItem(),
+                        groundTruthFileTextField.getText());
             } catch (Exception e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(mainFrame.getFrame(),
@@ -447,6 +478,7 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
     private JTabbedPane rightPanel = new JTabbedPane();
 
     private JPanel predictionOptionPanel = new JPanel(new GridBagLayout());
+    private JPanel groundTruthPanel = new JPanel(new GridBagLayout());
     private JPanel optionPanelHelper = new MyFixWidthPanel(new BorderLayout());
     private JScrollPane mScroll = new JScrollPane(optionPanelHelper);
     private JPanel optionPanel = new JPanel(new GridBagLayout());
@@ -455,6 +487,7 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
 
     private JRadioButton algorithmOnlyRadio = new JRadioButton("Causal discovery");
     private JRadioButton predictionRadio = new JRadioButton("Classification");
+    private JRadioButton groundTruthData = new JRadioButton("Ground Truth Data");
     private JRadioButton suppliedTestData = new JRadioButton("Supplied Test Data");
     private JRadioButton validationRadio = new JRadioButton("Validation");
     private JRadioButton crossValidationRadio = new JRadioButton("Cross Validation");
@@ -464,7 +497,9 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
     private MyFormattedTextField validationRepeatTimeTextField = new MyFormattedTextField(NumberFormat.getIntegerInstance()),
             validationTestingRatioTextField = new MyFormattedTextField(NumberFormat.getIntegerInstance());
     private JButton openFileButton = new JButton("Open file...");
+    private JButton openGTFileButton = new JButton("Open file...");
     private JTextField fileTextField = new JTextField(17);
+    private JTextField groundTruthFileTextField = new JTextField(17);
     private static JFileChooser fileChooser;
 
     private DefaultListModel<String> listModel = new DefaultListModel<>();

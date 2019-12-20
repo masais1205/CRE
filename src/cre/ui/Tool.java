@@ -64,4 +64,25 @@ public class Tool {
         return helpDoc;
     }
 
+    public static Document getGroundTruthHelpDoc() {
+        Document helpDoc = new DefaultStyledDocument();
+        MutableAttributeSet set = new SimpleAttributeSet();
+        StyleConstants.setFontSize(set, Tool.HighResolution(16));
+        StyleConstants.setBold(set, true);
+        try {
+            helpDoc.insertString(helpDoc.getLength(), "\nGround Truth Data (Optional)\n", set);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+        StyleConstants.setFontSize(set, Tool.HighResolution(12));
+        StyleConstants.setBold(set, false);
+        try {
+            helpDoc.insertString(helpDoc.getLength(), "\nGround Truth Data File is required to have the same format with training and testing data, " +
+                    "\nbut one more column has to be added in the end to indicate the individual treatment effects.\n", set);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+        return helpDoc;
+    }
+
 }
