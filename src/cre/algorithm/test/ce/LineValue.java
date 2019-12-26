@@ -6,11 +6,13 @@ package cre.algorithm.test.ce;
 public class LineValue {
     private char[] value;
     private int[] WYValues;
+    private double groundTruthValue;
 
     public LineValue(char[] buffer) {
         value = new char[buffer.length];
         System.arraycopy(buffer, 0, value, 0, buffer.length);
         WYValues = new int[4];
+//        groundTruthValue = 0;
     }
 
     public int[] getWYValues() {
@@ -43,6 +45,12 @@ public class LineValue {
                 WYValues[3]++;
             }
         }
+    }
+
+    public void updateGTValue(double GTValue) {
+        double tmpValue = groundTruthValue * getWYSum();
+        tmpValue += GTValue;
+        groundTruthValue = tmpValue / (getWYSum() + 1);
     }
 
     public char[] getValue() {

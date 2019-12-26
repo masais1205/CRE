@@ -1,5 +1,6 @@
 package cre.algorithm.test;
 
+import com.google.common.base.Joiner;
 import cre.Config.OtherConfig;
 import cre.algorithm.AbstractAlgorithm;
 import cre.algorithm.CanShowOutput;
@@ -111,7 +112,10 @@ public class TestAlgorithm extends AbstractAlgorithm {
             {
                 HashMap<String, String> map = new HashMap<>();
                 for (String configAttributeClass : configAttributeClasses) {
+                    canShowOutput.showOutputString(configAttributeClass);
                     List<Integer> l = config.getType().get(configAttributeClass);
+                    if (l == null)
+                        continue;
                     for (int i : l) {
                         map.put(configAttributeNames[i], configAttributeClass);
                     }

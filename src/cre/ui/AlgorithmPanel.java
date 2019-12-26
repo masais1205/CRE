@@ -397,7 +397,6 @@ public class AlgorithmPanel extends JPanel implements ItemListener, CanShowOutpu
                         e.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            System.out.println("===================="+fileTextField.getText());
             startButton.setEnabled(false);
             startButton.setText("Running");
             stopButton.setEnabled(true);

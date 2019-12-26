@@ -1,5 +1,6 @@
 package cre.algorithm.test.ce;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -18,30 +19,35 @@ public class TrueFalseCE extends AbstractCE {
     public TrueFalseCE(char[] buffer) {
         super(buffer);
         statisticValue = new int[4];
+//        groundTruthValue = 0;
     }
 
     @Override
-    public AbstractCE mergeInstance(AbstractCE c, List<Integer> position, int[] PCMembers, char positionChar, CEValue preferredValue, double zc) {
+    public AbstractCE mergeInstance(AbstractCE c, int GT, List<Integer> position, int[] PCMembers, char positionChar, CEValue preferredValue, double zc) {
         TrueFalseCE c2 = (TrueFalseCE) c;
         TrueFalseCE result = new TrueFalseCE(this.value);
+        result.groundTruthValue = this.groundTruthValue;
         boolean hasPC = false;
         for (int i : position) {
             if (!hasPC)
                 hasPC = IntStream.of(PCMembers).anyMatch(x -> x == i);
             result.value[i] = positionChar;
         }
-        System.arraycopy(this.statisticValue, 0, result.statisticValue, 0, 4);
         if(!hasPC) {
+            if (GT > 0)
+                result.updateStatistics(c2, GT);
             for (int i = 0; i < 4; i++) {
                 result.statisticValue[i] += c2.statisticValue[i];
+                result.statistics[i] = result.statisticValue[i];
             }
-            result.updateStatistics();
+            if (GT < 0)
+                result.updateStatistics(GT);
         }
         else {
-            statistics[4] = updateStatistics(result, c2);
+            result.updateStatistics(c2, GT);
             for (int i = 0; i < 4; i++) {
                 result.statisticValue[i] += c2.statisticValue[i];
-                statistics[i] = result.statisticValue[i] == 0 ? 0.5 : result.statisticValue[i];
+                result.statistics[i] = result.statisticValue[i];
             }
         }
         if (preferredValue != null) {
@@ -105,6 +111,13 @@ public class TrueFalseCE extends AbstractCE {
         }
     }
 
+//    @Override
+    public void updateGTValue(double GTValue) {
+        double tmpValue = groundTruthValue * getInstanceNumber();
+        tmpValue += GTValue;
+        groundTruthValue = tmpValue / (getInstanceNumber() + 1);
+    }
+
     @Override
     public int getInstanceNumber() {
         return statisticValue[0] + statisticValue[1]
@@ -135,12 +148,12 @@ public class TrueFalseCE extends AbstractCE {
         }
     }
 
-    public double updateStatistics(TrueFalseCE c1, TrueFalseCE c2) {
+    public void updateStatistics(TrueFalseCE c2, int GT) {
         double[] s1 = new double[4];
         double[] s2 = new double[4];
         double ce;
         for (int i = 0; i < 4; i++) {
-            s1[i] = c1.statisticValue[i] == 0 ? 0.5 : c1.statisticValue[i];
+            s1[i] = statisticValue[i] == 0 ? 0.5 : statisticValue[i];
             s2[i] = c2.statisticValue[i] == 0 ? 0.5 : c2.statisticValue[i];
         }
 
@@ -150,13 +163,18 @@ public class TrueFalseCE extends AbstractCE {
         double c20 = s2[2] + s2[3];
         double c21 = s2[0] + s2[1];
 
-        ce = ((s1[0]/c11 - s1[2]/c10) * (c10+c11) + (s2[0]/c21 - s2[2]/c20) * (c20+c21) /
-                (c10+c11+c20+c21));
-        return ce;
+        if (GT > 0)
+            statistics[4] = (groundTruthValue * (c10+c11) + c2.groundTruthValue * (c20+c21))
+                    / (c10+c11+c20+c21);
+        else
+            statistics[4] = ((s1[0]/c11 - s1[2]/c10) * (c10+c11) + (s2[0]/c21 - s2[2]/c20) * (c20+c21))
+                    / (c10+c11+c20+c21);
+        System.out.println(groundTruthValue +" "+ (c10+c11) +" "+ c2.groundTruthValue +" "+ (c20+c21) +" "+statistics[4]);
+        groundTruthValue = statistics[4];
     }
 
     @Override
-    public void updateStatistics() {
+    public void updateStatistics(int GT) {
         for (int i = 0; i < 4; i++) {
             statistics[i] = statisticValue[i] == 0 ? 0.5 : statisticValue[i];
         }
@@ -165,7 +183,10 @@ public class TrueFalseCE extends AbstractCE {
 
         double p1 = statistics[0] / WAll1;
         double p2 = statistics[2] / WAll0;
-        statistics[4] = p1 - p2;
+        if (GT > 0)
+            statistics[4] = groundTruthValue;
+        else
+            statistics[4] = p1 - p2;
     }
 
 
@@ -196,7 +217,8 @@ public class TrueFalseCE extends AbstractCE {
 
         double p1 = tempStatisticValue[0] / WAll1;
         double p2 = tempStatisticValue[2] / WAll0;
-        sb.append(String.format(Locale.CHINA, "%.4f", p1 - p2));
+//        sb.append(String.format(Locale.CHINA, "%.4f", p1 - p2)); // output p1-p2
+        sb.append(String.format(Locale.CHINA, "%.4f", statistics[4]));
         return sb.toString();
     }
 }

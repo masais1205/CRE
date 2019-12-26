@@ -211,6 +211,8 @@ public class TestOldAlgorithm {
                                 cE = new TrueFalseCE(cBuffer);
                                 trainingData.put(s, cE);
                             }
+                            if (GT > 0)
+                                ((TrueFalseCE) cE).updateGTValue(Double.parseDouble(tempSS[GT]));
                             ((TrueFalseCE) cE).addItem(WValue, YBooleanValue);
                         } else {
                             AbstractCE cE = trainingData.get(s);
@@ -218,6 +220,8 @@ public class TestOldAlgorithm {
                                 cE = new NumberCE(cBuffer);
                                 trainingData.put(s, cE);
                             }
+                            if (GT > 0)
+                                ((NumberCE) cE).updateGTValue(Double.parseDouble(tempSS[GT]));
                             ((NumberCE) cE).addItem(WValue, yValue);
                         }
                     } else {
@@ -227,6 +231,8 @@ public class TestOldAlgorithm {
                             lv = new LineValue(cBuffer);
                             testingData.put(s, lv);
                         }
+                        if (GT > 0)
+                            lv.updateGTValue(Double.parseDouble(tempSS[GT]));
                         lv.addItem(WValue, YBooleanValue);
                     }
                 } else {
@@ -313,7 +319,7 @@ public class TestOldAlgorithm {
 
             for (AbstractCE i : trainingData.values()) {
                 i.updateCEValue(ZC);
-                System.out.println(i);
+//                System.out.println(i);
             }
             //show pattern numbers before generation
             int countPlus = 0, countMinus = 0, countQuestion = 0;
@@ -370,11 +376,11 @@ public class TestOldAlgorithm {
 //                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             // add by mss, treatment effect homogeneity first
-            CEAlgorithm.doMergeEffectHomo(trainingData.values(), mergeResult, PCMembers, XPSorted,
+            CEAlgorithm.doMergeEffectHomo(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
                     XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             // add by mss, reliability first
-//            CEAlgorithm.doMergeReliable(trainingData.values(), mergeResult, PCMembers, XPSorted,
+//            CEAlgorithm.doMergeReliable(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
 //                        XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             //show pattern numbers after generation
@@ -511,7 +517,7 @@ public class TestOldAlgorithm {
                 statistic.recall = (double) successInstance / allInstanceIncludeQuestion;
                 statistic.testNoMatch = (double) notMatch / testingDataCount;
 //                statistic.patternMatch = (double) testPlusMinusCount / trainPlusMinusCount;
-                canShowOutput.showLogString(statistic.toString());
+//                canShowOutput.showLogString(statistic.toString());
                 return statistic;
             }
         } catch (IOException e) {

@@ -11,9 +11,9 @@ public class NumberCE extends AbstractCE {
     private List<Double> trueList = new ArrayList<>();
     private List<Double> falseList = new ArrayList<>();
 
-
     public NumberCE(char[] buffer) {
         super(buffer);
+//        groundTruthValue = 0;
     }
 
 
@@ -25,8 +25,15 @@ public class NumberCE extends AbstractCE {
         }
     }
 
+//    @Override
+    public void updateGTValue(double GTValue) {
+        double tmpValue = groundTruthValue * getInstanceNumber();
+        tmpValue += GTValue;
+        groundTruthValue = tmpValue / (getInstanceNumber() + 1);
+    }
+
     @Override
-    public AbstractCE mergeInstance(AbstractCE cc, List<Integer> position, int[] PCMembers, char positionChar, CEValue preferredValue, double zc) {
+    public AbstractCE mergeInstance(AbstractCE cc, int GT, List<Integer> position, int[] PCMembers, char positionChar, CEValue preferredValue, double zc) {
         NumberCE c2 = (NumberCE) cc;
         NumberCE result = new NumberCE(this.value);
         for (int i : position) {
@@ -93,7 +100,7 @@ public class NumberCE extends AbstractCE {
 
 
     @Override
-    public void updateStatistics() {
+    public void updateStatistics(int GT) {
         statistics[0] = trueList.size();
         statistics[1] = falseList.size();
         for(int i=2; i<5; i++)

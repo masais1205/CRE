@@ -31,7 +31,7 @@ public class CEAlgorithm {
         int mergeDepth;
     }
 
-    private static void mergeQuestionList(List<AbstractCE> old, List<AbstractCE> plusResult, List<AbstractCE> minusResult,
+/*    private static void mergeQuestionList(List<AbstractCE> old, List<AbstractCE> plusResult, List<AbstractCE> minusResult,
                                           List<AbstractCE> questionResult, int[] PCMembers, MergeConfig mc, CanShowOutput canShowOutput) {
         canShowOutput.showLogString("Merge Question: " + old.size() + "\t" + plusResult.size() + "\t" + questionResult.size());
         //As index
@@ -114,9 +114,9 @@ public class CEAlgorithm {
         }
         old.clear();
         canShowOutput.showLogString("Merge Question Finish: " + "\t" + plusResult.size() + "\t" + questionResult.size());
-    }
+    }*/
 
-    private static void mergeSimpleList(List<AbstractCE> old, List<AbstractCE> result, int[] PCMembers, MergeConfig mc, CEValue preferredValue, CanShowOutput canShowOutput) {
+/*    private static void mergeSimpleList(List<AbstractCE> old, List<AbstractCE> result, int[] PCMembers, MergeConfig mc, CEValue preferredValue, CanShowOutput canShowOutput) {
         canShowOutput.showLogString("Merge " + preferredValue + ": " + old.size() + "\t" + result.size());
         HashMap<String, Integer> map = new HashMap<>();
         ArrayList<AbstractCE> list = new ArrayList<>(old.size());
@@ -164,9 +164,9 @@ public class CEAlgorithm {
             result.add(list.get(i.getValue()));
         }
         canShowOutput.showLogString("Merge " + preferredValue + " Finish: " + old.size() + "\t" + result.size());
-    }
+    }*/
 
-    public static void doMerge(Collection<AbstractCE> old, List<AbstractCE> result, int[] PCMembers,
+/*    public static void doMerge(Collection<AbstractCE> old, List<AbstractCE> result, int[] PCMembers,
                                int[] order, int[] reverseOrder, double zc,
                                HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {
         MergeConfig mc = new MergeConfig();
@@ -197,7 +197,7 @@ public class CEAlgorithm {
         mergeSimpleList(minusResult, result, PCMembers, mc, CEValue.MINUS, canShowOutput);
         result.addAll(questionResult);
         canShowOutput.showLogString("All Finish:" + result.size());
-    }
+    }*/
 
     public static List<Integer> getMergePoistion(String xor) {
         List<Integer> positionsList = new ArrayList<>();
@@ -285,9 +285,9 @@ public class CEAlgorithm {
     }
 
     public static void doMergeOne(List<AbstractCE> CEList, ArrayList<AbstractCE> list, ArrayList<AbstractCE> reliableList,
-                                  List<Integer> positions, int[] PCMembers, int jKey, int kKey, Integer jValue, Integer kValue,
+                                  int GT, List<Integer> positions, int[] PCMembers, int jKey, int kKey, Integer jValue, Integer kValue,
                                   double zc, DistMeasure distMeasure) {
-        AbstractCE newCE = list.get(jValue).mergeInstance(list.get(kValue),
+        AbstractCE newCE = list.get(jValue).mergeInstance(list.get(kValue), GT,
                 positions, PCMembers, char_QUESTION, null, zc);
         if (newCE.reliable)
             reliableList.add(newCE);
@@ -301,13 +301,13 @@ public class CEAlgorithm {
         updateDistMeasure(distMeasure, list, jValue);
     }
 
-    public static void doMergeEffectHomo(Collection<AbstractCE> old, List<AbstractCE> result, int[] PCMembers,
+    public static void doMergeEffectHomo(Collection<AbstractCE> old, int GT, List<AbstractCE> result, int[] PCMembers,
                                int[] order, int[] reverseOrder, double zc,
                                HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {
         List<AbstractCE> CEList = new ArrayList<>();
         for (AbstractCE i : old) {
             i.updateReliable();
-            i.updateStatistics();
+            i.updateStatistics(GT);
             CEList.add(i);
         }
 
@@ -342,7 +342,7 @@ public class CEAlgorithm {
             List<Integer> positions = getMergePoistion(xor);
             if (positions.size() == 0)
                 continue;
-            doMergeOne(CEList, list, reliableList, positions, PCMembers, jKey, kKey, jValue, kValue, zc, distMeasure);
+            doMergeOne(CEList, list, reliableList, GT, positions, PCMembers, jKey, kKey, jValue, kValue, zc, distMeasure);
 
             List<Integer> keys = getKeysFromValue(map, kValue);
             for(Integer k : keys)
@@ -355,25 +355,25 @@ public class CEAlgorithm {
                 result.add(i);
                 listString.add(String.valueOf(i.value));
             }
-//        for (AbstractCE r : reliableList) {
-//            String rString = String.valueOf(r.value);
-//            boolean existing = false;
-//            for (String iString : listString) {
-//                if (rString.equals(iString))
-//                    existing = true;
-//            }
-//            if (!existing)
-//                result.add(r);
-//        }
+        for (AbstractCE r : reliableList) {
+            String rString = String.valueOf(r.value);
+            boolean existing = false;
+            for (String iString : listString) {
+                if (rString.equals(iString))
+                    existing = true;
+            }
+            if (!existing)
+                result.add(r);
+        }
     }
 
-    public static void doMergeReliable(Collection<AbstractCE> old, List<AbstractCE> result, int[] PCMembers,
+    public static void doMergeReliable(Collection<AbstractCE> old, int GT, List<AbstractCE> result, int[] PCMembers,
                                          int[] order, int[] reverseOrder, double zc,
                                          HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {
         List<AbstractCE> CEList = new ArrayList<>();
         for (AbstractCE i : old) {
             i.updateReliable();
-            i.updateStatistics();
+            i.updateStatistics(GT);
             CEList.add(i);
         }
 
@@ -442,7 +442,7 @@ public class CEAlgorithm {
             }
 
             for (Integer k : kValueList) {
-                doMergeOne(CEList, list, reliableList, positions, PCMembers, jKey, kKey, jValue, k, zc, distMeasure);
+                doMergeOne(CEList, list, reliableList, GT, positions, PCMembers, jKey, kKey, jValue, k, zc, distMeasure);
 
                 List<Integer> keys = getKeysFromValue(map, k);
                 for (Integer key : keys) {
