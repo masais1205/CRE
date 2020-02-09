@@ -1,5 +1,6 @@
 package cre.algorithm.test.ce;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Table;
 import cre.algorithm.CanShowOutput;
 import cre.algorithm.test.MathListCombination;
@@ -12,6 +13,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static cre.algorithm.test.ce.DistMeasure.minDistLocation.sortDist;
 
@@ -212,8 +214,9 @@ public class CEAlgorithm {
                 positionsList.add(i);
             }
         }
-//        if (hasNumer & hasSymbol) // X110 vs 0100, if this line is commended, they would be merged; no merge otherwise.
-//            return new ArrayList<>();
+        if (hasNumer & hasSymbol) // X11 vs 010, if this line is commended, they would be merged; no merge otherwise.
+            return new ArrayList<>();
+//        System.out.println("---------------"+xor+" "+ Joiner.on(',').join(positionsList));
         return positionsList;
     }
 
@@ -265,11 +268,13 @@ public class CEAlgorithm {
             char[] kCEValue = kCE.value;
             char[] xorChars =new char[jCE.value.length];
             int dist = 0;
+//            System.out.println("================");
             for (int p=0; p<jCE.value.length; p++) {
                 if (jCEValue[p] == kCEValue[p])
                     xorChars[p] = '0';
                 else if ((jCEValue[p]==char_QUESTION & kCEValue[p]!=char_QUESTION) |
                         (jCEValue[p]!=char_QUESTION & kCEValue[p]==char_QUESTION)) {
+//                    System.out.println("================?????????");
                     xorChars[p] = char_QUESTION;
                     dist++;
                 }
@@ -279,6 +284,7 @@ public class CEAlgorithm {
                 }
             }
             String xor = String.valueOf(xorChars);
+//            System.out.println("================"+xor);
             distMeasure.xorMatrix.put(rowIndex, c, xor);
             distMeasure.distanceMatrix.put(rowIndex, c, dist);
         }
@@ -286,9 +292,9 @@ public class CEAlgorithm {
 
     public static void doMergeOne(List<AbstractCE> CEList, ArrayList<AbstractCE> list, ArrayList<AbstractCE> reliableList,
                                   int GT, List<Integer> positions, int[] PCMembers, int jKey, int kKey, Integer jValue, Integer kValue,
-                                  double zc, DistMeasure distMeasure) {
+                                  double zc, double reliabilityMinSupport, DistMeasure distMeasure) {
         AbstractCE newCE = list.get(jValue).mergeInstance(list.get(kValue), GT,
-                positions, PCMembers, char_QUESTION, null, zc);
+                positions, PCMembers, char_QUESTION, null, zc, reliabilityMinSupport);
         if (newCE.reliable)
             reliableList.add(newCE);
         list.set(jValue, newCE);
@@ -302,11 +308,11 @@ public class CEAlgorithm {
     }
 
     public static void doMergeEffectHomo(Collection<AbstractCE> old, int GT, List<AbstractCE> result, int[] PCMembers,
-                               int[] order, int[] reverseOrder, double zc,
+                               int[] order, int[] reverseOrder, double zc, double reliabilityMinSupport,
                                HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {
         List<AbstractCE> CEList = new ArrayList<>();
         for (AbstractCE i : old) {
-            i.updateReliable();
+            i.updateReliable(reliabilityMinSupport);
             i.updateStatistics(GT);
             CEList.add(i);
         }
@@ -342,7 +348,9 @@ public class CEAlgorithm {
             List<Integer> positions = getMergePoistion(xor);
             if (positions.size() == 0)
                 continue;
-            doMergeOne(CEList, list, reliableList, GT, positions, PCMembers, jKey, kKey, jValue, kValue, zc, distMeasure);
+            doMergeOne(CEList, list, reliableList, GT, positions, PCMembers, jKey, kKey, jValue, kValue, zc,
+                    reliabilityMinSupport, distMeasure);
+//            canShowOutput.showOutputString(distMeasure.xorMatrix.get(jValue, kValue));
 
             List<Integer> keys = getKeysFromValue(map, kValue);
             for(Integer k : keys)
@@ -355,24 +363,24 @@ public class CEAlgorithm {
                 result.add(i);
                 listString.add(String.valueOf(i.value));
             }
-        for (AbstractCE r : reliableList) {
-            String rString = String.valueOf(r.value);
-            boolean existing = false;
-            for (String iString : listString) {
-                if (rString.equals(iString))
-                    existing = true;
-            }
-            if (!existing)
-                result.add(r);
-        }
+//        for (AbstractCE r : reliableList) {
+//            String rString = String.valueOf(r.value);
+//            boolean existing = false;
+//            for (String iString : listString) {
+//                if (rString.equals(iString))
+//                    existing = true;
+//            }
+//            if (!existing)
+//                result.add(r);
+//        }
     }
 
     public static void doMergeReliable(Collection<AbstractCE> old, int GT, List<AbstractCE> result, int[] PCMembers,
-                                         int[] order, int[] reverseOrder, double zc,
+                                         int[] order, int[] reverseOrder, double zc,  double reliabilityMinSupport,
                                          HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {
         List<AbstractCE> CEList = new ArrayList<>();
         for (AbstractCE i : old) {
-            i.updateReliable();
+            i.updateReliable(reliabilityMinSupport);
             i.updateStatistics(GT);
             CEList.add(i);
         }
@@ -416,6 +424,7 @@ public class CEAlgorithm {
                     if (kValueList.contains(c) || c==jValue || list.get(c)==null)
                         continue;
                     String xor_tmp = distMeasure.xorMatrix.get(jValue, c);
+//                    canShowOutput.showOutputString(xor+"============"+xor_tmp);
                     List<Integer> tmp_positions = getMergePoistion(xor_tmp);
                     if (tmp_positions.size() == 0)
                         continue;
@@ -424,6 +433,7 @@ public class CEAlgorithm {
                         if (!positions.contains(p))
                             flag = false;
                     if (flag) {
+//                        canShowOutput.showOutputString("yes");
                         kValueList.add(c);
                         continue;
                     }
@@ -442,7 +452,9 @@ public class CEAlgorithm {
             }
 
             for (Integer k : kValueList) {
-                doMergeOne(CEList, list, reliableList, GT, positions, PCMembers, jKey, kKey, jValue, k, zc, distMeasure);
+                doMergeOne(CEList, list, reliableList, GT, positions, PCMembers, jKey, kKey, jValue, k, zc,
+                        reliabilityMinSupport, distMeasure);
+//                canShowOutput.showOutputString(xor+"----------"+distMeasure.xorMatrix.get(jValue, k));
 
                 List<Integer> keys = getKeysFromValue(map, k);
                 for (Integer key : keys) {
@@ -457,17 +469,54 @@ public class CEAlgorithm {
                 result.add(i);
                 listString.add(String.valueOf(i.value));
             }
-        for (AbstractCE r : reliableList) {
-            String rString = String.valueOf(r.value);
-            boolean existing = false;
-            for (String iString : listString) {
-                if (rString.equals(iString))
-                    existing = true;
-            }
-            if (!existing)
-                result.add(r);
-        }
+//        for (AbstractCE r : reliableList) {
+//            String rString = String.valueOf(r.value);
+//            boolean existing = false;
+//            for (String iString : listString) {
+//                if (rString.equals(iString))
+//                    existing = true;
+//            }
+//            if (!existing)
+//                result.add(r);
+//        }
     }
 
+    public static void refinePattern(Collection<AbstractCE> old, int GT, List<AbstractCE> result, int[] PCMembers,
+                                     int[] order, int[] reverseOrder, double zc,  double reliabilityMinSupport,
+                                     HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {
+        for (int i=0; i<result.size(); i++) {
+            char[] pattern = result.get(i).value;
+            double[] stats = new double[5];
+            List<Integer> varIdx = new ArrayList<>();
+            for (int j=0; j<pattern.length; j++) {
+                if (pattern[j] != char_QUESTION)
+                    varIdx.add(j);
+            }
+            List<Integer> PCIdx = new ArrayList<>();
+            int j = 0;
+            for (int ord : order) {
+                if (IntStream.of(PCMembers).anyMatch(x -> x == ord))
+                    PCIdx.add(j);
+                j++;
+            }
+
+            for (AbstractCE oldce : old) {
+                char[] record = oldce.value;
+                boolean matched = true;
+                for (int idx : varIdx) {
+                    if (pattern[idx] != record[idx]) {
+                        matched = false;
+                        break;
+                    }
+                }
+                if (matched) {
+                    ((TrueFalseCE) result.get(i)).updateItem(oldce.statistics);
+                }
+//                canShowOutput.showOutputString("before"+Arrays.toString(oldce.statistics));
+            }
+            result.get(i).updateStatistics(GT);
+//            canShowOutput.showOutputString(Arrays.toString(result.get(i).value)+"\t"+Arrays.toString(result.get(i).statistics));
+        }
+    }
 
 }

@@ -181,6 +181,40 @@ public class CESearchTool {
         return ceSign;
     }
 
+    public double getNearestFreqCE(char[] buffer) {
+        int minDist = Integer.MAX_VALUE;
+        List<Double> ceList = new ArrayList<>();
+        List<Integer> ceListSize = new ArrayList<>();
+        for (AbstractCE i : mergeResult) {
+            char[] now = i.value;
+            if (now.length == buffer.length) {
+                int dist = compareDistFromPatternToArray(now, buffer);
+                if (dist < minDist) {
+                    minDist = dist;
+                    ceList = new ArrayList<>();
+                    ceList.add(i.statistics[4]);
+                    ceListSize = new ArrayList<>();
+                    ceListSize.add(i.getInstanceNumber());
+                }
+                else if (dist == minDist) {
+                    ceList.add(i.statistics[4]);
+                    ceListSize.add(i.getInstanceNumber());
+                }
+            }
+        }
+        int maxSize = Integer.MIN_VALUE;
+        double ce = 0;
+        boolean flag = false;
+        for (int j=0; j<ceList.size(); j++) {
+            if (ceListSize.get(j) > maxSize) {
+                maxSize = ceListSize.get(j);
+                ce = ceList.get(j);
+                flag = true;
+            }
+        }
+        return ce;
+    }
+
     public char getNearestFreqCESign(char[] buffer) {
         int minDist = Integer.MAX_VALUE;
         List<Double> ceList = new ArrayList<>();

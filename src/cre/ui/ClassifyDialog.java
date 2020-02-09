@@ -88,7 +88,8 @@ public class ClassifyDialog extends JDialog {
         mainPanel.add(buttonOk, s);
         this.pack();
         Dimension oldSize = getSize();
-        this.setSize(Math.max(Tool.HighResolution(300), oldSize.width), oldSize.height);
+        this.setSize(Math.max(Tool.HighResolution(300), oldSize.width),
+                (int) Math.min(oldSize.getHeight(), Toolkit.getDefaultToolkit().getScreenSize().getHeight()*.8));
         Tool.moveToCenter(this, true);
     }
 

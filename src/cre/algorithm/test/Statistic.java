@@ -20,12 +20,16 @@ public class Statistic {
     public double patternMatch;
     public double sd;
     public double recall;
+    public double pehe;
+    public double peheSD;
 
 
     public static Statistic average(Collection<Statistic> data) {
         Statistic result = new Statistic();
         List<Double> accuracyDetail = new ArrayList<>();
+        List<Double> peheDetail = new ArrayList<>();
         int accuracyCount = 0;
+        int peheCount = 0;
         int testNoMatchCount = 0;
         int patternMatchCount = 0;
         int recallCount = 0;
@@ -34,6 +38,11 @@ public class Statistic {
                 result.accuracy += i.accuracy;
                 accuracyCount++;
                 accuracyDetail.add(i.accuracy);
+            }
+            if (!Double.isNaN(i.pehe) && !Double.isInfinite(i.pehe)) {
+                result.pehe += i.pehe;
+                peheCount++;
+                peheDetail.add(i.pehe);
             }
             if (!Double.isNaN(i.testNoMatch) && !Double.isInfinite(i.testNoMatch)) {
                 result.testNoMatch += i.testNoMatch;
@@ -49,12 +58,20 @@ public class Statistic {
             }
         }
         result.accuracy = result.accuracy / accuracyCount;
+        result.pehe = result.pehe / peheCount;
         {
             double sum = 0;
             for (double i : accuracyDetail) {
                 sum += Math.pow(i - result.accuracy, 2);
             }
             result.sd = Math.sqrt(sum / accuracyCount);
+        }
+        {
+            double sum = 0;
+            for (double i : peheDetail) {
+                sum += Math.pow(i - result.pehe, 2);
+            }
+            result.peheSD = Math.sqrt(sum / peheCount);
         }
         result.testNoMatch = result.testNoMatch / testNoMatchCount;
         result.patternMatch = result.patternMatch / patternMatchCount;
@@ -64,9 +81,12 @@ public class Statistic {
 
     @Override
     public String toString() {
-        return "Accuracy:\t" + String.format(Locale.ENGLISH, "%.2f", accuracy * 100) + "%\n"
-                + "Accuracy SD:\t" + String.format(Locale.ENGLISH, "%f", sd) + "\n"
-                + "Recall:\t" + String.format(Locale.ENGLISH, "%.2f", recall * 100) + "%\n"
+//        return "Accuracy:\t" + String.format(Locale.ENGLISH, "%.2f", accuracy * 100) + "%\n"
+//                + "Accuracy SD:\t" + String.format(Locale.ENGLISH, "%f", sd) + "\n"
+//                + "Recall:\t" + String.format(Locale.ENGLISH, "%.2f", recall * 100) + "%\n"
+//                + "Testing Data not matched:\t" + String.format(Locale.ENGLISH, "%.2f", testNoMatch * 100) + "%\n";
+        return "PEHE:\t" + String.format(Locale.ENGLISH, "%.2f", pehe) + "\n"
+                + "PEHE SD:\t" + String.format(Locale.ENGLISH, "%f", peheSD) + "\n"
                 + "Testing Data not matched:\t" + String.format(Locale.ENGLISH, "%.2f", testNoMatch * 100) + "%\n";
     }
 }

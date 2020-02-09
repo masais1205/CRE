@@ -34,13 +34,13 @@ import javax.xml.crypto.dom.DOMCryptoContext;
 public class TestOldAlgorithm {
     private static String delimiter = ",";
 
-    public static Statistic do_it(String fileName, double ZC, double odd_ratio, int mergeDepth, int WP, int YP, int[] XPArray,
+    public static Statistic do_it(String fileName, double ZC, double odd_ratio, int mergeDepth,  boolean featureSelection,
+                                  String mergeStrategy, double reliabilityMinSupport, int WP, int YP, int[] XPArray,
                                   int GT, int[] group, int testGroupId, OtherConfig otherConfig,
                                   CanShowStatus canShowStatus,
                                   CanShowOutput canShowOutput, boolean isTesting) throws CalculatingException {
         String testFileName = otherConfig.getTestFile();
         String groundTruthFileName = otherConfig.getGroundTruthFile();
-
         BufferedReader br = null;
 
         // modified by mss
@@ -66,7 +66,6 @@ public class TestOldAlgorithm {
             rFileName = rFileName.replace("\\","/");
 //            canShowOutput.showOutputString(rFileName);
             c.eval("source(\"" + rFileName + "\")");
-
             c.assign("fileName", fileName);
             int[] w = new int[1];
             w[0] = WP;
@@ -79,8 +78,8 @@ public class TestOldAlgorithm {
             double[] alpha = new double[1];
             alpha[0] = 0.05;
             c.assign("alpha", alpha);
-
-            c.assign(".tmp.", "adjustment(fileName,w,y,xArray,alpha)");
+            c.assign("featureSelection", Boolean.toString(featureSelection));
+            c.assign(".tmp.", "adjustment(fileName,w,y,xArray,alpha,featureSelection)");
             REXP r = c.parseAndEval("try(eval(parse(text=.tmp.)),silent=TRUE)");
             if (r.inherits("try-error")) {
                 canShowOutput.showOutputString("Error: " + r.asString());
@@ -88,7 +87,7 @@ public class TestOldAlgorithm {
 //                return 0;
             }
 
-            REXP XPArray_REXP = c.eval("adjustment(fileName,w,y,xArray,alpha)");
+            REXP XPArray_REXP = c.eval("adjustment(fileName,w,y,xArray,alpha,featureSelection)");
             XPArray_R = XPArray_REXP.asIntegers();
 //            for(int xp : XPArray_R)
 //                canShowOutput.showOutputString(String.valueOf(xp));
@@ -173,11 +172,13 @@ public class TestOldAlgorithm {
                 }
             }
 
+            int trainingInstanceNumer = 0;
             while (true) {
                 if (otherConfig.getValidation().toString().equals("SUPPLIED_TEST_DATA")) {
                     tempS = br.readLine();
                     if (tempS != null)
-                        isTrainingSet = group == null || (group[count - 2] == testGroupId);
+                        isTrainingSet = true;
+//                        isTrainingSet = group == null || (group[count - 2] == testGroupId);
                     else {
                         tempS = testBr.readLine();
                         if (tempS == null)
@@ -205,6 +206,7 @@ public class TestOldAlgorithm {
                     }
                     String s = new String(cBuffer);
                     if (isTrainingSet) {
+                        trainingInstanceNumer++;
                         if (simpleTrueFalse) {
                             AbstractCE cE = trainingData.get(s);
                             if (cE == null) {
@@ -241,7 +243,6 @@ public class TestOldAlgorithm {
                 }
                 count++;
             }
-
             /////////show OR
             {
                 StringBuilder sb = new StringBuilder();
@@ -375,13 +376,20 @@ public class TestOldAlgorithm {
 //            CEAlgorithm.doMerge(trainingData.values(), mergeResult, PCMembers, XPSorted,
 //                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
-            // add by mss, treatment effect homogeneity first
-            CEAlgorithm.doMergeEffectHomo(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
-                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+            reliabilityMinSupport *= trainingInstanceNumer;
+            if (reliabilityMinSupport < 20)
+                reliabilityMinSupport = 20;
+            // add by mss, reliability first or treatment effect homogeneity first
+            if (mergeStrategy.equals("Reliability first"))
+                CEAlgorithm.doMergeReliable(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
+                        XPReverseSorted, ZC, reliabilityMinSupport, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+            else
+                CEAlgorithm.doMergeEffectHomo(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
+                    XPReverseSorted, ZC, reliabilityMinSupport, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
-            // add by mss, reliability first
-//            CEAlgorithm.doMergeReliable(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
-//                        XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+            CEAlgorithm.refinePattern(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
+                    XPReverseSorted, ZC, reliabilityMinSupport, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+
 
             //show pattern numbers after generation
             countPlus = 0;
@@ -424,7 +432,7 @@ public class TestOldAlgorithm {
                     int p = XPArray[i];
                     if(IntStream.of(PCMembers).anyMatch(x -> x == p))
                         sb.append("[");
-                    sb.append(names[XPArray[i]]);
+                    sb.append(names[p]);
                     if(IntStream.of(PCMembers).anyMatch(x -> x == p))
                         sb.append("]");
                     sb.append("\t");
@@ -456,10 +464,25 @@ public class TestOldAlgorithm {
                 HashMap<String, LineValue> testDataStatistic = new HashMap<>();
                 for (LineValue lv : testingData.values()) {
                     if (otherConfig.getValidation().toString().equals("SUPPLIED_TEST_DATA")) {
-                        String tS = new String(lv.getValue());
-                        LineValue testLv = new LineValue(lv.getValue());
-                        testDataStatistic.put(tS, testLv);
-                        testLv.addSomeItem(lv.getWYValues());
+//                        String tS = new String(lv.getValue());
+//                        LineValue testLv = new LineValue(lv.getValue());
+//                        testDataStatistic.put(tS, testLv);
+//                        testLv.addSomeItem(lv.getWYValues());
+                        char[] charValue = searchTool.getNearestFreqCharValue(lv.getValue());
+                        if (charValue != null) {
+                            String tS = new String(charValue);
+                            LineValue testLv = testDataStatistic.get(tS);
+                            if (testLv == null) {
+                                testLv = new LineValue(charValue);
+                                testDataStatistic.put(tS, testLv);
+                            }
+                            testLv.addSomeItem(lv.getWYValues());
+                        } else {
+                            for (int i = 0; i < 4; i++) {
+                                notMatch += lv.getWYValues()[i];
+                            }
+                            canShowOutput.showLogString("CESearchTool#getCEValue return null");
+                        }
                     } else {
                         char[] charValue = searchTool.getNearestFreqCharValue(lv.getValue());
                         if (charValue != null) {
@@ -479,6 +502,7 @@ public class TestOldAlgorithm {
                     }
                 }
 
+                double sqrDiff = 0;
                 for (LineValue lv : testDataStatistic.values()) {
                     double[] dData = OtherTool.fromIntArrayToNoZeroArray(lv.getWYValues());
 //                    canShowOutput.showOutputString(Arrays.toString(dData));
@@ -487,37 +511,37 @@ public class TestOldAlgorithm {
                     int instanceCount = lv.getWYSum();
                     allInstanceIncludeQuestion += instanceCount;
 
-                    char ceSign = '?';
-                    ceSign = searchTool.getNearestFreqCESign(lv.getValue()); // get nearest and most frequent pattern
-//                    ceSign = searchTool.getNearestAvgCESign(lv.getValue()); // get nearest pattern, average
-//                    ceSign = searchTool.getNearestPCCESign(lv.getValue(), PCMembers); // get nearest pattern, more PC variables invovled
+                    double ce = searchTool.getNearestFreqCE(lv.getValue()); // get nearest and most frequent pattern
+                    sqrDiff += Math.pow((ATE - ce), 2) * instanceCount;
 
-                    if (ceSign != '?') {
-//                        canShowOutput.showOutputString(Character.toString(ateSign)+"\t"+Character.toString(ceSign));
-                        allInstance += instanceCount;
-                        if (ceSign == ateSign) {
-                            success++;
-                            successInstance += instanceCount;
-                        } else {
-                            failed++;
-                        }
-                    } else {
-                        for (int i = 0; i < 4; i++) {
-                            notMatch += lv.getWYValues()[i];
-                        }
-                        canShowOutput.showLogString("CESearchTool#getCEValue return null");
-                    }
+//                    char ceSign = '?';
+//                    ceSign = searchTool.getNearestFreqCESign(lv.getValue()); // get nearest and most frequent pattern
+////                    ceSign = searchTool.getNearestAvgCESign(lv.getValue()); // get nearest pattern, average
+////                    ceSign = searchTool.getNearestPCCESign(lv.getValue(), PCMembers); // get nearest pattern, more PC variables invovled
+//                    if (ceSign != '?') {
+//                        allInstance += instanceCount;
+//                        if (ceSign == ateSign) {
+//                            success++;
+//                            successInstance += instanceCount;
+//                        } else {
+//                            failed++;
+//                        }
+//                    } else {
+//                        for (int i = 0; i < 4; i++) {
+//                            notMatch += lv.getWYValues()[i];
+//                        }
+//                        canShowOutput.showLogString("CESearchTool#getCEValue return null");
+//                    }
                 }
-
-                canShowOutput.showLogString("accuracy: " + (double) successInstance / allInstance);
+                canShowOutput.showLogString("PEHE: " + Math.sqrt(sqrDiff / allInstanceIncludeQuestion));
                 canShowOutput.showLogString("Testing Data not matched: " + notMatch + "/" + testingDataCount);
 //                canShowOutput.showLogString("Pattern(testing / training): " + testPlusMinusCount + "/" + trainPlusMinusCount);
                 Statistic statistic = new Statistic();
                 statistic.accuracy = (double) successInstance / allInstance;
                 statistic.recall = (double) successInstance / allInstanceIncludeQuestion;
                 statistic.testNoMatch = (double) notMatch / testingDataCount;
+                statistic.pehe = Math.sqrt(sqrDiff / allInstanceIncludeQuestion);
 //                statistic.patternMatch = (double) testPlusMinusCount / trainPlusMinusCount;
-//                canShowOutput.showLogString(statistic.toString());
                 return statistic;
             }
         } catch (IOException e) {

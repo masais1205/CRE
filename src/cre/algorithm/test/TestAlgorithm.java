@@ -112,7 +112,6 @@ public class TestAlgorithm extends AbstractAlgorithm {
             {
                 HashMap<String, String> map = new HashMap<>();
                 for (String configAttributeClass : configAttributeClasses) {
-                    canShowOutput.showOutputString(configAttributeClass);
                     List<Integer> l = config.getType().get(configAttributeClass);
                     if (l == null)
                         continue;
@@ -136,8 +135,8 @@ public class TestAlgorithm extends AbstractAlgorithm {
             canShowOutput.showOutputString("==== full training set ===");
             canShowStatus.showStatus("Building...");
             TestOldAlgorithm.do_it(fileName,
-                    config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
-                    WP, YP,
+                    config.getZC(), config.getOddsRatio(), config.getMergeDepth(), config.getFeatureSelection(),
+                    config.getMergeStrategy(), config.getReliabilityMinSupport(), WP, YP,
                     XPArray, GT, null, -1, otherConfig,
                     canShowStatus, canShowOutput, false);
 
@@ -148,7 +147,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                     canShowOutput.showOutputString("\n========Supplied test data(test data: "
                             + otherConfig.getTestFile() + ")\n        repeat: "
                             + otherConfig.getValidationRepeatTimes() + "("
-                            + 1/otherConfig.getValidationRepeatTimes()*100 + "% of training data used " +
+                            + 100/otherConfig.getValidationRepeatTimes() + "% of training data used " +
                             "for training each time)=======\n");
 
                     StratifiedSampleHelper helper = new StratifiedSampleHelper(fileName, ",", YP,
@@ -161,8 +160,8 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         canShowStatus.showStatus("times: " + (i + 1));
                         int[] group = helper.nextLines();
                         result.add(TestOldAlgorithm.do_it(fileName,
-                                config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
-                                WP, YP,
+                                config.getZC(), config.getOddsRatio(), config.getMergeDepth(), config.getFeatureSelection(),
+                                config.getMergeStrategy(), config.getReliabilityMinSupport(), WP, YP,
                                 XPArray, GT, group, 0, otherConfig,
                                 canShowStatus, canShowOutput, true));
                     }
@@ -184,8 +183,8 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         canShowStatus.showStatus("times: " + (i + 1));
                         int[] group = helper.nextLines();
                         result.add(TestOldAlgorithm.do_it(fileName,
-                                config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
-                                WP, YP,
+                                config.getZC(), config.getOddsRatio(), config.getMergeDepth(), config.getFeatureSelection(),
+                                config.getMergeStrategy(), config.getReliabilityMinSupport(), WP, YP,
                                 XPArray, GT, group, 0, otherConfig,
                                 canShowStatus, canShowOutput, true));
                     }
@@ -212,8 +211,8 @@ public class TestAlgorithm extends AbstractAlgorithm {
                             }
                             canShowStatus.showStatus("times: " + (i + 1) + "; fold: " + (l + 1));
                             result.add(TestOldAlgorithm.do_it(fileName,
-                                    config.getZC(), config.getOddsRatio(), config.getMergeDepth(),
-                                    WP, YP,
+                                    config.getZC(), config.getOddsRatio(), config.getMergeDepth(), config.getFeatureSelection(),
+                                    config.getMergeStrategy(), config.getReliabilityMinSupport(), WP, YP,
                                     XPArray, GT, group, l, otherConfig,
                                     canShowStatus, canShowOutput, true));
                         }

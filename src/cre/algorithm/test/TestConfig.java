@@ -12,6 +12,9 @@ public class TestConfig extends TestConfigBase implements Cloneable {
     private double ZC;
     private double oddsRatio;
     private int mergeDepth;
+    private boolean featureSelection;
+    private String mergeStrategy;
+    private double reliabilityMinSupport;
     private TreeMap<String, List<Integer>> type;
 
     @Override
@@ -54,6 +57,9 @@ public class TestConfig extends TestConfigBase implements Cloneable {
         this.setZC(1.96);
         this.setOddsRatio(2);
         this.setMergeDepth(1);
+        this.setFeatureSelection(false);
+        this.setMergeStrategy("Reliability first");
+        this.setReliabilityMinSupport(0.01);
         super.fileName = fileName;
     }
 
@@ -93,6 +99,52 @@ public class TestConfig extends TestConfigBase implements Cloneable {
         }
     }
 
+    public boolean getFeatureSelection() { return featureSelection; }
+
+    public void setFeatureSelection(boolean featureSelection) { this.featureSelection = featureSelection; }
+
+    public String getFeatureSelectionShownName() {
+        return "Feature selection";
+    }
+
+    public String getFeatureSelectionComment() {
+        return "Automated feature selection, yes/no";
+    }
+
+    public String getMergeStrategy() {return mergeStrategy;}
+
+    public void setMergeStrategy(String mergeStrategy) {
+        this.mergeStrategy = mergeStrategy;
+    }
+
+    public String getMergeStrategyShownName() { return "Merge strategy"; }
+
+    public String[] getMergeStrategyList() { return new String[]{"Reliability first", "Treatment effect homogeneity first"}; }
+
+    public String getMergeStrategyComment() { return "Two different strategies to generalise unreliable patterns to reliable patterns"; }
+
+    public boolean getReliabilityMinSupportVisible() { return false; }
+
+    public double getReliabilityMinSupport() {return reliabilityMinSupport;}
+
+    public void setReliabilityMinSupport(double reliabilityMinSupport) {
+        this.reliabilityMinSupport = reliabilityMinSupport;
+    }
+
+    public String getReliabilityMinSupportShownName() {return "Reliability minimal support";}
+
+    public double getReliabilityMinSupportMax() {return 0.1;}
+
+    public double getReliabilityMinSupportMin() {return 0.0001;}
+
+    public int getMergeDepth() {
+        return mergeDepth;
+    }
+
+    public void setMergeDepth(int mergeDepth) {
+        this.mergeDepth = mergeDepth;
+    }
+
     public String getMergeDepthShownName() {
         return "Depth of merge";
     }
@@ -105,13 +157,7 @@ public class TestConfig extends TestConfigBase implements Cloneable {
         return 0;
     }
 
-    public int getMergeDepth() {
-        return mergeDepth;
-    }
-
-    public void setMergeDepth(int mergeDepth) {
-        this.mergeDepth = mergeDepth;
-    }
+    public boolean getMergeDepthVisible() { return false; }
 
     public String getOddsRatioShownName() {
         return "Odds Ratio";
@@ -132,6 +178,8 @@ public class TestConfig extends TestConfigBase implements Cloneable {
     public void setOddsRatio(double oddsRatio) {
         this.oddsRatio = oddsRatio;
     }
+
+    public boolean getOddsRatioVisible() { return false; }
 
     public String[] getTypeNames() {
         return attributeNames;
@@ -164,6 +212,8 @@ public class TestConfig extends TestConfigBase implements Cloneable {
     public void setZC(double ZC) {
         this.ZC = ZC;
     }
+
+    public boolean getZCVisible() { return false; }
 
     public TreeMap<String, List<Integer>> getType() {
         return type;

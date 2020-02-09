@@ -33,7 +33,8 @@ public class NumberCE extends AbstractCE {
     }
 
     @Override
-    public AbstractCE mergeInstance(AbstractCE cc, int GT, List<Integer> position, int[] PCMembers, char positionChar, CEValue preferredValue, double zc) {
+    public AbstractCE mergeInstance(AbstractCE cc, int GT, List<Integer> position, int[] PCMembers, char positionChar,
+                                    CEValue preferredValue, double zc, double reliabilityMinSupport) {
         NumberCE c2 = (NumberCE) cc;
         NumberCE result = new NumberCE(this.value);
         for (int i : position) {
@@ -109,9 +110,9 @@ public class NumberCE extends AbstractCE {
 
 
     @Override
-    public void updateReliable() {
+    public void updateReliable(double reliabilityMinSupport) {
         int num = getInstanceNumber();
-        reliable = num >= 20 ? true : false;
+        reliable = num >= reliabilityMinSupport ? true : false;
     }
 
 

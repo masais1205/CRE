@@ -21,7 +21,8 @@ public abstract class AbstractCE {
         System.arraycopy(buffer, 0, value, 0, buffer.length);
     }
 
-    public abstract AbstractCE mergeInstance(AbstractCE c2, int GT, List<Integer> position, int[] PCMembers, char positionChar, CEValue preferredValue, double zc);
+    public abstract AbstractCE mergeInstance(AbstractCE c2, int GT, List<Integer> position, int[] PCMembers,
+                                             char positionChar, CEValue preferredValue, double zc, double reliabilityMinSupport);
 
     public abstract void updateCEValue(double zc);
 
@@ -31,6 +32,6 @@ public abstract class AbstractCE {
 
     public abstract void updateStatistics(int GT);
 
-    public abstract void updateReliable();
+    public abstract void updateReliable(double reliabilityMinSupport);
 
 }
