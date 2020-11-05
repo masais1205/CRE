@@ -307,6 +307,12 @@ public class CEAlgorithm {
         updateDistMeasure(distMeasure, list, jValue);
     }
 
+    public static void doMergeTwoConstraints(Collection<AbstractCE> old, int GT, List<AbstractCE> result, int[] PCMembers,
+                                             int[] order, int[] reverseOrder, double zc, double reliabilityMinSupport,
+                                             HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {
+
+    }
+
     public static void doMergeEffectHomo(Collection<AbstractCE> old, int GT, List<AbstractCE> result, int[] PCMembers,
                                int[] order, int[] reverseOrder, double zc, double reliabilityMinSupport,
                                HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {

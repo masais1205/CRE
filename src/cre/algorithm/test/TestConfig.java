@@ -14,6 +14,7 @@ public class TestConfig extends TestConfigBase implements Cloneable {
     private int mergeDepth;
     private boolean featureSelection;
     private String mergeStrategy;
+    private String significanceLevel;
     private double reliabilityMinSupport;
     private TreeMap<String, List<Integer>> type;
 
@@ -59,6 +60,7 @@ public class TestConfig extends TestConfigBase implements Cloneable {
         this.setMergeDepth(1);
         this.setFeatureSelection(false);
         this.setMergeStrategy("Reliability first");
+        this.setSignificanceLevel("95%");
         this.setReliabilityMinSupport(0.01);
         super.fileName = fileName;
     }
@@ -100,91 +102,78 @@ public class TestConfig extends TestConfigBase implements Cloneable {
     }
 
     public boolean getFeatureSelection() { return featureSelection; }
-
     public void setFeatureSelection(boolean featureSelection) { this.featureSelection = featureSelection; }
-
     public String getFeatureSelectionShownName() {
         return "Feature selection";
     }
-
     public String getFeatureSelectionComment() {
         return "Automated feature selection, yes/no";
     }
 
+    public boolean getMergeStrategyVisible() { return false; }
     public String getMergeStrategy() {return mergeStrategy;}
-
     public void setMergeStrategy(String mergeStrategy) {
         this.mergeStrategy = mergeStrategy;
     }
-
     public String getMergeStrategyShownName() { return "Merge strategy"; }
-
     public String[] getMergeStrategyList() { return new String[]{"Reliability first", "Treatment effect homogeneity first"}; }
-
     public String getMergeStrategyComment() { return "Two different strategies to generalise unreliable patterns to reliable patterns"; }
 
+    public boolean getSignificanceLevelVisible() { return true; }
+    public String getSignificanceLevel() {return significanceLevel;}
+    public void setSignificanceLevel(String significanceLevel) {
+        this.significanceLevel = significanceLevel;
+    }
+    public String getSignificanceLevelShownName() { return "Significance level"; }
+    public String[] getSignificanceLevelList() { return new String[]{"99%", "95%", "90%"}; }
+    public String getSignificanceLevelComment() { return "Statistical significance level"; }
+
     public boolean getReliabilityMinSupportVisible() { return false; }
-
     public double getReliabilityMinSupport() {return reliabilityMinSupport;}
-
     public void setReliabilityMinSupport(double reliabilityMinSupport) {
         this.reliabilityMinSupport = reliabilityMinSupport;
     }
-
     public String getReliabilityMinSupportShownName() {return "Reliability minimal support";}
-
     public double getReliabilityMinSupportMax() {return 0.1;}
-
     public double getReliabilityMinSupportMin() {return 0.0001;}
 
     public int getMergeDepth() {
         return mergeDepth;
     }
-
     public void setMergeDepth(int mergeDepth) {
         this.mergeDepth = mergeDepth;
     }
-
     public String getMergeDepthShownName() {
         return "Depth of merge";
     }
-
     public String getMergeDepthComment() {
         return "Must bigger than -1";
     }
-
     public int getMergeDepthMin() {
         return 0;
     }
-
     public boolean getMergeDepthVisible() { return false; }
 
     public String getOddsRatioShownName() {
         return "Odds Ratio";
     }
-
     public double getOddsRatioMax() {
         return 10;
     }
-
     public double getOddsRatioMin() {
         return 1.5;
     }
-
     public double getOddsRatio() {
         return oddsRatio;
     }
-
     public void setOddsRatio(double oddsRatio) {
         this.oddsRatio = oddsRatio;
     }
-
     public boolean getOddsRatioVisible() { return false; }
 
     public String[] getTypeNames() {
         return attributeNames;
     }
-
     public String[] getTypeClasses() {
         return attributeClasses;
     }
@@ -192,7 +181,6 @@ public class TestConfig extends TestConfigBase implements Cloneable {
     public String getZCShownName() {
         return "Threshold";
     }
-
     public String getTypeShownName() {
         return "Classify attributes";
     }
@@ -200,7 +188,6 @@ public class TestConfig extends TestConfigBase implements Cloneable {
     public double getZCMax() {
         return 10;
     }
-
     public double getZCMin() {
         return 0.1;
     }
@@ -208,11 +195,9 @@ public class TestConfig extends TestConfigBase implements Cloneable {
     public double getZC() {
         return ZC;
     }
-
     public void setZC(double ZC) {
         this.ZC = ZC;
     }
-
     public boolean getZCVisible() { return false; }
 
     public TreeMap<String, List<Integer>> getType() {
