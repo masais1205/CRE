@@ -224,8 +224,8 @@ public class CEAlgorithm {
 
 
     public static boolean isSamePatternGroup(char[] attrValue, char[] refValue, List<Integer> positions) {
-        for (int i=0; i<positions.size(); i++) {
-            if (positions.get(i) == 1)
+        for (int i=0; i<attrValue.length; i++) {
+            if (! positions.contains(i))
                 if (attrValue[i] != refValue[i])
                     return false;
         }
@@ -316,18 +316,18 @@ public class CEAlgorithm {
     }
 
 
-    public static void printMatrix(Table<Integer, Integer, Integer> matrix, int matSize, CanShowOutput canShowOutput) {
+    public static void printMatrix(Table<Integer, Integer, Integer> matrix, List<AbstractCE> CEList, CanShowOutput canShowOutput) {
         StringBuilder sb = new StringBuilder();
         sb.append("\tMatrix");
-        for (int i=0; i<matSize; i++)
-            sb.append("\t" + Integer.toString(i));
+        for (int i=0; i<CEList.size(); i++)
+            sb.append("\t" + String.valueOf(CEList.get(i).value));
         canShowOutput.showOutputString(sb.toString());
 
-        for (int i=0; i<matSize; i++) {
+        for (int i=0; i<CEList.size(); i++) {
             sb = new StringBuilder();
-            sb.append("\t" + Integer.toString(i));
+            sb.append(String.valueOf(CEList.get(i).value) + "\t");
             for (int j=0; j<=i; j++) {
-                sb.append("\t" + Integer.toString(matrix.get(i, j)));
+                sb.append(Integer.toString(matrix.get(i, j)) + "\t\t");
             }
             canShowOutput.showOutputString(sb.toString());
         }
@@ -365,9 +365,9 @@ public class CEAlgorithm {
 
         int rowIdx, colIdx, dist;
         while (CEList.size() - num_significant > 1 && minDist < order.length && minDist > 0) {
-            canShowOutput.showOutputString("*****************CEList " + Integer.toString(CEList.size()) + " *numSign " + Integer.toString(num_significant) +
-                    " *minDist " + Double.toString(minDist) + " *order " + Integer.toString(order.length) + "************************");
-            printMatrix(distMeasure.distanceMatrix, CEList.size(), canShowOutput);
+//            canShowOutput.showOutputString("*****************CEList " + Integer.toString(CEList.size()) + " *numSign " + Integer.toString(num_significant) +
+//                    " *minDist " + Double.toString(minDist) + " *order " + Integer.toString(order.length) + "************************");
+//            printMatrix(distMeasure.distanceMatrix, CEList, canShowOutput);
             DistMeasure.minDistLocation loc = location.get(0);
             rowIdx = loc.rowIndex;
             colIdx = loc.colIndex;
@@ -380,9 +380,13 @@ public class CEAlgorithm {
 
             String xor_tmp = distMeasure.xorMatrix.get(rowIdx, colIdx);
             List<Integer> positions = getMergePoistion(xor_tmp);
+            StringBuilder sb = new StringBuilder();
+            for (Integer p : positions)
+                sb.append(Integer.valueOf(p));
+
             if (dist == 1) {
                 // dist==1, merge two patterns
-                canShowOutput.showOutputString("***dist=1 * " + String.valueOf(CEList.get(rowIdx).value) + "\t" + String.valueOf(CEList.get(colIdx).value));
+//                canShowOutput.showOutputString("***dist=1 * " + String.valueOf(CEList.get(rowIdx).value) + "\t" + String.valueOf(CEList.get(colIdx).value));
                 if (CEList.get(rowIdx).isSignificant && CEList.get(colIdx).isSignificant)
                     continue;
                 newCE = CEList.get(rowIdx).mergeInstance(CEList.get(colIdx), GT,
@@ -399,20 +403,21 @@ public class CEAlgorithm {
                         continue;
                     attrValue = CEList.get(i).value;
                     toBeMerge = isSamePatternGroup(attrValue, CEList.get(rowIdx).value, positions);
+//                    canShowOutput.showOutputString(sb + " * " + String.valueOf(attrValue) + " * " + String.valueOf(CEList.get(rowIdx).value) + " * " + Boolean.toString(toBeMerge));
                     if (toBeMerge) {
                         removeIdxList.add(CEList.get(i));
                         tmpCEList.add(CEList.get(i));
                     }
                 }
-                canShowOutput.showOutputString("***dist>1" + String.valueOf(CEList.get(rowIdx).value) + "\t" + Integer.toString(tmpCEList.size()));
+//                canShowOutput.showOutputString("***dist>1 * " + String.valueOf(CEList.get(rowIdx).value) + "\tremoveList " + Integer.toString(tmpCEList.size()));
                 newCE = CEList.get(rowIdx).mergeInstanceList(tmpCEList, GT,
                         positions, PCMembers, char_QUESTION, null, significanceLevel);
             }
             newCE.updateSignificance(significanceLevel);
             if (newCE.isSignificant)
                 num_significant++;
-            CEList.add(newCE);
             CEList.removeAll(removeIdxList);
+            CEList.add(newCE);
 
             // generate new distance matrix with updated pattern set
             distMeasure = new DistMeasure();
@@ -420,8 +425,8 @@ public class CEAlgorithm {
             location = getMinDistLocation(CEList, distMeasure.distanceMatrix);
             sortDist(location);
             minDist = location.get(0).distance;
-            canShowOutput.showOutputString("-----CEList " + Integer.toString(CEList.size()) + " *numSign " + Integer.toString(num_significant) + " *minDist " +
-                    Double.toString(minDist) + " *removeList " + Integer.toString(removeIdxList.size()) + "************************");
+//            canShowOutput.showOutputString("-----CEList " + Integer.toString(CEList.size()) + " *numSign " + Integer.toString(num_significant) + " *minDist " +
+//                    Double.toString(minDist) + " *removeList " + Integer.toString(removeIdxList.size()) + "************************");
         }
     }
 

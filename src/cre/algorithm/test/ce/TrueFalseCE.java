@@ -13,11 +13,8 @@ import cre.ui.MainFrameEventHandler;
  */
 public class TrueFalseCE extends AbstractCE {
 
-    private int[] statisticValue;
-
     public TrueFalseCE(char[] buffer) {
         super(buffer);
-        statisticValue = new int[4];
 //        groundTruthValue = 0;
     }
 
@@ -46,7 +43,7 @@ public class TrueFalseCE extends AbstractCE {
 //        }
 //        else {
             result.updateStatistics(c2, GT);
-            result.updateItem(c2.statisticValue);
+            result.updateItem(c2.statistics);
 //            for (int i = 0; i < 4; i++) {
 //                result.statisticValue[i] += c2.statisticValue[i];
 //                result.statistics[i] = result.statisticValue[i];
@@ -58,6 +55,7 @@ public class TrueFalseCE extends AbstractCE {
             result.updateCEValue(zc);
         }
 //        System.out.println(Boolean.toString(hasPC)+" "+String.valueOf(result.value)+" "+result.getInstanceNumber());
+//        System.out.println(Character.toString(positionChar) + String.valueOf(result.value));
         return result;
     }
 
@@ -87,7 +85,7 @@ public class TrueFalseCE extends AbstractCE {
 //            }
 //            else {
                 result.updateStatistics(c2, GT);
-                result.updateItem(c2.statisticValue);
+                result.updateItem(c2.statistics);
 //            for (int i = 0; i < 4; i++) {
 //                result.statisticValue[i] += c2.statisticValue[i];
 //                result.statistics[i] = result.statisticValue[i];
@@ -113,7 +111,7 @@ public class TrueFalseCE extends AbstractCE {
     public void updateCEValue(double zc) {
         double[] tempStatisticValue = new double[4];
         for (int i = 0; i < 4; i++) {
-            tempStatisticValue[i] = statisticValue[i] == 0 ? 0.5 : statisticValue[i];
+            tempStatisticValue[i] = statistics[i] == 0 ? 0.5 : statistics[i];
         }
         double WAll0 = tempStatisticValue[2] + tempStatisticValue[3];
         double WAll1 = tempStatisticValue[0] + tempStatisticValue[1];
@@ -166,8 +164,8 @@ public class TrueFalseCE extends AbstractCE {
 
     @Override
     public int getInstanceNumber() {
-        return statisticValue[0] + statisticValue[1]
-                + statisticValue[2] + statisticValue[3];
+        return (int) (statistics[0] + statistics[1]
+                        + statistics[2] + statistics[3]);
     }
 
 
@@ -182,7 +180,7 @@ public class TrueFalseCE extends AbstractCE {
     public void updateSignificance(double significanceLevel) {
         double[] tempStatisticValue = new double[4];
         for (int i = 0; i < 4; i++) {
-            tempStatisticValue[i] = statisticValue[i] == 0 ? 0.5 : statisticValue[i];
+            tempStatisticValue[i] = statistics[i] == 0 ? 0.5 : statistics[i];
         }
         double WAll0 = tempStatisticValue[2] + tempStatisticValue[3];
         double WAll1 = tempStatisticValue[0] + tempStatisticValue[1];
@@ -203,28 +201,28 @@ public class TrueFalseCE extends AbstractCE {
 
     public void updateItem(int[] stats) {
         for (int i=0; i<4; i++)
-            statisticValue[i] += stats[i];
+            statistics[i] += stats[i];
     }
 
 
     public void updateItem(double[] stats) {
         for (int i=0; i<4; i++)
-            statisticValue[i] += stats[i];
+            statistics[i] += stats[i];
     }
 
 
     public void addItem(boolean W, boolean Y) {
         if (W) {
             if (Y) {
-                statisticValue[0]++;
+                statistics[0]++;
             } else {
-                statisticValue[1]++;
+                statistics[1]++;
             }
         } else {
             if (Y) {
-                statisticValue[2]++;
+                statistics[2]++;
             } else {
-                statisticValue[3]++;
+                statistics[3]++;
             }
         }
     }
@@ -234,8 +232,8 @@ public class TrueFalseCE extends AbstractCE {
         double[] s2 = new double[4];
         double ce;
         for (int i = 0; i < 4; i++) {
-            s1[i] = this.statisticValue[i] == 0 ? 0.5 : this.statisticValue[i];
-            s2[i] = c2.statisticValue[i] == 0 ? 0.5 : c2.statisticValue[i];
+            s1[i] = this.statistics[i] == 0 ? 0.5 : this.statistics[i];
+            s2[i] = c2.statistics[i] == 0 ? 0.5 : c2.statistics[i];
         }
 
         double c10 = s1[2] + s1[3];
@@ -256,7 +254,7 @@ public class TrueFalseCE extends AbstractCE {
     @Override
     public void updateStatistics(int GT) {
         for (int i = 0; i < 4; i++) {
-            statistics[i] = statisticValue[i] == 0 ? 0.5 : statisticValue[i];
+            statistics[i] = statistics[i] == 0 ? 0.5 : statistics[i];
         }
         double WAll0 = statistics[2] + statistics[3];
         double WAll1 = statistics[0] + statistics[1];
@@ -280,18 +278,18 @@ public class TrueFalseCE extends AbstractCE {
         }
         sb.append(cEValue);
         sb.append('\t');
-        for (int i = 0; i < statisticValue.length; i++) {
-            if (statisticValue[i] == 0) {
+        for (int i = 0; i < statistics.length; i++) {
+            if (statistics[i] == 0) {
                 sb.append(0.5);
             } else {
-                sb.append(statisticValue[i]);
+                sb.append(statistics[i]);
             }
             sb.append('\t');
         }
 
         double[] tempStatisticValue = new double[4];
         for (int i = 0; i < 4; i++) {
-            tempStatisticValue[i] = statisticValue[i] == 0 ? 0.5 : statisticValue[i];
+            tempStatisticValue[i] = statistics[i] == 0 ? 0.5 : statistics[i];
         }
         double WAll0 = tempStatisticValue[2] + tempStatisticValue[3];
         double WAll1 = tempStatisticValue[0] + tempStatisticValue[1];
