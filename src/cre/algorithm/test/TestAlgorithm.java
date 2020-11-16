@@ -135,9 +135,10 @@ public class TestAlgorithm extends AbstractAlgorithm {
             canShowOutput.showOutputString("==== full training set ===");
             canShowStatus.showStatus("Building...");
             TestOldAlgorithm.do_it(fileName,
-                    config.getZC(), config.getOddsRatio(), config.getMergeDepth(), config.getFeatureSelection(),
-                    config.getMergeStrategy(), config.getReliabilityMinSupport(), WP, YP,
-                    XPArray, GT, null, -1, otherConfig,
+//                    config.getZC(), config.getOddsRatio(), config.getMergeDepth(), config.getFeatureSelection(),
+//                    config.getMergeStrategy(), config.getReliabilityMinSupport(),
+                    config,
+                    WP, YP, XPArray, GT, null, -1, otherConfig,
                     canShowStatus, canShowOutput, false);
 
 
@@ -160,8 +161,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         canShowStatus.showStatus("times: " + (i + 1));
                         int[] group = helper.nextLines();
                         result.add(TestOldAlgorithm.do_it(fileName,
-                                config.getZC(), config.getOddsRatio(), config.getMergeDepth(), config.getFeatureSelection(),
-                                config.getMergeStrategy(), config.getReliabilityMinSupport(), WP, YP,
+                                config, WP, YP,
                                 XPArray, GT, group, 0, otherConfig,
                                 canShowStatus, canShowOutput, true));
                     }
@@ -183,8 +183,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         canShowStatus.showStatus("times: " + (i + 1));
                         int[] group = helper.nextLines();
                         result.add(TestOldAlgorithm.do_it(fileName,
-                                config.getZC(), config.getOddsRatio(), config.getMergeDepth(), config.getFeatureSelection(),
-                                config.getMergeStrategy(), config.getReliabilityMinSupport(), WP, YP,
+                                config, WP, YP,
                                 XPArray, GT, group, 0, otherConfig,
                                 canShowStatus, canShowOutput, true));
                     }
@@ -211,8 +210,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                             }
                             canShowStatus.showStatus("times: " + (i + 1) + "; fold: " + (l + 1));
                             result.add(TestOldAlgorithm.do_it(fileName,
-                                    config.getZC(), config.getOddsRatio(), config.getMergeDepth(), config.getFeatureSelection(),
-                                    config.getMergeStrategy(), config.getReliabilityMinSupport(), WP, YP,
+                                    config, WP, YP,
                                     XPArray, GT, group, l, otherConfig,
                                     canShowStatus, canShowOutput, true));
                         }

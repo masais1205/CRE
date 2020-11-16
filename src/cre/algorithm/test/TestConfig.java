@@ -60,7 +60,7 @@ public class TestConfig extends TestConfigBase implements Cloneable {
         this.setMergeDepth(1);
         this.setFeatureSelection(false);
         this.setMergeStrategy("Reliability first");
-        this.setSignificanceLevel("95%");
+        this.setSignificanceLevel("90%");
         this.setReliabilityMinSupport(0.01);
         super.fileName = fileName;
     }
@@ -120,7 +120,13 @@ public class TestConfig extends TestConfigBase implements Cloneable {
     public String getMergeStrategyComment() { return "Two different strategies to generalise unreliable patterns to reliable patterns"; }
 
     public boolean getSignificanceLevelVisible() { return true; }
-    public String getSignificanceLevel() {return significanceLevel;}
+    public String getSignificanceLevel() { return significanceLevel; }
+    public double transSignificanceLevel() {
+//        confidence level, 1.645(90%), 1.96(95%), 2.33(98%), 2.58(99%)
+        if(this.significanceLevel == "99%") return 2.58;
+        else if(this.significanceLevel == "95%")  return 1.96;
+        else return 1.645;
+    }
     public void setSignificanceLevel(String significanceLevel) {
         this.significanceLevel = significanceLevel;
     }
@@ -191,7 +197,6 @@ public class TestConfig extends TestConfigBase implements Cloneable {
     public double getZCMin() {
         return 0.1;
     }
-
     public double getZC() {
         return ZC;
     }

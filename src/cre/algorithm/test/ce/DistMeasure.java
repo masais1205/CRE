@@ -25,16 +25,15 @@ public class DistMeasure {
     
     public DistMeasure() {
     }
-    
+
     public static class minDistLocation{
-        public int rowIndex, colIndex, minDistance, cntUnreliable;
+        public int rowIndex, colIndex, distance;
         public double diffCE;
 
-        public minDistLocation(int rowIndex, int colIndex, int minDistance, int cntUnreliable, double diffCE) {
+        public minDistLocation(int rowIndex, int colIndex, int distance, double diffCE) {
             this.rowIndex = rowIndex;
             this.colIndex = colIndex;
-            this.minDistance = minDistance;
-            this.cntUnreliable = cntUnreliable;
+            this.distance = distance;
             this.diffCE = diffCE;
         }
 
@@ -44,8 +43,8 @@ public class DistMeasure {
 
                 public int compare(Object o1, Object o2) {
 
-                    Integer d1 = ((minDistLocation) o1).minDistance;
-                    Integer d2 = ((minDistLocation) o2).minDistance;
+                    Integer d1 = ((minDistLocation) o1).distance;
+                    Integer d2 = ((minDistLocation) o2).distance;
                     int sComp = d1.compareTo(d2);
                     if (sComp != 0) {
                         return sComp;
@@ -58,6 +57,39 @@ public class DistMeasure {
         }
     }
 
+//    old version, detecting reliable
+//    public static class minDistLocation{
+//        public int rowIndex, colIndex, minDistance, cntUnreliable;
+//        public double diffCE;
+//
+//        public minDistLocation(int rowIndex, int colIndex, int minDistance, int cntUnreliable, double diffCE) {
+//            this.rowIndex = rowIndex;
+//            this.colIndex = colIndex;
+//            this.minDistance = minDistance;
+//            this.cntUnreliable = cntUnreliable;
+//            this.diffCE = diffCE;
+//        }
+//
+//        public static void sortDist(List<minDistLocation> location) {
+//
+//            Collections.sort(location, new Comparator() {
+//
+//                public int compare(Object o1, Object o2) {
+//
+//                    Integer d1 = ((minDistLocation) o1).minDistance;
+//                    Integer d2 = ((minDistLocation) o2).minDistance;
+//                    int sComp = d1.compareTo(d2);
+//                    if (sComp != 0) {
+//                        return sComp;
+//                    }
+//
+//                    Double e1 = ((minDistLocation) o1).diffCE;
+//                    Double e2 = ((minDistLocation) o2).diffCE;
+//                    return e1.compareTo(e2);
+//                }});
+//        }
+//    }
+
     public char[] calcXOR(char[] a, char[] b) {
         char[] xor = new char[a.length];
         for(int i=0; i<a.length; i++)
@@ -66,6 +98,9 @@ public class DistMeasure {
     }
 
     public void buildDistanceMatrix(List<AbstractCE> CEList) {
+        /*
+        distanceMatrix: row_index, col_index, distance
+         */
         int n = CEList.size();
         char [] xor;
         String xorString;

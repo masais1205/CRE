@@ -1,5 +1,6 @@
 package cre.algorithm.test.ce;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -16,13 +17,18 @@ public abstract class AbstractCE {
 
     public boolean reliable;
 
+    public boolean isSignificant;
+
     public AbstractCE(char[] buffer) {
         value = new char[buffer.length];
         System.arraycopy(buffer, 0, value, 0, buffer.length);
     }
 
     public abstract AbstractCE mergeInstance(AbstractCE c2, int GT, List<Integer> position, int[] PCMembers,
-                                             char positionChar, CEValue preferredValue, double zc, double reliabilityMinSupport);
+                                             char positionChar, CEValue preferredValue, double zc);
+
+    public abstract AbstractCE mergeInstanceList(Collection<AbstractCE> c, int GT, List<Integer> position, int[] PCMembers, char positionChar,
+                                    CEValue preferredValue, double zc);
 
     public abstract void updateCEValue(double zc);
 
@@ -33,5 +39,7 @@ public abstract class AbstractCE {
     public abstract void updateStatistics(int GT);
 
     public abstract void updateReliable(double reliabilityMinSupport);
+
+    public abstract void updateSignificance(double significanceLevel);
 
 }

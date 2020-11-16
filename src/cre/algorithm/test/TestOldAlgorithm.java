@@ -34,8 +34,10 @@ import javax.xml.crypto.dom.DOMCryptoContext;
 public class TestOldAlgorithm {
     private static String delimiter = ",";
 
-    public static Statistic do_it(String fileName, double ZC, double odd_ratio, int mergeDepth,  boolean featureSelection,
-                                  String mergeStrategy, double reliabilityMinSupport, int WP, int YP, int[] XPArray,
+    public static Statistic do_it(String fileName, TestConfig config,
+//                                  double ZC, double odd_ratio, int mergeDepth,  boolean featureSelection,
+//                                  String mergeStrategy, double reliabilityMinSupport,
+                                  int WP, int YP, int[] XPArray,
                                   int GT, int[] group, int testGroupId, OtherConfig otherConfig,
                                   CanShowStatus canShowStatus,
                                   CanShowOutput canShowOutput, boolean isTesting) throws CalculatingException {
@@ -78,7 +80,7 @@ public class TestOldAlgorithm {
             double[] alpha = new double[1];
             alpha[0] = 0.05;
             c.assign("alpha", alpha);
-            c.assign("featureSelection", Boolean.toString(featureSelection));
+            c.assign("featureSelection", Boolean.toString(config.getFeatureSelection()));
             c.assign(".tmp.", "adjustment(fileName,w,y,xArray,alpha,featureSelection)");
             REXP r = c.parseAndEval("try(eval(parse(text=.tmp.)),silent=TRUE)");
             if (r.inherits("try-error")) {
@@ -288,7 +290,7 @@ public class TestOldAlgorithm {
             for (int i = 0; i < orWX.length; i++) {
                 Integer tempValue = ((Integer) orWX[i].getAttach());
                 XPReverseSorted[orWX.length - i - 1] = tempValue;
-                if (orWX[i].getOR(false) > odd_ratio) {
+                if (orWX[i].getOR(false) > config.getOddsRatio()) {
                     orWXPNoFitOddsRatio.add(tempValue);
                 }
             }
@@ -302,7 +304,7 @@ public class TestOldAlgorithm {
             for (int i = 0; i < orYX.length; i++) {
                 Integer tempValue = ((Integer) orYX[i].getAttach());
                 XPSorted[i] = tempValue;
-                if (orYX[i].getOR(false) > odd_ratio && !orYXPNoFitOddsRatio.contains(tempValue)) {
+                if (orYX[i].getOR(false) > config.getOddsRatio() && !orYXPNoFitOddsRatio.contains(tempValue)) {
 //                    canShowOutput.showOutputString("OR threshold " + String.valueOf(XPArray[tempValue]));
                     orYXPNoFitOddsRatio.add(tempValue);
                 } else {
@@ -318,33 +320,33 @@ public class TestOldAlgorithm {
             ////////!!!!!!!!!!!!!!!!!
 
 
-            for (AbstractCE i : trainingData.values()) {
-                i.updateCEValue(ZC);
-//                System.out.println(i);
-            }
+//            for (AbstractCE i : trainingData.values()) {
+//                i.updateCEValue(ZC);
+////                System.out.println(i);
+//            }
             //show pattern numbers before generation
-            int countPlus = 0, countMinus = 0, countQuestion = 0;
-            int countPlusInstanceCount = 0, countMinusInstanceCount = 0, countQuestionInstanceCount = 0;
-            for (AbstractCE ce : trainingData.values()) {
-                switch (ce.cEValue) {
-                    case PLUS:
-                        countPlus++;
-                        countPlusInstanceCount += ce.getInstanceNumber();
-                        break;
-                    case QUESTION:
-                        countQuestion++;
-                        countQuestionInstanceCount += ce.getInstanceNumber();
-                        break;
-                    case MINUS:
-                        countMinus++;
-                        countMinusInstanceCount += ce.getInstanceNumber();
-                        break;
-                }
-            }
-            canShowOutput.showLogString("PLUS\tMINUS\tQUESTION");
-            canShowOutput.showLogString(countPlus + "(" + countPlusInstanceCount + ")\t"
-                    + countMinus + "(" + countMinusInstanceCount + ")\t"
-                    + countQuestion + "(" + countQuestionInstanceCount + ")");
+//            int countPlus = 0, countMinus = 0, countQuestion = 0;
+//            int countPlusInstanceCount = 0, countMinusInstanceCount = 0, countQuestionInstanceCount = 0;
+//            for (AbstractCE ce : trainingData.values()) {
+//                switch (ce.cEValue) {
+//                    case PLUS:
+//                        countPlus++;
+//                        countPlusInstanceCount += ce.getInstanceNumber();
+//                        break;
+//                    case QUESTION:
+//                        countQuestion++;
+//                        countQuestionInstanceCount += ce.getInstanceNumber();
+//                        break;
+//                    case MINUS:
+//                        countMinus++;
+//                        countMinusInstanceCount += ce.getInstanceNumber();
+//                        break;
+//                }
+//            }
+//            canShowOutput.showLogString("PLUS\tMINUS\tQUESTION");
+//            canShowOutput.showLogString(countPlus + "(" + countPlusInstanceCount + ")\t"
+//                    + countMinus + "(" + countMinusInstanceCount + ")\t"
+//                    + countQuestion + "(" + countQuestionInstanceCount + ")");
 
             // modified by mss, show pattern before merge
 //            canShowOutput.showOutputString("before merge");
@@ -376,9 +378,9 @@ public class TestOldAlgorithm {
 //            CEAlgorithm.doMerge(trainingData.values(), mergeResult, PCMembers, XPSorted,
 //                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
-            reliabilityMinSupport *= trainingInstanceNumer;
-            if (reliabilityMinSupport < 20)
-                reliabilityMinSupport = 20;
+//            reliabilityMinSupport *= trainingInstanceNumer;
+//            if (reliabilityMinSupport < 20)
+//                reliabilityMinSupport = 20;
             // add by mss, reliability first or treatment effect homogeneity first
 //            if (mergeStrategy.equals("Reliability first"))
 //                CEAlgorithm.doMergeReliable(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
@@ -386,46 +388,46 @@ public class TestOldAlgorithm {
 //            else
 //                CEAlgorithm.doMergeEffectHomo(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
 //                    XPReverseSorted, ZC, reliabilityMinSupport, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
-//
+
 //            CEAlgorithm.refinePattern(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
 //                    XPReverseSorted, ZC, reliabilityMinSupport, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             CEAlgorithm.doMergeTwoConstraints(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
-                        XPReverseSorted, ZC, reliabilityMinSupport, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
+                        XPReverseSorted, config, orYXPNoFitOddsRatio, canShowOutput);
 
 
             //show pattern numbers after generation
-            countPlus = 0;
-            countMinus = 0;
-            countQuestion = 0;
-            countPlusInstanceCount = 0;
-            countMinusInstanceCount = 0;
-            countQuestionInstanceCount = 0;
-            int trainPlusMinusCount = 0;
-            for (AbstractCE ce : mergeResult) {
-                switch (ce.cEValue) {
-                    case PLUS:
-                        countPlus++;
-                        countPlusInstanceCount += ce.getInstanceNumber();
-                        break;
-                    case QUESTION:
-                        countQuestion++;
-                        countQuestionInstanceCount += ce.getInstanceNumber();
-                        break;
-                    case MINUS:
-                        countMinus++;
-                        countMinusInstanceCount += ce.getInstanceNumber();
-                        break;
-                }
-            }
-            trainPlusMinusCount = countMinus + countPlus;
-            canShowOutput.showLogString("After");
-            canShowOutput.showLogString("PLUS\tMINUS\tQUESTION");
-            canShowOutput.showLogString(countPlus + "(" + countPlusInstanceCount + ")\t"
-                    + countMinus + "(" + countMinusInstanceCount + ")\t"
-                    + countQuestion + "(" + countQuestionInstanceCount + ")");
-            //////////////////
-
+//            countPlus = 0;
+//            countMinus = 0;
+//            countQuestion = 0;
+//            countPlusInstanceCount = 0;
+//            countMinusInstanceCount = 0;
+//            countQuestionInstanceCount = 0;
+//            int trainPlusMinusCount = 0;
+//            for (AbstractCE ce : mergeResult) {
+//                switch (ce.cEValue) {
+//                    case PLUS:
+//                        countPlus++;
+//                        countPlusInstanceCount += ce.getInstanceNumber();
+//                        break;
+//                    case QUESTION:
+//                        countQuestion++;
+//                        countQuestionInstanceCount += ce.getInstanceNumber();
+//                        break;
+//                    case MINUS:
+//                        countMinus++;
+//                        countMinusInstanceCount += ce.getInstanceNumber();
+//                        break;
+//                }
+//            }
+//            trainPlusMinusCount = countMinus + countPlus;
+//            canShowOutput.showLogString("After");
+//            canShowOutput.showLogString("PLUS\tMINUS\tQUESTION");
+//            canShowOutput.showLogString(countPlus + "(" + countPlusInstanceCount + ")\t"
+//                    + countMinus + "(" + countMinusInstanceCount + ")\t"
+//                    + countQuestion + "(" + countQuestionInstanceCount + ")");
+//            //////////////////
+//
             //Log training result.
             if (!isTesting) {
                 StringBuilder sb = new StringBuilder();
@@ -546,16 +548,16 @@ public class TestOldAlgorithm {
 ////                    }
 //                }
 //                canShowOutput.showOutputString("===========================================");
-                canShowOutput.showLogString("PEHE: " + Math.sqrt(sqrDiff / allInstanceIncludeQuestion));
-                canShowOutput.showLogString("Testing Data not matched: " + notMatch + "/" + testingDataCount);
-//                canShowOutput.showLogString("Pattern(testing / training): " + testPlusMinusCount + "/" + trainPlusMinusCount);
-                Statistic statistic = new Statistic();
-                statistic.accuracy = (double) successInstance / allInstance;
-                statistic.recall = (double) successInstance / allInstanceIncludeQuestion;
-                statistic.testNoMatch = (double) notMatch / testingDataCount;
-                statistic.pehe = Math.sqrt(sqrDiff / allInstanceIncludeQuestion);
-//                statistic.patternMatch = (double) testPlusMinusCount / trainPlusMinusCount;
-                return statistic;
+//                canShowOutput.showLogString("PEHE: " + Math.sqrt(sqrDiff / allInstanceIncludeQuestion));
+//                canShowOutput.showLogString("Testing Data not matched: " + notMatch + "/" + testingDataCount);
+////                canShowOutput.showLogString("Pattern(testing / training): " + testPlusMinusCount + "/" + trainPlusMinusCount);
+//                Statistic statistic = new Statistic();
+//                statistic.accuracy = (double) successInstance / allInstance;
+//                statistic.recall = (double) successInstance / allInstanceIncludeQuestion;
+//                statistic.testNoMatch = (double) notMatch / testingDataCount;
+//                statistic.pehe = Math.sqrt(sqrDiff / allInstanceIncludeQuestion);
+////                statistic.patternMatch = (double) testPlusMinusCount / trainPlusMinusCount;
+//                return statistic;
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -1,6 +1,7 @@
 package cre.algorithm.test.ce;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -34,7 +35,7 @@ public class NumberCE extends AbstractCE {
 
     @Override
     public AbstractCE mergeInstance(AbstractCE cc, int GT, List<Integer> position, int[] PCMembers, char positionChar,
-                                    CEValue preferredValue, double zc, double reliabilityMinSupport) {
+                                    CEValue preferredValue, double zc) {
         NumberCE c2 = (NumberCE) cc;
         NumberCE result = new NumberCE(this.value);
         for (int i : position) {
@@ -48,6 +49,28 @@ public class NumberCE extends AbstractCE {
             result.cEValue = preferredValue;
         } else {
             result.updateCEValue(zc);
+        }
+        return result;
+    }
+
+    @Override
+    public AbstractCE mergeInstanceList(Collection<AbstractCE> ccList, int GT, List<Integer> position, int[] PCMembers, char positionChar,
+                                    CEValue preferredValue, double zc) {
+        NumberCE result = new NumberCE(this.value);
+        for (AbstractCE cc : ccList) {
+            NumberCE c2 = (NumberCE) cc;
+            for (int i : position) {
+                result.value[i] = positionChar;
+            }
+            result.trueList.addAll(this.trueList);
+            result.trueList.addAll(c2.trueList);
+            result.falseList.addAll(this.falseList);
+            result.falseList.addAll(c2.falseList);
+            if (preferredValue != null) {
+                result.cEValue = preferredValue;
+            } else {
+                result.updateCEValue(zc);
+            }
         }
         return result;
     }
@@ -92,6 +115,20 @@ public class NumberCE extends AbstractCE {
         } else {
             cEValue = CEValue.QUESTION;
         }
+    }
+
+    @Override
+    public void updateSignificance(double significanceLevel) {
+        double X1 = mean(trueList);
+        double X2 = mean(falseList);
+
+        double var1 = var(trueList, X1);
+        double var2 = var(falseList, X2);
+
+        double t = (X1 - X2)
+                / Math.sqrt(var1 / trueList.size() + var2 / falseList.size());
+
+        isSignificant = t >= significanceLevel ? true : false;
     }
 
     @Override

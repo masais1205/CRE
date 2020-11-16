@@ -5,6 +5,7 @@ import com.google.common.collect.Table;
 import cre.algorithm.CanShowOutput;
 import cre.algorithm.test.MathListCombination;
 import cre.algorithm.test.Statistic;
+import cre.algorithm.test.TestConfig;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
@@ -201,6 +202,7 @@ public class CEAlgorithm {
         canShowOutput.showLogString("All Finish:" + result.size());
     }*/
 
+
     public static List<Integer> getMergePoistion(String xor) {
         List<Integer> positionsList = new ArrayList<>();
         boolean hasNumer = false, hasSymbol = false;
@@ -219,6 +221,17 @@ public class CEAlgorithm {
 //        System.out.println("---------------"+xor+" "+ Joiner.on(',').join(positionsList));
         return positionsList;
     }
+
+
+    public static boolean isSamePatternGroup(char[] attrValue, char[] refValue, List<Integer> positions) {
+        for (int i=0; i<positions.size(); i++) {
+            if (positions.get(i) == 1)
+                if (attrValue[i] != refValue[i])
+                    return false;
+        }
+        return true;
+    }
+
 
     public static List<Integer> getKeysFromValue(Map hm,Object value){
         Set ref = hm.keySet();
@@ -239,20 +252,15 @@ public class CEAlgorithm {
         int n = CEList.size();
 
         Map<Integer, Integer> row = new HashMap<>();
-        int distance, cntUnreliable;
+        int distance;
         double diffCE;
         for(int j=1; j<n; j++) {
             row = distanceMatrix.row(j);
 
             for(int k=0; k<j; k++) {
-                cntUnreliable = 0;
                 distance = row.get(k);
-                if (! CEList.get(j).reliable)
-                    cntUnreliable++;
-                if (! CEList.get(k).reliable)
-                    cntUnreliable++;
                 diffCE = Math.abs(CEList.get(j).statistics[4] - CEList.get(k).statistics[4]);
-                location.add(new DistMeasure.minDistLocation(j, k, distance, cntUnreliable, diffCE));
+                location.add(new DistMeasure.minDistLocation(j, k, distance, diffCE));
             }
         }
         return location;
@@ -294,7 +302,7 @@ public class CEAlgorithm {
                                   int GT, List<Integer> positions, int[] PCMembers, int jKey, int kKey, Integer jValue, Integer kValue,
                                   double zc, double reliabilityMinSupport, DistMeasure distMeasure) {
         AbstractCE newCE = list.get(jValue).mergeInstance(list.get(kValue), GT,
-                positions, PCMembers, char_QUESTION, null, zc, reliabilityMinSupport);
+                positions, PCMembers, char_QUESTION, null, zc);
         if (newCE.reliable)
             reliableList.add(newCE);
         list.set(jValue, newCE);
@@ -307,10 +315,114 @@ public class CEAlgorithm {
         updateDistMeasure(distMeasure, list, jValue);
     }
 
-    public static void doMergeTwoConstraints(Collection<AbstractCE> old, int GT, List<AbstractCE> result, int[] PCMembers,
-                                             int[] order, int[] reverseOrder, double zc, double reliabilityMinSupport,
-                                             HashSet<Integer> positionNotFitOddsRatio, int mergeDepth, CanShowOutput canShowOutput) {
 
+    public static void printMatrix(Table<Integer, Integer, Integer> matrix, int matSize, CanShowOutput canShowOutput) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\tMatrix");
+        for (int i=0; i<matSize; i++)
+            sb.append("\t" + Integer.toString(i));
+        canShowOutput.showOutputString(sb.toString());
+
+        for (int i=0; i<matSize; i++) {
+            sb = new StringBuilder();
+            sb.append("\t" + Integer.toString(i));
+            for (int j=0; j<=i; j++) {
+                sb.append("\t" + Integer.toString(matrix.get(i, j)));
+            }
+            canShowOutput.showOutputString(sb.toString());
+        }
+    }
+
+    public static void doMergeTwoConstraints(Collection<AbstractCE> old, int GT, List<AbstractCE> CEList, int[] PCMembers,
+                                             int[] order, int[] reverseOrder, TestConfig config,
+                                             HashSet<Integer> positionNotFitOddsRatio, CanShowOutput canShowOutput) {
+        /*
+        More specifically, the search strategy is as the following.
+        1. for each insignificant pattern, find its closest patterns with the smallest edit distance.
+        2. In the set of closest patterns, chose the pattern with the closest treatment effect value to generalise with
+        the given pattern.
+         */
+//        List<AbstractCE> CEList = new ArrayList<>();
+        int num_significant = 0;
+        double significanceLevel = config.transSignificanceLevel();
+
+        double significance = 0;
+        for (AbstractCE i : old) {
+            i.updateSignificance(significanceLevel);
+            if (i.isSignificant)
+                num_significant++;
+            i.updateStatistics(GT);
+            CEList.add(i);
+        }
+
+        DistMeasure distMeasure = new DistMeasure();
+        distMeasure.buildDistanceMatrix(CEList);
+        List<DistMeasure.minDistLocation> location = getMinDistLocation(CEList, distMeasure.distanceMatrix);
+        canShowOutput.showOutputString("CEList Size:" + Integer.toString(CEList.size()));
+//        printMatrix(distMeasure.distanceMatrix, CEList.size(), canShowOutput);
+        sortDist(location);
+        int minDist = location.get(0).distance;
+
+        int rowIdx, colIdx, dist;
+        while (CEList.size() - num_significant > 1 && minDist < order.length && minDist > 0) {
+            canShowOutput.showOutputString("*****************CEList " + Integer.toString(CEList.size()) + " *numSign " + Integer.toString(num_significant) +
+                    " *minDist " + Double.toString(minDist) + " *order " + Integer.toString(order.length) + "************************");
+            printMatrix(distMeasure.distanceMatrix, CEList.size(), canShowOutput);
+            DistMeasure.minDistLocation loc = location.get(0);
+            rowIdx = loc.rowIndex;
+            colIdx = loc.colIndex;
+            dist = loc.distance;
+
+            List<AbstractCE> removeIdxList = new ArrayList<>();
+            removeIdxList.add(CEList.get(rowIdx));
+
+            AbstractCE newCE;
+
+            String xor_tmp = distMeasure.xorMatrix.get(rowIdx, colIdx);
+            List<Integer> positions = getMergePoistion(xor_tmp);
+            if (dist == 1) {
+                // dist==1, merge two patterns
+                canShowOutput.showOutputString("***dist=1 * " + String.valueOf(CEList.get(rowIdx).value) + "\t" + String.valueOf(CEList.get(colIdx).value));
+                if (CEList.get(rowIdx).isSignificant && CEList.get(colIdx).isSignificant)
+                    continue;
+                newCE = CEList.get(rowIdx).mergeInstance(CEList.get(colIdx), GT,
+                        positions, PCMembers, char_QUESTION, null, significanceLevel);
+                removeIdxList.add(CEList.get(colIdx));
+            }
+            else {
+                // dist>1, find all pattern based on merge position and merge all of them
+                char[] attrValue;
+                boolean toBeMerge = false;
+                List<AbstractCE> tmpCEList = new ArrayList<>();
+                for (int i=0; i<CEList.size(); i++) {
+                    if (i == rowIdx)
+                        continue;
+                    attrValue = CEList.get(i).value;
+                    toBeMerge = isSamePatternGroup(attrValue, CEList.get(rowIdx).value, positions);
+                    if (toBeMerge) {
+                        removeIdxList.add(CEList.get(i));
+                        tmpCEList.add(CEList.get(i));
+                    }
+                }
+                canShowOutput.showOutputString("***dist>1" + String.valueOf(CEList.get(rowIdx).value) + "\t" + Integer.toString(tmpCEList.size()));
+                newCE = CEList.get(rowIdx).mergeInstanceList(tmpCEList, GT,
+                        positions, PCMembers, char_QUESTION, null, significanceLevel);
+            }
+            newCE.updateSignificance(significanceLevel);
+            if (newCE.isSignificant)
+                num_significant++;
+            CEList.add(newCE);
+            CEList.removeAll(removeIdxList);
+
+            // generate new distance matrix with updated pattern set
+            distMeasure = new DistMeasure();
+            distMeasure.buildDistanceMatrix(CEList);
+            location = getMinDistLocation(CEList, distMeasure.distanceMatrix);
+            sortDist(location);
+            minDist = location.get(0).distance;
+            canShowOutput.showOutputString("-----CEList " + Integer.toString(CEList.size()) + " *numSign " + Integer.toString(num_significant) + " *minDist " +
+                    Double.toString(minDist) + " *removeList " + Integer.toString(removeIdxList.size()) + "************************");
+        }
     }
 
     public static void doMergeEffectHomo(Collection<AbstractCE> old, int GT, List<AbstractCE> result, int[] PCMembers,
