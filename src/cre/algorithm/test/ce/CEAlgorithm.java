@@ -318,7 +318,9 @@ public class CEAlgorithm {
 
     public static void printMatrix(Table<Integer, Integer, Integer> matrix, List<AbstractCE> CEList, CanShowOutput canShowOutput) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\tMatrix");
+        if (CEList.get(0).value.length > 6)
+            sb.append("\t");
+        sb.append("Matrix");
         for (int i=0; i<CEList.size(); i++)
             sb.append("\t" + String.valueOf(CEList.get(i).value));
         canShowOutput.showOutputString(sb.toString());
@@ -327,7 +329,9 @@ public class CEAlgorithm {
             sb = new StringBuilder();
             sb.append(String.valueOf(CEList.get(i).value) + "\t");
             for (int j=0; j<=i; j++) {
-                sb.append(Integer.toString(matrix.get(i, j)) + "\t\t");
+                sb.append(Integer.toString(matrix.get(i, j)) + "\t");
+                if (CEList.get(i).value.length > 6)
+                    sb.append("\t");
             }
             canShowOutput.showOutputString(sb.toString());
         }
@@ -367,7 +371,9 @@ public class CEAlgorithm {
         while (CEList.size() - num_significant > 1 && minDist < order.length && minDist > 0) {
 //            canShowOutput.showOutputString("*****************CEList " + Integer.toString(CEList.size()) + " *numSign " + Integer.toString(num_significant) +
 //                    " *minDist " + Double.toString(minDist) + " *order " + Integer.toString(order.length) + "************************");
-//            printMatrix(distMeasure.distanceMatrix, CEList, canShowOutput);
+            printMatrix(distMeasure.distanceMatrix, CEList, canShowOutput);
+            canShowOutput.showOutputString("Pattern size (significant): " + Integer.toString(CEList.size()) + " (" +
+                    Integer.toString(num_significant) + ")" + ";\tminimal distance: " + Double.toString(minDist));
             DistMeasure.minDistLocation loc = location.get(0);
             rowIdx = loc.rowIndex;
             colIdx = loc.colIndex;
@@ -386,7 +392,7 @@ public class CEAlgorithm {
 
             if (dist == 1) {
                 // dist==1, merge two patterns
-//                canShowOutput.showOutputString("***dist=1 * " + String.valueOf(CEList.get(rowIdx).value) + "\t" + String.valueOf(CEList.get(colIdx).value));
+                canShowOutput.showOutputString("miniDistance=1, 2 patterns would be merged.\n");
                 if (CEList.get(rowIdx).isSignificant && CEList.get(colIdx).isSignificant)
                     continue;
                 newCE = CEList.get(rowIdx).mergeInstance(CEList.get(colIdx), GT,
@@ -409,7 +415,8 @@ public class CEAlgorithm {
                         tmpCEList.add(CEList.get(i));
                     }
                 }
-//                canShowOutput.showOutputString("***dist>1 * " + String.valueOf(CEList.get(rowIdx).value) + "\tremoveList " + Integer.toString(tmpCEList.size()));
+                canShowOutput.showOutputString("miniDistance=" + Integer.toString(dist) + ", " + Integer.toString(tmpCEList.size()+1) +
+                        " patterns would be merged.\n");
                 newCE = CEList.get(rowIdx).mergeInstanceList(tmpCEList, GT,
                         positions, PCMembers, char_QUESTION, null, significanceLevel);
             }

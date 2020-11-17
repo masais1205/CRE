@@ -278,7 +278,7 @@ public class TrueFalseCE extends AbstractCE {
         }
         sb.append(cEValue);
         sb.append('\t');
-        for (int i = 0; i < statistics.length; i++) {
+        for (int i = 0; i < 4; i++) {
             if (statistics[i] == 0) {
                 sb.append(0.5);
             } else {
