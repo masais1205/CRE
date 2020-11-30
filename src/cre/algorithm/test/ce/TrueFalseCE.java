@@ -22,7 +22,10 @@ public class TrueFalseCE extends AbstractCE {
     public AbstractCE mergeInstance(AbstractCE c, int GT, List<Integer> position, int[] PCMembers, char positionChar,
                                     CEValue preferredValue, double zc) {
         TrueFalseCE c2 = (TrueFalseCE) c;
-        TrueFalseCE result = this;
+        TrueFalseCE result = new TrueFalseCE(this.value);
+        result.statistics = this.statistics.clone();
+        result.groundTruthValue = this.groundTruthValue;
+
 //        System.out.println(String.valueOf(this.value)+" "+this.getInstanceNumber()+"\t"+String.valueOf(c2.value)+" "+c2.getInstanceNumber());
         boolean hasPC = false;
         for (int i : position) {
@@ -30,30 +33,14 @@ public class TrueFalseCE extends AbstractCE {
                 hasPC = IntStream.of(PCMembers).anyMatch(x -> x == i);
             result.value[i] = positionChar;
         }
-//        if(!hasPC) {
-//            if (GT > 0)
-//                result.updateStatistics(c2, GT);
-//            result.updateItem(c2.statisticValue);
-////            for (int i = 0; i < 4; i++) {
-////                result.statisticValue[i] += c2.statisticValue[i];
-////                result.statistics[i] = result.statisticValue[i];
-////            }
-//            if (GT < 0)
-//                result.updateStatistics(GT);
+        result.updateStatistics(c2, GT, hasPC);
+        result.updateItem(c2.statistics);
+
+//        if (preferredValue != null) {
+//            result.cEValue = preferredValue;
+//        } else {
+//            result.updateCEValue(zc);
 //        }
-//        else {
-            result.updateStatistics(c2, GT);
-            result.updateItem(c2.statistics);
-//            for (int i = 0; i < 4; i++) {
-//                result.statisticValue[i] += c2.statisticValue[i];
-//                result.statistics[i] = result.statisticValue[i];
-//            }
-//        }
-        if (preferredValue != null) {
-            result.cEValue = preferredValue;
-        } else {
-            result.updateCEValue(zc);
-        }
 //        System.out.println(Boolean.toString(hasPC)+" "+String.valueOf(result.value)+" "+result.getInstanceNumber());
 //        System.out.println(Character.toString(positionChar) + String.valueOf(result.value));
         return result;
@@ -62,7 +49,9 @@ public class TrueFalseCE extends AbstractCE {
     @Override
     public AbstractCE mergeInstanceList(Collection<AbstractCE> cList, int GT, List<Integer> position, int[] PCMembers, char positionChar,
                                     CEValue preferredValue, double zc) {
-        TrueFalseCE result = this;
+        TrueFalseCE result = new TrueFalseCE(this.value);
+        result.statistics = this.statistics.clone();
+        result.groundTruthValue = this.groundTruthValue;
         for (AbstractCE c : cList) {
             TrueFalseCE c2 = (TrueFalseCE) c;
 //            System.out.println(String.valueOf(this.value)+" "+this.getInstanceNumber()+"\t"+String.valueOf(c2.value)+" "+c2.getInstanceNumber());
@@ -72,35 +61,18 @@ public class TrueFalseCE extends AbstractCE {
                     hasPC = IntStream.of(PCMembers).anyMatch(x -> x == i);
                 result.value[i] = positionChar;
             }
-//            if(!hasPC) {
-//                if (GT > 0)
-//                    result.updateStatistics(c2, GT);
-//                result.updateItem(c2.statisticValue);
-////            for (int i = 0; i < 4; i++) {
-////                result.statisticValue[i] += c2.statisticValue[i];
-////                result.statistics[i] = result.statisticValue[i];
-////            }
-//                if (GT < 0)
-//                    result.updateStatistics(GT);
+            result.updateStatistics(c2, GT, hasPC);
+            result.updateItem(c2.statistics);
+
+//            if (preferredValue != null) {
+//                result.cEValue = preferredValue;
+//            } else {
+//                result.updateCEValue(zc);
 //            }
-//            else {
-                result.updateStatistics(c2, GT);
-                result.updateItem(c2.statistics);
-//            for (int i = 0; i < 4; i++) {
-//                result.statisticValue[i] += c2.statisticValue[i];
-//                result.statistics[i] = result.statisticValue[i];
-//            }
-//            }
-            if (preferredValue != null) {
-                result.cEValue = preferredValue;
-            } else {
-                result.updateCEValue(zc);
-            }
 //            System.out.println(Boolean.toString(hasPC)+" "+String.valueOf(result.value)+" "+result.getInstanceNumber());
         }
         return result;
     }
-
 
     /**
      * The interface in which there are functions MainFrame provide.
@@ -193,10 +165,9 @@ public class TrueFalseCE extends AbstractCE {
         double temp = (WAll0 + WAll1) / WAll0 / WAll1;
 //        double z = (Math.abs(p1 - p2) - temp / 2)
 //                / Math.sqrt(p_av * (1.0 - p_av) * temp);
-        double z = (p1 - p2)
+        significance = (p1 - p2)
                 / Math.sqrt(p_av * (1.0 - p_av) * temp);
-
-        isSignificant = z >= significanceLevel ? true : false;
+        isSignificant = significance >= significanceLevel ? true : false;
     }
 
     public void updateItem(int[] stats) {
@@ -227,7 +198,7 @@ public class TrueFalseCE extends AbstractCE {
         }
     }
 
-    public void updateStatistics(TrueFalseCE c2, int GT) {
+    public void updateStatistics(TrueFalseCE c2, int GT, boolean hasPC) {
         double[] s1 = new double[4];
         double[] s2 = new double[4];
         double ce;
@@ -242,13 +213,17 @@ public class TrueFalseCE extends AbstractCE {
         double c20 = s2[2] + s2[3];
         double c21 = s2[0] + s2[1];
 
-        if (GT > 0)
-            statistics[4] = (groundTruthValue * (c10+c11) + c2.groundTruthValue * (c20+c21))
-                    / (c10+c11+c20+c21);
+        statistics[4] = (s1[0]+s2[0]) / (c11+c21) - (s1[2]+s2[2]) / (c10+c20);
+        if (GT >= 0) {
+            groundTruthValue = (groundTruthValue * (c10 + c11) + c2.groundTruthValue * (c20 + c21))
+                    / (c10 + c11 + c20 + c21);
+        }
+        if (hasPC) {
+            groundTruthValue = ((s1[0] / c11 - s1[2] / c10) * (c10 + c11) + (s2[0] / c21 - s2[2] / c20) * (c20 + c21))
+                        / (c10 + c11 + c20 + c21);
+        }
         else
-            statistics[4] = ((s1[0]/c11 - s1[2]/c10) * (c10+c11) + (s2[0]/c21 - s2[2]/c20) * (c20+c21))
-                    / (c10+c11+c20+c21);
-        groundTruthValue = statistics[4];
+            groundTruthValue = statistics[4];
     }
 
     @Override
@@ -261,11 +236,11 @@ public class TrueFalseCE extends AbstractCE {
 
         double p1 = statistics[0] / WAll1;
         double p2 = statistics[2] / WAll0;
-        if (GT > 0)
-            statistics[4] = groundTruthValue;
-        else
-            statistics[4] = p1 - p2;
-        groundTruthValue = statistics[4];
+
+        statistics[4] = p1 - p2;
+        if (GT < 0) {
+            groundTruthValue = statistics[4];
+        }
     }
 
 
@@ -276,7 +251,7 @@ public class TrueFalseCE extends AbstractCE {
             sb.append(value[i]);
             sb.append('\t');
         }
-        sb.append(cEValue);
+        sb.append(isSignificant);
         sb.append('\t');
         for (int i = 0; i < 4; i++) {
             if (statistics[i] == 0) {
@@ -297,7 +272,8 @@ public class TrueFalseCE extends AbstractCE {
         double p1 = tempStatisticValue[0] / WAll1;
         double p2 = tempStatisticValue[2] / WAll0;
 //        sb.append(String.format(Locale.CHINA, "%.4f", p1 - p2)); // output p1-p2
-        sb.append(String.format(Locale.CHINA, "%.4f", statistics[4]));
+        sb.append(String.format(Locale.CHINA, "%.4f", statistics[4]) + "\t");
+        sb.append(String.format(Locale.CHINA, "%.4f", groundTruthValue));
         return sb.toString();
     }
 }

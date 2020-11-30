@@ -53,9 +53,19 @@ public class LineValue {
         groundTruthValue = tmpValue / (getWYSum() + 1);
     }
 
+    public void updateGTValue() {
+        double WAll0 = WYValues[2] + WYValues[3];
+        double WAll1 = WYValues[0] + WYValues[1];
+
+        double p1 = WYValues[0] / WAll1;
+        double p2 = WYValues[2] / WAll0;
+
+        groundTruthValue = p1 - p2;
+    }
+
     public char[] getValue() {
         return value;
     }
 
-
+    public double getGroundTruthValue() {return groundTruthValue;};
 }

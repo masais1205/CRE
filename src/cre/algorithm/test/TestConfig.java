@@ -17,6 +17,7 @@ public class TestConfig extends TestConfigBase implements Cloneable {
     private String significanceLevel;
     private double reliabilityMinSupport;
     private TreeMap<String, List<Integer>> type;
+    private boolean debug;
 
     @Override
     public Object clone() {
@@ -62,6 +63,7 @@ public class TestConfig extends TestConfigBase implements Cloneable {
         this.setMergeStrategy("Reliability first");
         this.setSignificanceLevel("90%");
         this.setReliabilityMinSupport(0.01);
+        this.setDebug(false);
         super.fileName = fileName;
     }
 
@@ -108,6 +110,15 @@ public class TestConfig extends TestConfigBase implements Cloneable {
     }
     public String getFeatureSelectionComment() {
         return "Automated feature selection, yes/no";
+    }
+
+    public boolean getDebug() { return debug; }
+    public void setDebug(boolean debug) { this.debug = debug; }
+    public String getDebugShownName() {
+        return "Debug Mode";
+    }
+    public String getDebugComment() {
+        return "Debug Mode, yes/no";
     }
 
     public boolean getMergeStrategyVisible() { return false; }

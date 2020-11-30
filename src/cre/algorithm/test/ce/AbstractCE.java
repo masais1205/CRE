@@ -9,13 +9,15 @@ import java.util.List;
 public abstract class AbstractCE {
     public char[] value;
 
-    public CEValue cEValue;
+    public CEValue cEValue; // still use this term, but use it to indicate if significant
 
     public double groundTruthValue; // (ground truth) individual/conditional causal effect
 
     public double[] statistics = new double[5];
 
     public boolean reliable;
+
+    public double significance;
 
     public boolean isSignificant;
 

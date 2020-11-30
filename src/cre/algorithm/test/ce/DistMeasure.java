@@ -123,7 +123,7 @@ public class DistMeasure {
         }
         for(int j=0; j<n; j++) {
             xorMatrix.put(j,j, repeat("1", CEList.get(j).value.length));
-            distanceMatrix.put(j,j,n);
+            distanceMatrix.put(j,j,n*100);
         }
     }
 }

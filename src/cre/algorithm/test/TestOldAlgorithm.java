@@ -5,6 +5,7 @@ import cre.Config.OtherConfig;
 import cre.algorithm.CalculatingException;
 import cre.algorithm.CanShowOutput;
 import cre.algorithm.CanShowStatus;
+import cre.algorithm.ToolFunctions;
 import cre.algorithm.test.ce.*;
 
 import cre.algorithm.tool.FileTool;
@@ -44,6 +45,7 @@ public class TestOldAlgorithm {
         String testFileName = otherConfig.getTestFile();
         String groundTruthFileName = otherConfig.getGroundTruthFile();
         BufferedReader br = null;
+        boolean debug = config.getDebug();
 
         // modified by mss
         int[] PCMembers = new int[XPArray.length];
@@ -319,114 +321,12 @@ public class TestOldAlgorithm {
             System.arraycopy(XPSorted, 0, XPReverseSorted, 0, XPSorted.length);
             ////////!!!!!!!!!!!!!!!!!
 
-
-//            for (AbstractCE i : trainingData.values()) {
-//                i.updateCEValue(ZC);
-////                System.out.println(i);
-//            }
-            //show pattern numbers before generation
-//            int countPlus = 0, countMinus = 0, countQuestion = 0;
-//            int countPlusInstanceCount = 0, countMinusInstanceCount = 0, countQuestionInstanceCount = 0;
-//            for (AbstractCE ce : trainingData.values()) {
-//                switch (ce.cEValue) {
-//                    case PLUS:
-//                        countPlus++;
-//                        countPlusInstanceCount += ce.getInstanceNumber();
-//                        break;
-//                    case QUESTION:
-//                        countQuestion++;
-//                        countQuestionInstanceCount += ce.getInstanceNumber();
-//                        break;
-//                    case MINUS:
-//                        countMinus++;
-//                        countMinusInstanceCount += ce.getInstanceNumber();
-//                        break;
-//                }
-//            }
-//            canShowOutput.showLogString("PLUS\tMINUS\tQUESTION");
-//            canShowOutput.showLogString(countPlus + "(" + countPlusInstanceCount + ")\t"
-//                    + countMinus + "(" + countMinusInstanceCount + ")\t"
-//                    + countQuestion + "(" + countQuestionInstanceCount + ")");
-
-            // modified by mss, show pattern before merge
-//            canShowOutput.showOutputString("before merge");
-//            if (!isTesting) {
-//                StringBuilder sb = new StringBuilder();
-//                sb.append("\n");
-//                for (int i = 0; i < XPArray.length; i++) {
-//                    sb.append(names[XPArray[i]]);
-//                    sb.append("\t");
-//                }
-//                if (simpleTrueFalse) {
-//                    sb.append("ce.TrueFalseCE\tn11\tn12\tn21\tn22\t");
-//                    sb.append("p1-p2");
-//                } else {
-//                    sb.append("ce.TrueFalseCE\tW=1\tW=0");
-//                }
-//                sb.append("\n");
-//                for (AbstractCE i : trainingData.values()) {
-//                    sb.append(i.toString());
-//                    sb.append("\n");
-//                }
-//                canShowOutput.showOutputString(sb.toString());
-//            }
-//            canShowOutput.showOutputString("finish");
-            // mss
-
             /////////////
             List<AbstractCE> mergeResult = new ArrayList<>();
-//            CEAlgorithm.doMerge(trainingData.values(), mergeResult, PCMembers, XPSorted,
-//                    XPReverseSorted, ZC, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
-
-//            reliabilityMinSupport *= trainingInstanceNumer;
-//            if (reliabilityMinSupport < 20)
-//                reliabilityMinSupport = 20;
-            // add by mss, reliability first or treatment effect homogeneity first
-//            if (mergeStrategy.equals("Reliability first"))
-//                CEAlgorithm.doMergeReliable(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
-//                        XPReverseSorted, ZC, reliabilityMinSupport, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
-//            else
-//                CEAlgorithm.doMergeEffectHomo(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
-//                    XPReverseSorted, ZC, reliabilityMinSupport, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
-
-//            CEAlgorithm.refinePattern(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
-//                    XPReverseSorted, ZC, reliabilityMinSupport, orYXPNoFitOddsRatio, mergeDepth, canShowOutput);
 
             CEAlgorithm.doMergeTwoConstraints(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
-                        XPReverseSorted, config, orYXPNoFitOddsRatio, canShowOutput);
+                        XPReverseSorted, config, orYXPNoFitOddsRatio, canShowOutput, debug);
 
-
-            //show pattern numbers after generation
-//            countPlus = 0;
-//            countMinus = 0;
-//            countQuestion = 0;
-//            countPlusInstanceCount = 0;
-//            countMinusInstanceCount = 0;
-//            countQuestionInstanceCount = 0;
-//            int trainPlusMinusCount = 0;
-//            for (AbstractCE ce : mergeResult) {
-//                switch (ce.cEValue) {
-//                    case PLUS:
-//                        countPlus++;
-//                        countPlusInstanceCount += ce.getInstanceNumber();
-//                        break;
-//                    case QUESTION:
-//                        countQuestion++;
-//                        countQuestionInstanceCount += ce.getInstanceNumber();
-//                        break;
-//                    case MINUS:
-//                        countMinus++;
-//                        countMinusInstanceCount += ce.getInstanceNumber();
-//                        break;
-//                }
-//            }
-//            trainPlusMinusCount = countMinus + countPlus;
-//            canShowOutput.showLogString("After");
-//            canShowOutput.showLogString("PLUS\tMINUS\tQUESTION");
-//            canShowOutput.showLogString(countPlus + "(" + countPlusInstanceCount + ")\t"
-//                    + countMinus + "(" + countMinusInstanceCount + ")\t"
-//                    + countQuestion + "(" + countQuestionInstanceCount + ")");
-//            //////////////////
 //
             //Log training result.
             if (!isTesting) {
@@ -443,13 +343,15 @@ public class TestOldAlgorithm {
                     sb.append("\t");
                 }
                 if (simpleTrueFalse) {
-                    sb.append("ce.TrueFalseCE\tn11\tn12\tn21\tn22\t");
-                    sb.append("p1-p2");
+                    sb.append("isSignificant\tn11\tn12\tn21\tn22\t");
+                    sb.append("p1-p2\t");
+                    sb.append("causalEffect");
                 } else {
-                    sb.append("ce.TrueFalseCE\tW=1\tW=0");
+                    sb.append("isSignificant\tW=1\tW=0");
                 }
                 sb.append("\n");
                 for (AbstractCE i : mergeResult) {
+//                    canShowOutput.showOutputString(Boolean.toString(i.isSignificant));
                     sb.append(i.toString());
                     sb.append("\n");
                 }
@@ -462,26 +364,24 @@ public class TestOldAlgorithm {
                 int successInstance = 0;
                 int allInstance = 0;
                 int allInstanceIncludeQuestion = 0;
-                int success = 0;
-                int failed = 0;
                 canShowOutput.showLogString("\n===Testing process===");
-                int testPlusMinusCount = 0;
                 HashMap<String, LineValue> testDataStatistic = new HashMap<>();
 
-                double sqrDiff = 0;
+                // group data with same att values
                 for (LineValue lv : testingData.values()) {
-                    char[] charValue = searchTool.getNearestFreqCharValue(lv.getValue());
+                    AbstractCE patt = searchTool.getNearestFreqPatt(lv.getValue());
+                    char[] charValue = patt.value;
                     if (charValue != null) {
-                        LineValue testLv = new LineValue(charValue);
+                        String tS = new String(charValue);
+                        LineValue testLv = testDataStatistic.get(tS);
+                        if (testLv == null) {
+                            testLv = new LineValue(charValue);
+                            testDataStatistic.put(tS, testLv);
+                        }
                         testLv.addSomeItem(lv.getWYValues());
-
-                        double[] dData = OtherTool.fromIntArrayToNoZeroArray(lv.getWYValues());
-                        double ATE = dData[0] / (dData[0] + dData[1]) - dData[2] / (dData[2] + dData[3]);
-                        allInstanceIncludeQuestion ++;
-
-                        double ce  = searchTool.getNearestFreqCE(lv.getValue()); // get nearest and most frequent pattern
-                        sqrDiff += Math.pow((ATE - ce), 2);
-
+                        if (debug)
+                            canShowOutput.showOutputString("sample: " + Arrays.toString(lv.getValue()) +
+                                " -> pattern: " + Arrays.toString(testLv.getValue()));
                     } else {
                         for (int i = 0; i < 4; i++) {
                             notMatch += lv.getWYValues()[i];
@@ -490,74 +390,49 @@ public class TestOldAlgorithm {
                     }
                 }
 
-//                for (LineValue lv : testingData.values()) {
-////                        String tS = new String(lv.getValue());
-////                        LineValue testLv = new LineValue(lv.getValue());
-////                        testDataStatistic.put(tS, testLv);
-////                        testLv.addSomeItem(lv.getWYValues());
-//                    char[] charValue = searchTool.getNearestFreqCharValue(lv.getValue());
-//                    if (charValue != null) {
-//                        String tS = new String(charValue);
-//                        LineValue testLv = testDataStatistic.get(tS);
-//                        if (testLv == null) {
-//                            testLv = new LineValue(charValue);
-//                            testDataStatistic.put(tS, testLv);
-//                        }
-//                        testLv.addSomeItem(lv.getWYValues());
-//                        canShowOutput.showOutputString(Arrays.toString(lv.getValue()) +
-//                                Arrays.toString(testLv.getValue()));
-//                    } else {
-//                        for (int i = 0; i < 4; i++) {
-//                            notMatch += lv.getWYValues()[i];
-//                        }
-//                        canShowOutput.showLogString("CESearchTool#getCEValue return null");
-//                    }
-//                }
-//
-//                double sqrDiff = 0;
-////                canShowOutput.showOutputString("+++++++++++++++++++++++++++++++++++++++++++++++");
-//                for (LineValue lv : testDataStatistic.values()) {
-//                    double[] dData = OtherTool.fromIntArrayToNoZeroArray(lv.getWYValues());
-//                    double ATE = dData[0] / (dData[0] + dData[1]) - dData[2] / (dData[2] + dData[3]);
-//                    canShowOutput.showOutputString(Arrays.toString(lv.getValue()) + Double.toString(ATE));
-//                    char ateSign = searchTool.getSign(ATE);
-//                    int instanceCount = lv.getWYSum();
-//                    allInstanceIncludeQuestion += instanceCount;
-//
-//                    double ce  = searchTool.getNearestFreqCE(lv.getValue()); // get nearest and most frequent pattern
-//                    sqrDiff += Math.pow((ATE - ce), 2) * instanceCount;
-////                    canShowOutput.showOutputString(Arrays.toString(dData) +","+Double.toString(ce));
-//
-////                    char ceSign = '?';
-////                    ceSign = searchTool.getNearestFreqCESign(lv.getValue()); // get nearest and most frequent pattern
-//////                    ceSign = searchTool.getNearestAvgCESign(lv.getValue()); // get nearest pattern, average
-//////                    ceSign = searchTool.getNearestPCCESign(lv.getValue(), PCMembers); // get nearest pattern, more PC variables invovled
-////                    if (ceSign != '?') {
-////                        allInstance += instanceCount;
-////                        if (ceSign == ateSign) {
-////                            success++;
-////                            successInstance += instanceCount;
-////                        } else {
-////                            failed++;
-////                        }
-////                    } else {
-////                        for (int i = 0; i < 4; i++) {
-////                            notMatch += lv.getWYValues()[i];
-////                        }
-////                        canShowOutput.showLogString("CESearchTool#getCEValue return null");
-////                    }
-//                }
-//                canShowOutput.showOutputString("===========================================");
-//                canShowOutput.showLogString("PEHE: " + Math.sqrt(sqrDiff / allInstanceIncludeQuestion));
-//                canShowOutput.showLogString("Testing Data not matched: " + notMatch + "/" + testingDataCount);
-////                canShowOutput.showLogString("Pattern(testing / training): " + testPlusMinusCount + "/" + trainPlusMinusCount);
-//                Statistic statistic = new Statistic();
-//                statistic.accuracy = (double) successInstance / allInstance;
-//                statistic.recall = (double) successInstance / allInstanceIncludeQuestion;
-//                statistic.testNoMatch = (double) notMatch / testingDataCount;
-//                statistic.pehe = Math.sqrt(sqrDiff / allInstanceIncludeQuestion);
-////                statistic.patternMatch = (double) testPlusMinusCount / trainPlusMinusCount;
-//                return statistic;
+                // metrics: consistency between training and testing
+                double sqrDiff = 0;
+                double ape = 0;
+                double consistent = 0;
+                for (LineValue lv : testDataStatistic.values()) {
+                    lv.updateGTValue();
+                    double ATE = lv.getGroundTruthValue();
+                    int instanceCount = lv.getWYSum();
+                    allInstanceIncludeQuestion += instanceCount;
+
+                    // PEHE
+                    AbstractCE patt = searchTool.getNearestFreqPatt(lv.getValue()); // get nearest and most frequent pattern
+                    double ce  = patt.groundTruthValue;
+                    sqrDiff += Math.pow((ATE - ce), 2) * instanceCount;
+                    // MAPE
+                    ape += ce==0 ? 0 : Math.abs(ATE - ce) / ce * instanceCount;
+                    // consistency within patterns
+                    int numInstance = lv.getWYSum();
+                    if (ToolFunctions.isSamePatternGroup(lv.getValue(), patt.value)) {
+                        double lvCe = lv.getGroundTruthValue();
+                        if (ce>=-0.01 && ce<=0.01 && lvCe>=-0.01 && lvCe<=0.01)
+                            consistent += numInstance;
+                        else if (ce * lvCe >= 0)
+                            consistent += numInstance;
+                    }
+                }
+
+                Statistic statistic = new Statistic();
+                statistic.accuracy = (double) successInstance / allInstance;
+                statistic.recall = (double) successInstance / allInstanceIncludeQuestion;
+                statistic.testNoMatch = (double) notMatch / testingDataCount;
+                statistic.pehe = Math.sqrt(sqrDiff / allInstanceIncludeQuestion);
+                statistic.mape = ape / allInstanceIncludeQuestion;
+                statistic.consistencyInPattern = consistent / allInstanceIncludeQuestion;
+
+                if (debug) {
+                    canShowOutput.showOutputString("===========================================");
+                    canShowOutput.showOutputString("Consistency within patterns: " + statistic.consistencyInPattern);
+                    canShowOutput.showOutputString("PEHE: " + Math.sqrt(statistic.pehe));
+                    canShowOutput.showOutputString("MAPE: " + statistic.mape);
+                    canShowOutput.showOutputString("Testing Data not matched: " + statistic.testNoMatch);
+                }
+                return statistic;
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -5,6 +5,7 @@ import org.omg.CORBA.INTERNAL;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -47,39 +48,44 @@ public class CESearchTool {
         return null;
     }
 
-    public char[] getNearestFreqCharValue(char[] buffer) {
+    public AbstractCE getNearestFreqPatt(char[] buffer) {
         int minDist = Integer.MAX_VALUE;
-        List<char[]> valueList = new ArrayList<>();
+        List<TrueFalseCE> ceList = new ArrayList<>();
         List<Integer> ceListSize = new ArrayList<>();
         for (AbstractCE i : mergeResult) {
             char[] now = i.value;
             if (now.length == buffer.length) {
                 int dist = compareDistFromPatternToArray(now, buffer);
+                if (dist == -1)
+                    continue;
                 if (dist < minDist) {
                     minDist = dist;
-                    valueList = new ArrayList<>();
-                    valueList.add(now);
+                    ceList = new ArrayList<>();
+                    ceList.add((TrueFalseCE) i);
                     ceListSize = new ArrayList<>();
                     ceListSize.add(i.getInstanceNumber());
                 }
                 else if (dist == minDist) {
-                    valueList.add(now);
+                    ceList.add((TrueFalseCE) i);
                     ceListSize.add(i.getInstanceNumber());
                 }
             }
         }
+        if (minDist == Integer.MAX_VALUE)
+            return null;
+
         int maxSize = Integer.MIN_VALUE;
-        char[] value = new char[buffer.length];
+        TrueFalseCE patt = new TrueFalseCE(buffer);
         boolean flag = false;
-        for (int j=0; j<valueList.size(); j++) {
+        for (int j=0; j<ceList.size(); j++) {
             if (ceListSize.get(j) > maxSize) {
                 maxSize = ceListSize.get(j);
-                value = valueList.get(j);
+                patt = ceList.get(j);
                 flag = true;
             }
         }
         if (flag)
-            return value;
+            return patt;
         else
             return null;
     }
@@ -122,8 +128,7 @@ public class CESearchTool {
         for (int i = 0; i < array.length; i++) {
             if (pattern[i] != array[i]) {
                 if (pattern[i] != CEAlgorithm.char_Star && pattern[i] != CEAlgorithm.char_QUESTION) {
-                    dist = array.length*10;
-                    break;
+                    return -1;
                 }
                 dist++;
             }
@@ -189,6 +194,8 @@ public class CESearchTool {
             char[] now = i.value;
             if (now.length == buffer.length) {
                 int dist = compareDistFromPatternToArray(now, buffer);
+                if (dist == -1)
+                    continue;
                 if (dist < minDist) {
                     minDist = dist;
                     ceList = new ArrayList<>();
@@ -202,6 +209,9 @@ public class CESearchTool {
                 }
             }
         }
+        if (minDist == Integer.MAX_VALUE)
+            throw new java.lang.Error("Not matched to any pattern!!!");
+
         int maxSize = Integer.MIN_VALUE;
         double ce = 0;
         boolean flag = false;
