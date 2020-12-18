@@ -9,7 +9,7 @@ public class DEEPConfig {
     private String trainFile;
     private String testFile;
     private boolean featureSelection;
-    private List<DEEPAttributes> attr;
+    private DEEPAttributes attr;
     private String significanceLevel;
 
     @Option
@@ -25,7 +25,7 @@ public class DEEPConfig {
     @ShortSwitch("t")
     @SingleArgument
     public void setTestFile(String testFile) {
-        this.trainFile = testFile;
+        this.testFile = testFile;
     }
 
     @Option
@@ -39,9 +39,8 @@ public class DEEPConfig {
     @Option
     @LongSwitch("attr")
     @ShortSwitch("a")
-    @Multiple
     @SubConfiguration(DEEPAttributes.class)
-    public void setAttr(List<DEEPAttributes> attr) {
+    public void setAttr(DEEPAttributes attr) {
         this.attr = attr;
     }
 
@@ -63,7 +62,7 @@ public class DEEPConfig {
     public boolean getFeatureSelection() {
         return featureSelection;
     }
-    public List<DEEPAttributes> getAttr() { return attr; }
+    public DEEPAttributes getAttr() { return attr; }
     public String getSignificanceLevel() {
         return significanceLevel;
     }

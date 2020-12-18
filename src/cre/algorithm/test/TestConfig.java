@@ -67,6 +67,18 @@ public class TestConfig extends TestConfigBase implements Cloneable {
         super.fileName = fileName;
     }
 
+    public TestConfig(String fileName, boolean featureSelection, String significanceLevel) {
+        this.setZC(1.96);
+        this.setOddsRatio(2);
+        this.setMergeDepth(1);
+        this.setFeatureSelection(featureSelection);
+        this.setMergeStrategy("Reliability first");
+        this.setSignificanceLevel(significanceLevel);
+        this.setReliabilityMinSupport(0.01);
+        this.setDebug(false);
+        super.fileName = fileName;
+    }
+
     public void init() throws Exception {
         BufferedReader br = null;
         try {
