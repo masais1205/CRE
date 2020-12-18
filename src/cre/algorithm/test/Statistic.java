@@ -121,7 +121,7 @@ public class Statistic {
 //                + "Testing Data not matched:\t" + String.format(Locale.ENGLISH, "%.2f", testNoMatch * 100) + "%\n";
         return "Consistency within patterns (std):\t" + String.format(Locale.ENGLISH, "%.2f", consistencyInPattern) + "(" + String.format(Locale.ENGLISH, "%.2f", consistencyInPatternSD) + ")" + "\n" +
                 "PEHE (std):\t" + String.format(Locale.ENGLISH, "%.2f", pehe) + "(" + String.format(Locale.ENGLISH, "%.2f", peheSD) + ")" + "\n" +
-                "MAPE (std):\t" + String.format(Locale.ENGLISH, "%.2f", mape) + "(" + String.format(Locale.ENGLISH, "%.2f", mapeSD) + ")" + "\n"
-                + "Testing Data not matched:\t" + String.format(Locale.ENGLISH, "%.2f", testNoMatch * 100) + "%\n";
+                "MAPE (std):\t" + String.format(Locale.ENGLISH, "%.2f", mape) + "(" + String.format(Locale.ENGLISH, "%.2f", mapeSD) + ")" + "\n" +
+                "Testing Data not matched:\t" + String.format(Locale.ENGLISH, "%.2f", testNoMatch * 100) + "%\n";
     }
 }

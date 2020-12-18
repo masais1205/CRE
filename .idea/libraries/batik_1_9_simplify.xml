@@ -2,6 +2,7 @@
   <library name="batik-1.9-simplify">
     <CLASSES>
       <root url="file://$PROJECT_DIR$/lib/batik-1.9-simplify" />
+      <root url="jar://$PROJECT_DIR$/lib/commandline-1.7.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

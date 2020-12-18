@@ -54,11 +54,15 @@ public class LineValue {
     }
 
     public void updateGTValue() {
-        double WAll0 = WYValues[2] + WYValues[3];
-        double WAll1 = WYValues[0] + WYValues[1];
+        double[] WYValuesTmp = new double[4];
+        for (int i=0; i<4; i++)
+            WYValuesTmp[i] = WYValues[i] == 0 ? 0.5 : WYValues[i];
 
-        double p1 = WYValues[0] / WAll1;
-        double p2 = WYValues[2] / WAll0;
+        double WAll0 = WYValuesTmp[2] + WYValuesTmp[3];
+        double WAll1 = WYValuesTmp[0] + WYValuesTmp[1];
+
+        double p1 = WYValuesTmp[0] / WAll1;
+        double p2 = WYValuesTmp[2] / WAll0;
 
         groundTruthValue = p1 - p2;
     }

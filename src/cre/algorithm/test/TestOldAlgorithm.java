@@ -1,6 +1,7 @@
 package cre.algorithm.test;
 
 
+import com.sun.deploy.security.SelectableSecurityManager;
 import cre.Config.OtherConfig;
 import cre.algorithm.CalculatingException;
 import cre.algorithm.CanShowOutput;
@@ -12,11 +13,10 @@ import cre.algorithm.tool.FileTool;
 import cre.algorithm.tool.OtherTool;
 import cre.algorithm.tool.TemporaryFileManager;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Array;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
@@ -39,7 +39,7 @@ public class TestOldAlgorithm {
 //                                  double ZC, double odd_ratio, int mergeDepth,  boolean featureSelection,
 //                                  String mergeStrategy, double reliabilityMinSupport,
                                   int WP, int YP, int[] XPArray,
-                                  int GT, int[] group, int testGroupId, OtherConfig otherConfig,
+                                  int GT, int[] group, int testGroupId, OtherConfig otherConfig, int timesIdx,
                                   CanShowStatus canShowStatus,
                                   CanShowOutput canShowOutput, boolean isTesting) throws CalculatingException {
         String testFileName = otherConfig.getTestFile();
@@ -50,21 +50,20 @@ public class TestOldAlgorithm {
         // modified by mss
         int[] PCMembers = new int[XPArray.length];
 
-//        String rFileName = "";
-//        try {
-//            File f = TemporaryFileManager.getInstance().releasePackedFile("/r_code/adjustment.R");
-//            rFileName = f.getAbsolutePath();
-//            canShowOutput.showOutputString(f.getAbsolutePath());
-//        } catch (Exception e) {
-//            canShowOutput.showOutputString(e.toString());
-//            e.printStackTrace();
-//        }
+        // output file path
+        String inFilePath = fileName.replace("\\","/");
+        String outFilePath = inFilePath.substring(0, inFilePath.lastIndexOf("/")+1) + "output/";
+        try {
+            Files.createDirectories(Paths.get(outFilePath));
+        } catch (Exception e) {
+            canShowOutput.showOutputString("IO Exception! " + e.getMessage());
+        }
+        String inFileName = inFilePath.substring(inFilePath.lastIndexOf("/")+1);
 
         try {
             int[] XPArray_R = new int[XPArray.length];
             RConnection c = new RConnection();
             String filePath = fileName.replace("\\","/");
-//            String rFileName = "C:/Users/maysy020/Documents/adjustment.R";
             File f = TemporaryFileManager.getInstance().releasePackedFile("/r_code/adjustment.R");
             String rFileName = f.getAbsolutePath();
             rFileName = rFileName.replace("\\","/");
@@ -123,7 +122,7 @@ public class TestOldAlgorithm {
         } catch (Exception e) {
             canShowOutput.showOutputString(e.toString());
         } // mss
-//        canShowOutput.showOutputString("Z+C"+Integer.toString(PCMembers.length));
+        canShowOutput.showOutputString(Arrays.toString(XPArray));
 //        for(int pc : PCMembers)
 //            canShowOutput.showOutputString(String.valueOf(pc));
 
@@ -323,39 +322,51 @@ public class TestOldAlgorithm {
 
             /////////////
             List<AbstractCE> mergeResult = new ArrayList<>();
-
             CEAlgorithm.doMergeTwoConstraints(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
                         XPReverseSorted, config, orYXPNoFitOddsRatio, canShowOutput, debug);
 
 //
             //Log training result.
             if (!isTesting) {
-                StringBuilder sb = new StringBuilder();
-//                sb.append(mergeResult.size());
-//                sb.append("\n");
-                for (int i = 0; i < XPArray.length; i++) {
-                    int p = XPArray[i];
-                    if(IntStream.of(PCMembers).anyMatch(x -> x == p))
-                        sb.append("[");
-                    sb.append(names[p]);
-                    if(IntStream.of(PCMembers).anyMatch(x -> x == p))
-                        sb.append("]");
-                    sb.append("\t");
-                }
-                if (simpleTrueFalse) {
-                    sb.append("isSignificant\tn11\tn12\tn21\tn22\t");
-                    sb.append("p1-p2\t");
-                    sb.append("causalEffect");
-                } else {
-                    sb.append("isSignificant\tW=1\tW=0");
-                }
-                sb.append("\n");
-                for (AbstractCE i : mergeResult) {
-//                    canShowOutput.showOutputString(Boolean.toString(i.isSignificant));
-                    sb.append(i.toString());
+                try {
+                    // NOTE: "output to file" is designed for standalone (no UI) version
+                    // Thus the output file name would not specify index of repeating times or index of n-fold CV
+                    String outFileName = outFilePath + inFileName.replace(".csv", "_DEEPPattern.csv");
+                    FileWriter fileWriter = new FileWriter(outFileName);
+                    if (testGroupId == 0)
+                        fileWriter = new FileWriter(outFileName);
+                    PrintWriter writer = new PrintWriter(fileWriter);
+                    StringBuilder sb = new StringBuilder();
+
+                    for (int i = 0; i < XPArray.length; i++) {
+                        int p = XPArray[i];
+                        if (IntStream.of(PCMembers).anyMatch(x -> x == p))
+                            sb.append("[");
+                        sb.append(names[p]);
+                        if (IntStream.of(PCMembers).anyMatch(x -> x == p))
+                            sb.append("]");
+                        sb.append("\t");
+                    }
+                    if (simpleTrueFalse) {
+                        sb.append("isSignificant\tn11\tn12\tn21\tn22\t");
+                        sb.append("p1-p2\t");
+                        sb.append("causalEffect");
+                    } else {
+                        sb.append("isSignificant\tW=1\tW=0");
+                    }
                     sb.append("\n");
+                    for (AbstractCE i : mergeResult) {
+//                    canShowOutput.showOutputString(Boolean.toString(i.isSignificant));
+                        sb.append(i.toString());
+                        sb.append("\n");
+                    }
+                    canShowOutput.showOutputString(sb.toString());
+                    replaceAll(sb, "\t", ",");
+                    writer.print(sb);
+                    writer.close();
+                } catch (Exception e) {
+                    canShowOutput.showOutputString("IO Exception! " + e.getMessage());
                 }
-                canShowOutput.showOutputString(sb.toString());
             } else {
 
                 // Training is finished. Start testing.
@@ -368,33 +379,85 @@ public class TestOldAlgorithm {
                 HashMap<String, LineValue> testDataStatistic = new HashMap<>();
 
                 // group data with same att values
-                for (LineValue lv : testingData.values()) {
-                    AbstractCE patt = searchTool.getNearestFreqPatt(lv.getValue());
-                    char[] charValue = patt.value;
-                    if (charValue != null) {
-                        String tS = new String(charValue);
-                        LineValue testLv = testDataStatistic.get(tS);
-                        if (testLv == null) {
-                            testLv = new LineValue(charValue);
-                            testDataStatistic.put(tS, testLv);
+                try {
+                    // NOTE: "output to file" is designed for standalone (no UI) version
+                    // Thus the output file name would not specify index of repeating times or index of n-fold CV
+                    String outFileName = outFilePath + inFileName.replace(".csv", "_DEEPOutput.csv");
+                    FileWriter fileWriter = new FileWriter(outFileName);
+                    if (testGroupId == 0)
+                        fileWriter = new FileWriter(outFileName);
+                    PrintWriter writer = new PrintWriter(fileWriter);
+                    StringBuilder sb = new StringBuilder();
+
+                    if (testGroupId == 0) {
+                        for (int i = 0; i < XPArray.length; i++) {
+                            int p = XPArray[i];
+                            if (IntStream.of(PCMembers).anyMatch(x -> x == p))
+                                sb.append("[");
+                            sb.append(names[p]);
+                            if (IntStream.of(PCMembers).anyMatch(x -> x == p))
+                                sb.append("]");
+                            sb.append(",");
                         }
-                        testLv.addSomeItem(lv.getWYValues());
-                        if (debug)
-                            canShowOutput.showOutputString("sample: " + Arrays.toString(lv.getValue()) +
-                                " -> pattern: " + Arrays.toString(testLv.getValue()));
-                    } else {
-                        for (int i = 0; i < 4; i++) {
-                            notMatch += lv.getWYValues()[i];
+                        sb.append("n11,n12,n21,n22,");
+
+                        sb.append("pattern,");
+                        for (int i = 0; i < XPArray.length; i++) {
+                            int p = XPArray[i];
+                            if (IntStream.of(PCMembers).anyMatch(x -> x == p))
+                                sb.append("[");
+                            sb.append(names[p]);
+                            if (IntStream.of(PCMembers).anyMatch(x -> x == p))
+                                sb.append("]");
+                            sb.append(",");
                         }
-                        canShowOutput.showLogString("CESearchTool#getCEValue return null");
+                        sb.append("causalEffect\n");
                     }
+
+                    for (LineValue lv : testingData.values()) {
+                        AbstractCE patt = searchTool.getNearestFreqPatt(lv.getValue());
+                        char[] charValue = patt.value;
+                        if (charValue != null) {
+                            String tS = new String(charValue);
+                            LineValue testLv = testDataStatistic.get(tS);
+                            if (testLv == null) {
+                                testLv = new LineValue(charValue);
+                                testDataStatistic.put(tS, testLv);
+                            }
+                            testLv.addSomeItem(lv.getWYValues());
+                        } else {
+                            for (int i = 0; i < 4; i++) {
+                                notMatch += lv.getWYValues()[i];
+                            }
+                            canShowOutput.showLogString("CESearchTool#getCEValue return null");
+                        }
+
+                        // output predictions to files
+                        for (char c : lv.getValue())
+                            sb.append(c + ",");
+                        for (int i : lv.getWYValues())
+                            sb.append(i + ",");
+                        sb.append("->,");
+                        for (char c : patt.value)
+                            sb.append(c + ",");
+                        sb.append(patt.groundTruthValue + "\n");
+                    }
+                    writer.print(sb);
+                    writer.close();
+                } catch (IOException e) {
+                    canShowOutput.showOutputString("IO Exception! " + e.getMessage());
                 }
 
+
                 // metrics: consistency between training and testing
-                double sqrDiff = 0;
+                double peheDiff = 0;
                 double ape = 0;
                 double consistent = 0;
-                for (LineValue lv : testDataStatistic.values()) {
+
+                Iterator it = testDataStatistic.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry pair = (Map.Entry)it.next();
+                    LineValue lv = (LineValue) pair.getValue();
                     lv.updateGTValue();
                     double ATE = lv.getGroundTruthValue();
                     int instanceCount = lv.getWYSum();
@@ -403,9 +466,9 @@ public class TestOldAlgorithm {
                     // PEHE
                     AbstractCE patt = searchTool.getNearestFreqPatt(lv.getValue()); // get nearest and most frequent pattern
                     double ce  = patt.groundTruthValue;
-                    sqrDiff += Math.pow((ATE - ce), 2) * instanceCount;
+                    peheDiff += Math.pow((ATE - ce), 2) * instanceCount;
                     // MAPE
-                    ape += ce==0 ? 0 : Math.abs(ATE - ce) / ce * instanceCount;
+                    ape += ce==0 ? 0 : Math.abs((ATE - ce) / ce) * instanceCount;
                     // consistency within patterns
                     int numInstance = lv.getWYSum();
                     if (ToolFunctions.isSamePatternGroup(lv.getValue(), patt.value)) {
@@ -421,7 +484,7 @@ public class TestOldAlgorithm {
                 statistic.accuracy = (double) successInstance / allInstance;
                 statistic.recall = (double) successInstance / allInstanceIncludeQuestion;
                 statistic.testNoMatch = (double) notMatch / testingDataCount;
-                statistic.pehe = Math.sqrt(sqrDiff / allInstanceIncludeQuestion);
+                statistic.pehe = Math.sqrt(peheDiff / allInstanceIncludeQuestion);
                 statistic.mape = ape / allInstanceIncludeQuestion;
                 statistic.consistencyInPattern = consistent / allInstanceIncludeQuestion;
 
@@ -457,4 +520,14 @@ public class TestOldAlgorithm {
         }
         return newArray;
     }
+
+    public static void replaceAll(StringBuilder builder, String from, String to) {
+        int index = builder.indexOf(from);
+        while (index != -1) {
+            builder.replace(index, index + from.length(), to);
+            index += to.length(); // Move to the end of the replacement
+            index = builder.indexOf(from, index);
+        }
+    }
+
 }

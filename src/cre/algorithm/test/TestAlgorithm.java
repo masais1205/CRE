@@ -138,7 +138,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
 //                    config.getZC(), config.getOddsRatio(), config.getMergeDepth(), config.getFeatureSelection(),
 //                    config.getMergeStrategy(), config.getReliabilityMinSupport(),
                     config,
-                    WP, YP, XPArray, GT, null, -1, otherConfig,
+                    WP, YP, XPArray, GT, null, -1, otherConfig, -1,
                     canShowStatus, canShowOutput, false);
 
 
@@ -162,7 +162,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         int[] group = helper.nextLines();
                         result.add(TestOldAlgorithm.do_it(fileName,
                                 config, WP, YP,
-                                XPArray, GT, group, 0, otherConfig,
+                                XPArray, GT, group, 0, otherConfig, i,
                                 canShowStatus, canShowOutput, true));
                     }
                 }
@@ -184,7 +184,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                         int[] group = helper.nextLines();
                         result.add(TestOldAlgorithm.do_it(fileName,
                                 config, WP, YP,
-                                XPArray, GT, group, 0, otherConfig,
+                                XPArray, GT, group, 0, otherConfig, i,
                                 canShowStatus, canShowOutput, true));
                     }
                 }
@@ -211,7 +211,7 @@ public class TestAlgorithm extends AbstractAlgorithm {
                             canShowStatus.showStatus("times: " + (i + 1) + "; fold: " + (l + 1));
                             result.add(TestOldAlgorithm.do_it(fileName,
                                     config, WP, YP,
-                                    XPArray, GT, group, l, otherConfig,
+                                    XPArray, GT, group, l, otherConfig, i,
                                     canShowStatus, canShowOutput, true));
                         }
                     }
