@@ -383,7 +383,7 @@ public class CEAlgorithm {
 
     public static void doMergeTwoConstraints(Collection<AbstractCE> old, int GT, List<AbstractCE> result, int[] PCMembers,
                                              int[] order, int[] reverseOrder, TestConfig config,
-                                             HashSet<Integer> positionNotFitOddsRatio, CanShowOutput canShowOutput, boolean debug) {
+                                             HashSet<Integer> positionNotFitOddsRatio, boolean debug) {
         /*
         More specifically, the search strategy is as the following.
         1. for each insignificant pattern, find its closest patterns with the smallest edit distance.
@@ -408,7 +408,6 @@ public class CEAlgorithm {
         DistMeasure distMeasure = new DistMeasure();
         distMeasure.buildDistanceMatrix(CEList);
         List<DistMeasure.minDistLocation> location = getMinDistLocation(CEList, distMeasure.distanceMatrix);
-//        printMatrix(distMeasure.distanceMatrix, CEList.size(), canShowOutput);
         sortDist(location);
         int minDist = location.get(0).distance;
 
@@ -418,13 +417,11 @@ public class CEAlgorithm {
         int idx_loc = 0;
         StringBuilder tmp_sb = new StringBuilder();
         while (CEList.size() - num_significant > 1 && minDist < order.length && minDist > 0) {
-//            canShowOutput.showOutputString("*****************CEList " + Integer.toString(CEList.size()) + " *numSign " + Integer.toString(num_significant) +
-//                    " *minDist " + Double.toString(minDist) + " *order " + Integer.toString(order.length) + "************************");
-            if (debug) {
-                printMatrix(distMeasure.distanceMatrix, CEList, canShowOutput);
-                canShowOutput.showOutputString("Pattern size (significant): " + Integer.toString(CEList.size()) + " (" +
-                        Integer.toString(num_significant) + ")" + ";\tminimal distance: " + Double.toString(minDist));
-            }
+//            if (debug) {
+//                printMatrix(distMeasure.distanceMatrix, CEList, canShowOutput);
+//                canShowOutput.showOutputString("Pattern size (significant): " + Integer.toString(CEList.size()) + " (" +
+//                        Integer.toString(num_significant) + ")" + ";\tminimal distance: " + Double.toString(minDist));
+//            }
             DistMeasure.minDistLocation loc = location.get(idx_loc);
             rowIdx = loc.rowIndex;
             colIdx = loc.colIndex;
@@ -448,9 +445,9 @@ public class CEAlgorithm {
                         idx_loc++;
                         continue;
                     }
-                if (debug)
-                    canShowOutput.showOutputString("miniDistance=1, 2 patterns would be merged: " + String.valueOf(CEList.get(rowIdx).value) +
-                            " & " + String.valueOf(CEList.get(colIdx).value) + "\n");
+//                if (debug)
+//                    canShowOutput.showOutputString("miniDistance=1, 2 patterns would be merged: " + String.valueOf(CEList.get(rowIdx).value) +
+//                            " & " + String.valueOf(CEList.get(colIdx).value) + "\n");
                 newCE = CEList.get(rowIdx).mergeInstance(CEList.get(colIdx), GT,
                         positions, PCMembers, char_QUESTION, null, significanceLevel);
                 removeIdxList.add(CEList.get(colIdx));
@@ -465,15 +462,15 @@ public class CEAlgorithm {
                         continue;
                     attrValue = CEList.get(i).value;
                     toBeMerge = ToolFunctions.isSamePatternGroup(attrValue, CEList.get(rowIdx).value, positions);
-//                    canShowOutput.showOutputString(sb + " * " + String.valueOf(attrValue) + " * " + String.valueOf(CEList.get(rowIdx).value) + " * " + Boolean.toString(toBeMerge));
-                    if (toBeMerge) {
+//
+                  if (toBeMerge) {
                         if (allSignificant)
                             allSignificant &= CEList.get(i).isSignificant;
                         removeIdxList.add(CEList.get(i));
                         tmpCEList.add(CEList.get(i));
                     }
                 }
-//                canShowOutput.showOutputString(Boolean.toString(allSignificant) + " " + Integer.toString(CEList.size()) + " " + Integer.toString(num_significant));
+
                 if (allSignificant) {
                     idx_loc++;
                     continue;
@@ -483,8 +480,8 @@ public class CEAlgorithm {
                     tmp_sb.append(String.valueOf(CEList.get(rowIdx).value) + " & ");
                     for (AbstractCE ab : tmpCEList)
                         tmp_sb.append(String.valueOf(ab.value) + " & ");
-                    canShowOutput.showOutputString("miniDistance=" + Integer.toString(dist) + ", " + Integer.toString(tmpCEList.size() + 1) +
-                            " patterns would be merged: " + tmp_sb +"\n");
+//                    canShowOutput.showOutputString("miniDistance=" + Integer.toString(dist) + ", " + Integer.toString(tmpCEList.size() + 1) +
+//                            " patterns would be merged: " + tmp_sb +"\n");
                 }
                 newCE = CEList.get(rowIdx).mergeInstanceList(tmpCEList, GT,
                         positions, PCMembers, char_QUESTION, null, significanceLevel);

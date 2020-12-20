@@ -4,7 +4,7 @@ import java.util.List;
 
 public class ToolFunctions {
     public static final char char_Star = '*';
-    public static final char char_QUESTION = '×';
+    public static final char char_QUESTION = 'x';
 
     public static boolean isSamePatternGroup(char[] attrValue, char[] refValue, List<Integer> positions) {
         for (int i=0; i<attrValue.length; i++) {

@@ -26,7 +26,6 @@ public class FileTool {
      * @param attributeLength      The num of all attributes
      * @param crossValidationGroup The group ID of each line
      * @param nowFold              Now Fold
-     * @param canShowOutput        Used to show something. Can be null.
      * @return The double value, if the value of this attribute is numeric.
      * Null, if the value of this attribute is 1 or 0 or when exception happened.
      */
@@ -35,8 +34,7 @@ public class FileTool {
                                               int position,
                                               int attributeLength,
                                               int[] crossValidationGroup,
-                                              int nowFold,
-                                              CanShowOutput canShowOutput) throws CalculatingException {
+                                              int nowFold) throws CalculatingException {
         List<Double> yValueList = new ArrayList<>();
         String tempS;
         BufferedReader brPre = null;
@@ -57,9 +55,6 @@ public class FileTool {
                         yValueList.add(Double.parseDouble(tempSS[position]));
                     } else {
                         String message = "Line value ERROR: (line:" + count + ") " + tempS;
-                        if (canShowOutput != null) {
-                            canShowOutput.showOutputString(message);
-                        }
                         throw new CalculatingException(message);
                     }
                 }

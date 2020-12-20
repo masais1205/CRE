@@ -40,8 +40,7 @@ public class TestOldAlgorithm {
 //                                  String mergeStrategy, double reliabilityMinSupport,
                                   int WP, int YP, int[] XPArray,
                                   int GT, int[] group, int testGroupId, OtherConfig otherConfig, int timesIdx,
-                                  CanShowStatus canShowStatus,
-                                  CanShowOutput canShowOutput, boolean isTesting) throws CalculatingException {
+                                  boolean isTesting) throws CalculatingException {
         String testFileName = otherConfig.getTestFile();
         String groundTruthFileName = otherConfig.getGroundTruthFile();
         BufferedReader br = null;
@@ -56,7 +55,7 @@ public class TestOldAlgorithm {
         try {
             Files.createDirectories(Paths.get(outFilePath));
         } catch (Exception e) {
-            canShowOutput.showOutputString("IO Exception! " + e.getMessage());
+            System.out.println("IO Exception! " + e.getMessage());
         }
         String inFileName = inFilePath.substring(inFilePath.lastIndexOf("/")+1);
 
@@ -67,7 +66,7 @@ public class TestOldAlgorithm {
             File f = TemporaryFileManager.getInstance().releasePackedFile("/r_code/adjustment.R");
             String rFileName = f.getAbsolutePath();
             rFileName = rFileName.replace("\\","/");
-//            canShowOutput.showOutputString(rFileName);
+//            System.out.println(rFileName);
             c.eval("source(\"" + rFileName + "\")");
             c.assign("fileName", fileName);
             int[] w = new int[1];
@@ -85,7 +84,7 @@ public class TestOldAlgorithm {
             c.assign(".tmp.", "adjustment(fileName,w,y,xArray,alpha,featureSelection)");
             REXP r = c.parseAndEval("try(eval(parse(text=.tmp.)),silent=TRUE)");
             if (r.inherits("try-error")) {
-                canShowOutput.showOutputString("Error: " + r.asString());
+                System.out.println("Error: " + r.asString());
                 c.close();
 //                return 0;
             }
@@ -93,8 +92,8 @@ public class TestOldAlgorithm {
             REXP XPArray_REXP = c.eval("adjustment(fileName,w,y,xArray,alpha,featureSelection)");
             XPArray_R = XPArray_REXP.asIntegers();
 //            for(int xp : XPArray_R)
-//                canShowOutput.showOutputString(String.valueOf(xp));
-//            canShowOutput.showOutputString("String.valueOf(xp)");
+//                System.out.println(String.valueOf(xp));
+//            System.out.println("String.valueOf(xp)");
 
             boolean flag = true;
             int cnt_xp = 0;
@@ -113,18 +112,15 @@ public class TestOldAlgorithm {
             }
             XPArray = trimlength(XPArray, cnt_xp);
             PCMembers = trimlength(PCMembers, cnt_xp_black);
-//            canShowOutput.showOutputString("Z");
+//            System.out.println("Z");
 //            for(int xp : XPArray)
-//                canShowOutput.showOutputString(String.valueOf(xp));
-//            canShowOutput.showOutputString("stop");
+//                System.out.println(String.valueOf(xp));
+//            System.out.println("stop");
 
             c.close();
         } catch (Exception e) {
-            canShowOutput.showOutputString(e.toString());
+            System.out.println(e.toString());
         } // mss
-        canShowOutput.showOutputString(Arrays.toString(XPArray));
-//        for(int pc : PCMembers)
-//            canShowOutput.showOutputString(String.valueOf(pc));
 
         int[] XPSorted;
         int[] XPReverseSorted;
@@ -144,14 +140,14 @@ public class TestOldAlgorithm {
             double YMedian = 0;
 
             Double YMedianResult = FileTool.getMedianOfAttribute(fileName,
-                    delimiter, YP, names.length, group, testGroupId, canShowOutput);
+                    delimiter, YP, names.length, group, testGroupId);
             if (YMedianResult == null) {
                 simpleTrueFalse = true;
             } else {
                 simpleTrueFalse = false;
                 YMedian = YMedianResult;
             }
-            canShowOutput.showLogString("SimpleTrueFalse:" + simpleTrueFalse);
+            System.out.println("SimpleTrueFalse:" + simpleTrueFalse);
 
             char[] cBuffer = new char[XPArray.length];
             int count = 2;
@@ -168,7 +164,7 @@ public class TestOldAlgorithm {
                 String[] testNames = testHeader.split(delimiter);
                 for (int t = 0; t < names.length; t++) {
                     if (!names[t].equals(testNames[t])) {
-                        canShowOutput.showOutputString("Error. Attributes names of training and testing data" +
+                        System.out.println("Error. Attributes names of training and testing data" +
                                 " have to be consistent!");
                         return null;
                     }
@@ -241,7 +237,7 @@ public class TestOldAlgorithm {
                         lv.addItem(WValue, YBooleanValue);
                     }
                 } else {
-                    canShowOutput.showOutputString("Line value ERROR: (line:" + count + ") " + tempS);
+                    System.out.println("Line value ERROR: (line:" + count + ") " + tempS);
                     break;
                 }
                 count++;
@@ -262,8 +258,8 @@ public class TestOldAlgorithm {
                     sb.append(String.format(Locale.ENGLISH, "%.2f", orWX[i].getOR(false)));
                     sb.append("\n");
                 }
-                canShowOutput.showLogString("Odd Ratio");
-                canShowOutput.showLogString(sb.toString());
+                System.out.println("Odd Ratio");
+                System.out.println(sb.toString());
             }
             ///////////////
 
@@ -306,12 +302,12 @@ public class TestOldAlgorithm {
                 Integer tempValue = ((Integer) orYX[i].getAttach());
                 XPSorted[i] = tempValue;
                 if (orYX[i].getOR(false) > config.getOddsRatio() && !orYXPNoFitOddsRatio.contains(tempValue)) {
-//                    canShowOutput.showOutputString("OR threshold " + String.valueOf(XPArray[tempValue]));
+//                    System.out.println("OR threshold " + String.valueOf(XPArray[tempValue]));
                     orYXPNoFitOddsRatio.add(tempValue);
                 } else {
                     if (tempIndex.size() > 0 && tempIndex.contains(tempValue) && !orYXPNoFitOddsRatio.contains(tempValue)) {
                         orYXPNoFitOddsRatio.add(tempValue);
-//                        canShowOutput.showOutputString("C " + String.valueOf(XPArray[tempValue]));
+//                        System.out.println("C " + String.valueOf(XPArray[tempValue]));
                     }
                 }
             }
@@ -323,11 +319,11 @@ public class TestOldAlgorithm {
             /////////////
             List<AbstractCE> mergeResult = new ArrayList<>();
             CEAlgorithm.doMergeTwoConstraints(trainingData.values(), GT, mergeResult, PCMembers, XPSorted,
-                        XPReverseSorted, config, orYXPNoFitOddsRatio, canShowOutput, debug);
+                        XPReverseSorted, config, orYXPNoFitOddsRatio, debug);
 
 //
-            //Log training result.
-            if (!isTesting) {
+            // output patterns
+            {
                 try {
                     // NOTE: "output to file" is designed for standalone (no UI) version
                     // Thus the output file name would not specify index of repeating times or index of n-fold CV
@@ -356,26 +352,27 @@ public class TestOldAlgorithm {
                     }
                     sb.append("\n");
                     for (AbstractCE i : mergeResult) {
-//                    canShowOutput.showOutputString(Boolean.toString(i.isSignificant));
+//                    System.out.println(Boolean.toString(i.isSignificant));
                         sb.append(i.toString());
                         sb.append("\n");
                     }
-                    canShowOutput.showOutputString(sb.toString());
+                    System.out.println(sb.toString());
                     replaceAll(sb, "\t", ",");
                     writer.print(sb);
                     writer.close();
                 } catch (Exception e) {
-                    canShowOutput.showOutputString("IO Exception! " + e.getMessage());
+                    System.out.println("IO Exception! " + e.getMessage());
                 }
-            } else {
-
+            }
+            // output testing results
+            {
                 // Training is finished. Start testing.
                 CESearchTool searchTool = new CESearchTool(mergeResult);
                 int notMatch = 0;
                 int successInstance = 0;
                 int allInstance = 0;
                 int allInstanceIncludeQuestion = 0;
-                canShowOutput.showLogString("\n===Testing process===");
+                System.out.println("\n===Testing process===");
                 HashMap<String, LineValue> testDataStatistic = new HashMap<>();
 
                 // group data with same att values
@@ -389,30 +386,29 @@ public class TestOldAlgorithm {
                     PrintWriter writer = new PrintWriter(fileWriter);
                     StringBuilder sb = new StringBuilder();
 
-                    if (testGroupId == 0) {
-                        for (int i = 0; i < XPArray.length; i++) {
-                            int p = XPArray[i];
-                            if (IntStream.of(PCMembers).anyMatch(x -> x == p))
-                                sb.append("[");
-                            sb.append(names[p]);
-                            if (IntStream.of(PCMembers).anyMatch(x -> x == p))
-                                sb.append("]");
-                            sb.append(",");
-                        }
-                        sb.append("n11,n12,n21,n22,");
-
-                        sb.append("pattern,");
-                        for (int i = 0; i < XPArray.length; i++) {
-                            int p = XPArray[i];
-                            if (IntStream.of(PCMembers).anyMatch(x -> x == p))
-                                sb.append("[");
-                            sb.append(names[p]);
-                            if (IntStream.of(PCMembers).anyMatch(x -> x == p))
-                                sb.append("]");
-                            sb.append(",");
-                        }
-                        sb.append("causalEffect\n");
+                    // output header
+                    for (int i = 0; i < XPArray.length; i++) {
+                        int p = XPArray[i];
+                        if (IntStream.of(PCMembers).anyMatch(x -> x == p))
+                            sb.append("[");
+                        sb.append(names[p]);
+                        if (IntStream.of(PCMembers).anyMatch(x -> x == p))
+                            sb.append("]");
+                        sb.append(",");
                     }
+                    sb.append("n11,n12,n21,n22,");
+
+                    sb.append("pattern,");
+                    for (int i = 0; i < XPArray.length; i++) {
+                        int p = XPArray[i];
+                        if (IntStream.of(PCMembers).anyMatch(x -> x == p))
+                            sb.append("[");
+                        sb.append(names[p]);
+                        if (IntStream.of(PCMembers).anyMatch(x -> x == p))
+                            sb.append("]");
+                        sb.append(",");
+                    }
+                    sb.append("causalEffect\n");
 
                     for (LineValue lv : testingData.values()) {
                         AbstractCE patt = searchTool.getNearestFreqPatt(lv.getValue());
@@ -429,7 +425,7 @@ public class TestOldAlgorithm {
                             for (int i = 0; i < 4; i++) {
                                 notMatch += lv.getWYValues()[i];
                             }
-                            canShowOutput.showLogString("CESearchTool#getCEValue return null");
+                            System.out.println("CESearchTool#getCEValue return null");
                         }
 
                         // output predictions to files
@@ -445,7 +441,7 @@ public class TestOldAlgorithm {
                     writer.print(sb);
                     writer.close();
                 } catch (IOException e) {
-                    canShowOutput.showOutputString("IO Exception! " + e.getMessage());
+                    System.out.println("IO Exception! " + e.getMessage());
                 }
 
 
@@ -489,11 +485,11 @@ public class TestOldAlgorithm {
                 statistic.consistencyInPattern = consistent / allInstanceIncludeQuestion;
 
                 if (debug) {
-                    canShowOutput.showOutputString("===========================================");
-                    canShowOutput.showOutputString("Consistency within patterns: " + statistic.consistencyInPattern);
-                    canShowOutput.showOutputString("PEHE: " + Math.sqrt(statistic.pehe));
-                    canShowOutput.showOutputString("MAPE: " + statistic.mape);
-                    canShowOutput.showOutputString("Testing Data not matched: " + statistic.testNoMatch);
+                    System.out.println("===========================================");
+                    System.out.println("Consistency within patterns: " + statistic.consistencyInPattern);
+                    System.out.println("PEHE: " + Math.sqrt(statistic.pehe));
+                    System.out.println("MAPE: " + statistic.mape);
+                    System.out.println("Testing Data not matched: " + statistic.testNoMatch);
                 }
                 return statistic;
             }

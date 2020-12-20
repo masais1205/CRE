@@ -12,6 +12,7 @@ import cre.algorithm.test.TestConfig;
 import cre.algorithm.test.TestOldAlgorithm;
 import cre.algorithm.CanShowOutput;
 import cre.algorithm.CanShowStatus;
+import cre.ui.MainFrameEventHandler;
 
 
 public class DEEPStandalone {
@@ -19,9 +20,6 @@ public class DEEPStandalone {
     private TestConfig config;
 
     public static final void main(String[] args) {
-        CanShowOutput canShowOutput = null;
-        CanShowStatus canShowStatus = null;
-
         try {
             DEEPConfig dbConfig = CommandLineParser.parse(DEEPConfig.class, args,
                     OptionStyle.LONG_OR_COMPACT);
@@ -71,11 +69,9 @@ public class DEEPStandalone {
                     throw new Exception();
                 }
 
-                int WP = java.util.Arrays.asList(w).indexOf(trainNames);
-                int YP = java.util.Arrays.asList(y).indexOf(trainNames);
-                int GT = -1;
-                if (Arrays.asList(trainNames).contains(w))
-                     GT = java.util.Arrays.asList(y).indexOf(trainNames);
+                int WP = indexOf(trainNames, w);
+                int YP = indexOf(trainNames, y);
+                int GT = indexOf(trainNames, gt);
                 int[] XPArray = new int[trainNames.length];
                 int XPArrayLength = 0;
                 for (int idx=0; idx<trainNames.length; idx++)
@@ -88,11 +84,9 @@ public class DEEPStandalone {
                 TestConfig config = new TestConfig(trainFile, dbConfig.getFeatureSelection(), dbConfig.getSignificanceLevel());
                 OtherConfig otherConfig = new OtherConfig(OtherConfig.Validation.SUPPLIED_TEST_DATA, 1, testFile, 50, 10, null);
 
-                System.out.println("do_it");
                 TestOldAlgorithm.do_it(trainFile,
                         config,
-                        WP, YP, XPArray, GT, null, -1, otherConfig, -1,
-                        canShowStatus, canShowOutput, false);
+                        WP, YP, XPArray, GT, null, -1, otherConfig, -1, false);
                 System.out.println("done_it");
 
             } catch (IOException e) {
@@ -111,5 +105,13 @@ public class DEEPStandalone {
             newArray[i] = array[i];
         }
         return newArray;
+    }
+
+    public static int indexOf(String[] arr, String str) {
+        for (int i=0; i<arr.length; i++) {
+            if (arr[i].equals(str))
+                return i;
+        }
+        return -1;
     }
 }
